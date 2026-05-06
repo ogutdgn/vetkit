@@ -263,6 +263,7 @@ vetkit/
 │   └── ovapark-veteriner/
 │
 ├── project-documentation/                # all committed project docs live here
+│   ├── EXECUTION-MAP.md                  # live operational plan — read first when picking up work
 │   ├── PROJECT-ARCHITECTURE.md           # repo skeleton walkthrough (commit/ignore, what each folder does)
 │   ├── ONBOARDING.md                     # step-by-step new client setup
 │   ├── SCHEMA.md                         # schema documentation
@@ -517,6 +518,8 @@ When this playbook gets repeated 3+ times, automate steps 1, 3, and 5 in `script
 
 ## 10. Phased roadmap
 
+> The high-level phases live here. The granular, current-state, ordered execution plan (active chunk, dependencies, open decisions) lives in [`project-documentation/EXECUTION-MAP.md`](project-documentation/EXECUTION-MAP.md) — read that for "what do I work on next?".
+
 ### Phase 1 — MVP (target: 4 weeks of focused work)
 
 - [ ] Initialize monorepo (Turborepo, pnpm workspaces)
@@ -599,6 +602,7 @@ These are temptations that will damage the project. Resist them.
 | 2026-05 | Project name: `vetkit` | Short, memorable, sector-flexible; clean npm scope | — |
 | 2026-05-06 | Next.js 16.2.4 (not 15) | Latest stable; Turbopack default, async params/cookies/headers, new `revalidateTag(tag, profile)` signature, `next lint` removed. Project-specific impact tracked in `project-documentation/NEXTJS-16.md` (local-only). | 3 |
 | 2026-05-06 | `project-documentation/` (not `docs/`) for committed docs | Renamed to make the folder's purpose explicit; all committed reference material (architecture, schema, onboarding, client guide) lives here. Personal/working notes (e.g. `NEXTJS-16.md`) sit in the same folder but are gitignored. | 4 |
+| 2026-05-06 | EXECUTION-MAP.md as live operational plan | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp. | 13, project-documentation/EXECUTION-MAP.md |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
@@ -609,12 +613,14 @@ When making future decisions, append to this table with date, decision, rational
 If you are Claude Code joining this project:
 
 1. **Read this entire document first.** Do not skip sections.
-2. **Read `./old-sites/gigi-veteriner/` and `./old-sites/ovapark-veteriner/`** to understand the existing content and design baseline.
-3. **Confirm understanding before writing code.** Ask the project owner to confirm anything ambiguous.
-4. **Start with the monorepo skeleton** (Turborepo, pnpm workspaces, `apps/web`, `apps/studio`) before any feature work.
-5. **Build the Sanity schema next** — it's the keystone. Do not start `apps/web` features until the schema is reviewed and locked.
-6. **Implement the `modern` template last** in Phase 1, after all shared infrastructure exists.
-7. **Update this document whenever a decision changes.** This file is the source of truth.
+2. **Then read [`project-documentation/EXECUTION-MAP.md`](project-documentation/EXECUTION-MAP.md).** It is the live operational plan — current snapshot, the active chunk of work, the ordered Phase 1 backlog, and any open decisions still pending. This document captures *what to do*; CLAUDE.md captures *how and why*.
+3. **Read [`project-documentation/PROJECT-ARCHITECTURE.md`](project-documentation/PROJECT-ARCHITECTURE.md)** for the repo-skeleton walkthrough (what every folder and config is for, what's committed vs. generated).
+4. **Read `./old-sites/gigi-veteriner/` and `./old-sites/ovapark-veteriner/`** to understand the existing content and design baseline.
+5. **Confirm understanding before writing code.** Ask the project owner to confirm anything ambiguous.
+6. **Start with the monorepo skeleton** (Turborepo, pnpm workspaces, `apps/web`, `apps/studio`) before any feature work.
+7. **Build the Sanity schema next** — it's the keystone. Do not start `apps/web` features until the schema is reviewed and locked.
+8. **Implement the `modern` template last** in Phase 1, after all shared infrastructure exists.
+9. **Update CLAUDE.md whenever a decision changes; update EXECUTION-MAP.md after every working session.** Both are source-of-truth in their respective scopes.
 
 When in doubt, prefer:
 - **Less code over more code**
