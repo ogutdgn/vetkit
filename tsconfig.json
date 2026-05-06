@@ -1,0 +1,5 @@
+{
+  "extends": "@vetkit/config-typescript/base.json",
+  "include": [],
+  "exclude": ["node_modules", "**/node_modules", ".next", ".turbo", "dist", "build"]
+}
