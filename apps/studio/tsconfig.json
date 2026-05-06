@@ -1,0 +1,10 @@
+{
+  "extends": "@vetkit/config-typescript/react-library.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist", ".sanity"]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@vetkit/studio",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "start": "sanity start",
+    "deploy": "sanity deploy",
+    "lint": "echo 'lint placeholder — eslint flat config will land in a later step'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "sanity": "^3.74.0",
+    "styled-components": "^6.1.13"
+  },
+  "devDependencies": {
+    "@sanity/vision": "^3.74.0",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@vetkit/config-typescript": "workspace:*",
+    "typescript": "^5.6.3"
+  }
+}
