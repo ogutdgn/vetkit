@@ -1,0 +1,50 @@
+# vetkit — root .gitignore
+# Reference content from old client sites; never deployed.
+old-sites/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Sanity
+.sanity/
+
+# Env files (each app has its own .env.example committed)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Testing / coverage
+coverage/
+
+# Vercel
+.vercel
+
+# Local-only working notes (committed docs live in project-documentation/, but
+# NEXTJS-16.md is a personal reference / changelog tracking file and stays local).
+project-documentation/NEXTJS-16.md
