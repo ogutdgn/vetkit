@@ -35,11 +35,13 @@ Every decision below has been deliberated. Do not change without reading the rat
 **Decision:** Single GitHub monorepo. For each client, create a separate Vercel project that points to the same GitHub repo. Tenant differentiation happens via **environment variables** at build time.
 
 **Rationale:**
+
 - A separate repo per client means bug fixes get applied N times, code fossilizes per client, and the system collapses past 3-4 clients. This is the exact problem the old setup created.
 - Domain-based runtime tenant detection (single deploy, hostname → tenant resolution) is overengineering for 2-5 clients. Vercel projects are free, deployment isolation is clean, and build-time decisions are simpler.
 - Template selection (see 2.4) is also build-time. There is no runtime tenant decision logic anywhere in the codebase.
 
 **Rejected alternatives:**
+
 - ❌ One repo per client (the old system's mistake — unsustainable)
 - ❌ Single Vercel project + middleware-based hostname routing (revisit only at 15+ clients)
 
@@ -48,12 +50,14 @@ Every decision below has been deliberated. Do not change without reading the rat
 **Decision:** Each client gets their own Sanity project. The schema is defined once in `apps/studio/` and deployed per project.
 
 **Rationale:**
+
 - Sanity ships with a polished content management UI out of the box: rich text editor, image hotspot/cropping, draft/publish workflow, document preview, references. Building this UI from scratch is 2-3 weeks of work that adds zero customer value.
 - Free tier per project: 3 users, 10GB assets, 500K API CDN requests/month. A vet clinic site stays well within this. So 5 clients = 5 free Sanity projects = $0/month for CMS.
 - Managed service — no hosting, no DB backups, no monitoring overhead.
 - TypeScript codegen via `sanity-codegen` produces types from schema, enabling type-safe data fetching in Next.js.
 
 **Rejected alternatives:**
+
 - ❌ **Supabase as CMS:** Would require building a custom admin UI (rich text, image upload + CDN, draft/publish, preview). 2-3 weeks of non-revenue work. Wrong tool.
 - ❌ **Payload CMS:** Self-hosted, requires MongoDB or Postgres, you own monitoring/backups. Pricing becomes more attractive at 15+ clients, but at 2-5 the operational overhead is too high.
 - ❌ **Strapi:** Same self-hosting overhead, weaker DX.
@@ -65,6 +69,7 @@ Every decision below has been deliberated. Do not change without reading the rat
 **Decision:** Contact form submissions are emailed directly to the clinic's email address via Resend. No data is persisted in any database.
 
 **Rationale:**
+
 - Vet clinics already use Gmail/Outlook for communication. They do not want or need a separate CRM dashboard.
 - Adding a database means: infrastructure overhead, GDPR/KVKK considerations for stored personal data, building a "messages" view in some panel. None of this is requested or valuable at this scale.
 - Resend free tier: 3000 emails/month. Vastly sufficient.
@@ -76,26 +81,31 @@ Every decision below has been deliberated. Do not change without reading the rat
 **Decision:** Three visually distinct templates live in `apps/web/templates/` (`modern`, `classic`, `premium`). Each client selects one template via the `TEMPLATE` environment variable at deploy time and uses it for the lifetime of their site.
 
 **Rationale:**
+
 - Clients do not switch templates after launch. There is no real-world need for runtime switching.
 - Build-time selection enables tree-shaking — only the chosen template's components ship in the JS bundle.
 - All non-visual logic (data fetching, SEO, form handling, routing, schema) is **shared** across templates. Only presentation differs.
 
 **Critical contract — schema is the lowest common denominator:**
+
 - All three templates consume **the same Sanity schema**. No template may demand a template-specific field.
 - When adding a new feature, the schema field must make sense for **all three** templates. If a field is meaningful for only one template, the design is wrong — rethink it.
 - Templates render the same data differently (e.g. services may be a carousel in `modern`, a grid in `classic`, a list in `premium`). They never request different data shapes.
 
 **Template contract (TypeScript):**
+
 - Every template must export the same component names with the same props interface.
 - This is enforced via a shared `ThemeComponents` interface in `apps/web/types/template.ts`.
 - A template that renames `Header` to `NavBar` or accepts different props for `Hero` is broken by definition.
 
 **Rejected alternatives:**
+
 - ❌ **Runtime theme switching (theme selected in Sanity):** Adds complexity for no real-world benefit. Clients pick once and stay.
 - ❌ **Block/section page builder:** Reconsider only past 5 clients. At current scale, the freedom given to clients destroys design consistency. Clients will create ugly pages and blame the platform.
 - ❌ **One repo per template:** Same multi-tenancy problem repeated at the template level. Unsustainable.
 
 **Phased implementation:**
+
 - **Phase 1:** Build only the `modern` template. Ship gigi-veteriner with it. Validate the schema with real content.
 - **Phase 2:** After client feedback, build `classic`. Migrate ovapark-veteriner.
 - **Phase 3:** Build `premium` only if a third client requests something the first two templates cannot deliver. Otherwise leave it out — having two solid templates is better than three half-finished ones.
@@ -107,6 +117,7 @@ Every decision below has been deliberated. Do not change without reading the rat
 **Decision:** Brand color, logo, and font choice live in the `siteSettings` singleton in Sanity. Templates consume these as CSS variables at runtime.
 
 **Rationale:**
+
 - The same template with different brand colors looks substantially different across clients. This alone provides meaningful visual variety even with a single template.
 - Rebranding a client (color change, logo update) requires zero code changes — the client edits Sanity and the change is live.
 
@@ -310,15 +321,15 @@ The schema is the most critical design artifact in this project. A bad schema is
 
 ### Required document types (Phase 1)
 
-| Type | Plural label (TR) | Purpose | Singleton? |
-|---|---|---|---|
-| `siteSettings` | Klinik Bilgileri | Clinic name, logo, primary color, address, phone, email, opening hours, social links, Maps coordinates | Yes |
-| `service` | Hizmetler | Veterinary services offered | No |
-| `blogPost` | Blog Yazıları | Articles | No |
-| `teamMember` | Ekip | Veterinarians and staff | No |
-| `galleryImage` | Galeri | Clinic photos | No |
-| `faq` | Sıkça Sorulan Sorular | FAQ entries with category | No |
-| `page` | Sayfalar | Generic flexible pages (e.g. "Hakkımızda") | No |
+| Type           | Plural label (TR)     | Purpose                                                                                                | Singleton? |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
+| `siteSettings` | Klinik Bilgileri      | Clinic name, logo, primary color, address, phone, email, opening hours, social links, Maps coordinates | Yes        |
+| `service`      | Hizmetler             | Veterinary services offered                                                                            | No         |
+| `blogPost`     | Blog Yazıları         | Articles                                                                                               | No         |
+| `teamMember`   | Ekip                  | Veterinarians and staff                                                                                | No         |
+| `galleryImage` | Galeri                | Clinic photos                                                                                          | No         |
+| `faq`          | Sıkça Sorulan Sorular | FAQ entries with category                                                                              | No         |
+| `page`         | Sayfalar              | Generic flexible pages (e.g. "Hakkımızda")                                                             | No         |
 
 ### Reusable objects
 
@@ -335,7 +346,7 @@ When implementing the schema, **read `./old-sites/gigi-veteriner/` and `./old-si
 - Note what's hardcoded that should become editable (phone numbers, addresses, opening hours)
 - Identify what's missing that a clinic owner might want to manage (online appointment CTA, emergency contact banner, social media links)
 
-The schema should be a **superset** of what the old sites had — design for what clinic owners would *want* to manage, not just what currently exists.
+The schema should be a **superset** of what the old sites had — design for what clinic owners would _want_ to manage, not just what currently exists.
 
 ---
 
@@ -385,7 +396,7 @@ import { Header } from './Header';
 import { Hero } from './Hero';
 // ...
 
-const modern: ThemeComponents = { Header, Hero, ServiceCard, /* ... */ };
+const modern: ThemeComponents = { Header, Hero, ServiceCard /* ... */ };
 export default modern;
 ```
 
@@ -398,10 +409,14 @@ import type { ThemeComponents } from '@/types/template';
 export async function getTemplate(): Promise<ThemeComponents> {
   const name = process.env.TEMPLATE ?? 'modern';
   switch (name) {
-    case 'modern':  return (await import('@/templates/modern')).default;
-    case 'classic': return (await import('@/templates/classic')).default;
-    case 'premium': return (await import('@/templates/premium')).default;
-    default: throw new Error(`Unknown template: ${name}`);
+    case 'modern':
+      return (await import('@/templates/modern')).default;
+    case 'classic':
+      return (await import('@/templates/classic')).default;
+    case 'premium':
+      return (await import('@/templates/premium')).default;
+    default:
+      throw new Error(`Unknown template: ${name}`);
   }
 }
 ```
@@ -477,16 +492,20 @@ CONTACT_FROM_EMAIL=iletisim@gigiveteriner.com  # verified domain in Resend
 Goal: 30 minutes from "client signed" to "site is live."
 
 1. **Create Sanity project**
+
    ```bash
    cd apps/studio
    pnpm sanity init --create-project "<client-name>" --dataset production
    ```
+
    Save the project ID.
 
 2. **Deploy Sanity Studio**
+
    ```bash
    pnpm sanity deploy
    ```
+
    Choose a hostname (e.g. `gigi-vetkit` → studio at `gigi-vetkit.sanity.studio`). Optionally CNAME `studio.<client-domain>.com` to it.
 
 3. **Create Vercel project**
@@ -527,7 +546,7 @@ Companion operational docs:
 - [`project-documentation/execution-map.md`](project-documentation/execution-map.md) — the **next session's** focused chunk. Read first when picking up work.
 - [`project-documentation/last-point.md`](project-documentation/last-point.md) — **last session's** snapshot (last commit, working tree, what was done).
 
-CLAUDE.md (this file) remains the architectural source of truth for **decisions and conventions** (sections 2, 5, 6, 11, 12). plan.md is for *what gets built*; execution-map.md is for *what gets built next*; last-point.md is for *what was just built*.
+CLAUDE.md (this file) remains the architectural source of truth for **decisions and conventions** (sections 2, 5, 6, 11, 12). plan.md is for _what gets built_; execution-map.md is for _what gets built next_; last-point.md is for _what was just built_.
 
 Process skills under `.claude/skills/` codify the update protocols for each operational doc:
 
@@ -574,20 +593,21 @@ These are temptations that will damage the project. Resist them.
 
 ## 12. Decision log
 
-| Date | Decision | Rationale | Document section |
-|---|---|---|---|
-| 2026-05 | Multi-tenant via 1 repo + N Vercel projects (env-based) | Avoids per-client repo fossilization; simpler than runtime tenant detection at this scale | 2.1 |
-| 2026-05 | Sanity as CMS | Out-of-box admin UI, free tier covers scale, managed service | 2.2 |
-| 2026-05 | Resend for form submissions, no DB | Clinics use email anyway; DB is YAGNI at this scale | 2.3 |
-| 2026-05 | 3 build-time templates, schema is shared | Real client behavior is "pick once, use forever"; build-time enables tree-shaking | 2.4 |
-| 2026-05 | Brand customization via Sanity (color, logo, font) | Gives variety even within one template; no code changes for rebranding | 2.5 |
-| 2026-05 | Phase 1 ships only `modern` template | Avoids paralyzing the first delivery; validate schema with one real client first | 2.4, 10 |
-| 2026-05 | Project name: `vetkit` | Short, memorable, sector-flexible; clean npm scope | — |
-| 2026-05-06 | Next.js 16.2.4 (not 15) | Latest stable; Turbopack default, async params/cookies/headers, new `revalidateTag(tag, profile)` signature, `next lint` removed. Project-specific impact tracked in `project-documentation/NEXTJS-16.md` (local-only). | 3 |
-| 2026-05-06 | `project-documentation/` (not `docs/`) for committed docs | Renamed to make the folder's purpose explicit; all committed reference material (architecture, schema, onboarding, client guide) lives here. Personal/working notes (e.g. `NEXTJS-16.md`) sit in the same folder but are gitignored. | 4 |
-| 2026-05-06 | EXECUTION-MAP.md as live operational plan | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp. | 13, project-documentation/EXECUTION-MAP.md (superseded 2026-05-20) |
-| 2026-05-20 | Split EXECUTION-MAP.md into three operational docs: `plan.md` (full plan + ordered backlog + open decisions), `execution-map.md` (next session's focused chunk only), `last-point.md` (session-boundary snapshot). Each has a paired `.claude/skills/` skill that codifies its update protocol (`updating-plan`, `updating-execution-map`, `writing-last-point`). | The single file was doing three jobs at once — full roadmap, next-up focus, and current-state snapshot — which made it hard to scan and prone to drift. Three sharper files, each with one purpose and a dedicated update skill, keep the operational docs trustworthy. | 4, 10, 13 |
-| 2026-05-20 | Tailwind v4 with CSS-first config (no `tailwind.config.ts`); design tokens live per-template in `apps/web/templates/<name>/tokens.css`; Inter via `next/font/google` with `latin-ext` subset for Turkish characters. Resolves OD-5. | v4's idiomatic config is the `@theme` block in CSS, not a JS file. Per-template tokens.css matches §2.5 ("each template has its own tokens.css") and avoids a Phase 2 migration when classic adds its palette. Inter has strong Latin Extended coverage and a wide weight range that future components will need. | 2.5, 4 |
+| Date       | Decision                                                                                                                                                                                                                                                                                                                                                          | Rationale                                                                                                                                                                                                                                                                                                         | Document section                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 2026-05    | Multi-tenant via 1 repo + N Vercel projects (env-based)                                                                                                                                                                                                                                                                                                           | Avoids per-client repo fossilization; simpler than runtime tenant detection at this scale                                                                                                                                                                                                                         | 2.1                                                                |
+| 2026-05    | Sanity as CMS                                                                                                                                                                                                                                                                                                                                                     | Out-of-box admin UI, free tier covers scale, managed service                                                                                                                                                                                                                                                      | 2.2                                                                |
+| 2026-05    | Resend for form submissions, no DB                                                                                                                                                                                                                                                                                                                                | Clinics use email anyway; DB is YAGNI at this scale                                                                                                                                                                                                                                                               | 2.3                                                                |
+| 2026-05    | 3 build-time templates, schema is shared                                                                                                                                                                                                                                                                                                                          | Real client behavior is "pick once, use forever"; build-time enables tree-shaking                                                                                                                                                                                                                                 | 2.4                                                                |
+| 2026-05    | Brand customization via Sanity (color, logo, font)                                                                                                                                                                                                                                                                                                                | Gives variety even within one template; no code changes for rebranding                                                                                                                                                                                                                                            | 2.5                                                                |
+| 2026-05    | Phase 1 ships only `modern` template                                                                                                                                                                                                                                                                                                                              | Avoids paralyzing the first delivery; validate schema with one real client first                                                                                                                                                                                                                                  | 2.4, 10                                                            |
+| 2026-05    | Project name: `vetkit`                                                                                                                                                                                                                                                                                                                                            | Short, memorable, sector-flexible; clean npm scope                                                                                                                                                                                                                                                                | —                                                                  |
+| 2026-05-06 | Next.js 16.2.4 (not 15)                                                                                                                                                                                                                                                                                                                                           | Latest stable; Turbopack default, async params/cookies/headers, new `revalidateTag(tag, profile)` signature, `next lint` removed. Project-specific impact tracked in `project-documentation/NEXTJS-16.md` (local-only).                                                                                           | 3                                                                  |
+| 2026-05-06 | `project-documentation/` (not `docs/`) for committed docs                                                                                                                                                                                                                                                                                                         | Renamed to make the folder's purpose explicit; all committed reference material (architecture, schema, onboarding, client guide) lives here. Personal/working notes (e.g. `NEXTJS-16.md`) sit in the same folder but are gitignored.                                                                              | 4                                                                  |
+| 2026-05-06 | EXECUTION-MAP.md as live operational plan                                                                                                                                                                                                                                                                                                                         | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp.                                                                                                             | 13, project-documentation/EXECUTION-MAP.md (superseded 2026-05-20) |
+| 2026-05-20 | Split EXECUTION-MAP.md into three operational docs: `plan.md` (full plan + ordered backlog + open decisions), `execution-map.md` (next session's focused chunk only), `last-point.md` (session-boundary snapshot). Each has a paired `.claude/skills/` skill that codifies its update protocol (`updating-plan`, `updating-execution-map`, `writing-last-point`). | The single file was doing three jobs at once — full roadmap, next-up focus, and current-state snapshot — which made it hard to scan and prone to drift. Three sharper files, each with one purpose and a dedicated update skill, keep the operational docs trustworthy.                                           | 4, 10, 13                                                          |
+| 2026-05-20 | Tailwind v4 with CSS-first config (no `tailwind.config.ts`); design tokens live per-template in `apps/web/templates/<name>/tokens.css`; Inter via `next/font/google` with `latin-ext` subset for Turkish characters. Resolves OD-5.                                                                                                                               | v4's idiomatic config is the `@theme` block in CSS, not a JS file. Per-template tokens.css matches §2.5 ("each template has its own tokens.css") and avoids a Phase 2 migration when classic adds its palette. Inter has strong Latin Extended coverage and a wide weight range that future components will need. | 2.5, 4                                                             |
+| 2026-05-20 | Husky + lint-staged pre-commit hook with `eslint --fix` + `prettier --write` on staged JS/TS/MJS and Prettier-only on docs/styles. Resolves OD-2.                                                                                                                                                                                                                 | A local gate catches lint and format mistakes before they hit CI or `main`. Per-commit latency (~1-3s) is tolerable; the alternative — CI-only, with `next lint` removed in Next 16 and no CI workflow yet (OD-3) — would mean no gate at all in the short term.                                                  | 3                                                                  |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
@@ -603,7 +623,8 @@ If you are Claude Code joining this project:
    - [`project-documentation/execution-map.md`](project-documentation/execution-map.md) — the active chunk for the next session.
    - [`project-documentation/plan.md`](project-documentation/plan.md) — full roadmap, granular ordered Phase 1 backlog, open decisions.
 
-   CLAUDE.md (this file) captures *how and why* — architectural decisions and conventions. The three operational files above capture *what to do*, *what to do next*, and *what was just done*.
+   CLAUDE.md (this file) captures _how and why_ — architectural decisions and conventions. The three operational files above capture _what to do_, _what to do next_, and _what was just done_.
+
 3. **Read [`project-documentation/PROJECT-ARCHITECTURE.md`](project-documentation/PROJECT-ARCHITECTURE.md)** for the repo-skeleton walkthrough (what every folder and config is for, what's committed vs. generated).
 4. **Read `./old-sites/gigi-veteriner/` and `./old-sites/ovapark-veteriner/`** to understand the existing content and design baseline.
 5. **Confirm understanding before writing code.** Ask the project owner to confirm anything ambiguous.
@@ -617,6 +638,7 @@ If you are Claude Code joining this project:
    - For commits, follow the `writing-commits` skill at `.claude/skills/writing-commits/SKILL.md`.
 
 When in doubt, prefer:
+
 - **Less code over more code**
 - **Boring tech over exciting tech**
 - **Shipping one thing well over starting three things**
