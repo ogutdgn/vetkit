@@ -1,8 +1,9 @@
 # Execution map
 
-> **The single answer to "what do I work on next?"** — focused, ordered, *next session only*.
+> **The single answer to "what do I work on next?"** — focused, ordered, _next session only_.
 >
 > **Read with siblings:**
+>
 > - [`plan.md`](./plan.md) — full roadmap, granular ordered backlog, open decisions. Skim before changing scope.
 > - [`last-point.md`](./last-point.md) — what was actually done in the last session, current working tree.
 > - [`../CLAUDE.md`](../CLAUDE.md) — architectural source of truth.
@@ -13,26 +14,39 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 2 — ESLint flat config: `packages/config-eslint` + per-app `eslint.config.mjs`.**
+**Chunk 4 — Sanity schema (Phase 1) — the keystone.**
 
-**Goal:** Replace the placeholder `lint` scripts in `apps/web` and `apps/studio` (which currently just `echo`) with a real ESLint flat-config setup. Create `packages/config-eslint` as a shared preset (TypeScript + React + Next.js rules), wire each app to consume it via its own `eslint.config.mjs`, and make `pnpm lint` at the repo root run lint across both workspaces.
+**Goal:** Implement the full Phase 1 Sanity schema in `apps/studio/schemas/` per CLAUDE.md §5: all required document types, all reusable objects, singleton enforcement for `siteSettings`, and a Turkish-friendly document structure. Read `old-sites/gigi-veteriner/` and `old-sites/ovapark-veteriner/` first to inform field shapes (don't constrain to them — design as a _superset_ of what the old sites had).
 
 **Done when:**
-- `packages/config-eslint/` exists with a flat-config preset that exports rule sets for `nextjs` and `react-library` targets.
-- `apps/web/eslint.config.mjs` and `apps/studio/eslint.config.mjs` consume the preset.
-- `pnpm --filter @vetkit/web lint` actually runs ESLint (not `echo`) and exits 0 on the current codebase.
-- `pnpm --filter @vetkit/studio lint` does the same.
-- `pnpm lint` at the root runs both via Turborepo.
-- **No reliance on `next lint`** — it was removed in Next 16; ESLint is invoked directly per Next 16's migration guidance.
 
-**Depends on:** nothing.
+- All document types from §5 exist: `siteSettings` (singleton), `service`, `blogPost`, `teamMember`, `faq`, `galleryImage`, `page`.
+- All reusable objects exist: `seo` (metaTitle/metaDescription/ogImage), `openingHours` (day-by-day), `socialLinks` (instagram/facebook/x/youtube/tiktok), `cta` (label/link).
+- Every public-URL document embeds the `seo` object.
+- Every image field has `hotspot: true`.
+- Rich-text (Portable Text) is constrained: marks `strong`/`em`/`link`, block styles `normal`/`h2`/`h3`/`blockquote` (no h1).
+- `siteSettings` enforced as a singleton via the Studio's custom desk structure (or stop-gap workaround) — exactly one document per Sanity project.
+- All schemas exported from `apps/studio/schemas/index.ts`.
+- `pnpm --filter @vetkit/studio dev` opens Studio with the new schemas visible; documents of each type can be created and saved.
+- `pnpm --filter @vetkit/studio typecheck` and `lint` both pass.
 
-**Open decisions that affect this chunk:** none directly. OD-2 (Husky vs CI-only) is the next chunk's blocker; OD-3 (CI timing) is downstream. Flag both if work expands.
+**Depends on:** **OD-1 must be resolved first.** Picking Sanity v3 vs v4 vs v5 changes the schema authoring API and the singleton-enforcement plumbing. Don't start until the version is locked.
+
+**Open decisions that affect this chunk:**
+
+- **OD-1 (Sanity major version)** — blocker. Resolve before any schema code.
+- Field-level questions will surface as we go (e.g. should `service` have `pricing`? does `teamMember` need a `credentials` field?). Capture new ODs in `plan.md` §3 as they appear rather than deciding silently.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
-1. `feat(packages): add @vetkit/config-eslint shared flat-config preset`
-2. `feat(web): wire @vetkit/web to the shared ESLint preset and run lint`
-3. `feat(studio): wire @vetkit/studio to the shared ESLint preset and run lint`
+
+1. `chore(studio): pin Sanity major version per OD-1 resolution` (if we upgrade)
+2. `feat(studio): add reusable objects (seo, openingHours, socialLinks, cta)`
+3. `feat(studio): add siteSettings singleton with desk-structure enforcement`
+4. `feat(studio): add service and blogPost document types with SEO`
+5. `feat(studio): add teamMember, galleryImage, faq, page document types`
+6. `docs(schema): document the Phase 1 schema in project-documentation/SCHEMA.md`
+
+Chunk 5 (Turkish localization + polished desk structure) is the natural follow-up.
 
 ---
 
