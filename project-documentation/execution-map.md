@@ -13,24 +13,26 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 1 — Tailwind CSS v4 + token system in `apps/web`.**
+**Chunk 2 — ESLint flat config: `packages/config-eslint` + per-app `eslint.config.mjs`.**
 
-**Goal:** Install Tailwind v4 in `apps/web`, define the design-token contract (CSS variables for brand color, fonts, etc. so Sanity `siteSettings` can override them at runtime per CLAUDE.md §2.5), and replace the placeholder inline styles in the home page so we know the wiring works end-to-end.
+**Goal:** Replace the placeholder `lint` scripts in `apps/web` and `apps/studio` (which currently just `echo`) with a real ESLint flat-config setup. Create `packages/config-eslint` as a shared preset (TypeScript + React + Next.js rules), wire each app to consume it via its own `eslint.config.mjs`, and make `pnpm lint` at the repo root run lint across both workspaces.
 
 **Done when:**
-- `apps/web` builds (`pnpm --filter @vetkit/web build`) and dev-runs with Tailwind classes applied.
-- A `tokens.css` (or equivalent) declares the CSS variables that templates will read.
-- The placeholder home page is restyled with Tailwind utilities — **no inline styles remain**.
-- A `packages/config-tailwind/` shared preset exists *only* if the config grows non-trivial; otherwise leave it inline in `apps/web` and extract later.
+- `packages/config-eslint/` exists with a flat-config preset that exports rule sets for `nextjs` and `react-library` targets.
+- `apps/web/eslint.config.mjs` and `apps/studio/eslint.config.mjs` consume the preset.
+- `pnpm --filter @vetkit/web lint` actually runs ESLint (not `echo`) and exits 0 on the current codebase.
+- `pnpm --filter @vetkit/studio lint` does the same.
+- `pnpm lint` at the root runs both via Turborepo.
+- **No reliance on `next lint`** — it was removed in Next 16; ESLint is invoked directly per Next 16's migration guidance.
 
 **Depends on:** nothing.
 
-**Open decisions that affect this chunk:** OD-5 (where do `tokens.css` brand variables live in Phase 1?). Resolve during the chunk — don't defer past it.
+**Open decisions that affect this chunk:** none directly. OD-2 (Husky vs CI-only) is the next chunk's blocker; OD-3 (CI timing) is downstream. Flag both if work expands.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
-1. `feat(web): add Tailwind v4 with PostCSS plugin and base config`
-2. `feat(web): add tokens.css with brand color, font, and spacing CSS variables`
-3. `refactor(web): replace placeholder inline styles with Tailwind utilities`
+1. `feat(packages): add @vetkit/config-eslint shared flat-config preset`
+2. `feat(web): wire @vetkit/web to the shared ESLint preset and run lint`
+3. `feat(studio): wire @vetkit/studio to the shared ESLint preset and run lint`
 
 ---
 
