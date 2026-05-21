@@ -214,7 +214,7 @@ vetkit/
 │   │   ├── public/                       # favicons, robots fallback
 │   │   ├── .env.example                  # documents required env vars
 │   │   ├── next.config.ts
-│   │   ├── tailwind.config.ts
+│   │   ├── postcss.config.mjs            # Tailwind v4 PostCSS plugin (CSS-first config; no tailwind.config.ts)
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
@@ -587,6 +587,7 @@ These are temptations that will damage the project. Resist them.
 | 2026-05-06 | `project-documentation/` (not `docs/`) for committed docs | Renamed to make the folder's purpose explicit; all committed reference material (architecture, schema, onboarding, client guide) lives here. Personal/working notes (e.g. `NEXTJS-16.md`) sit in the same folder but are gitignored. | 4 |
 | 2026-05-06 | EXECUTION-MAP.md as live operational plan | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp. | 13, project-documentation/EXECUTION-MAP.md (superseded 2026-05-20) |
 | 2026-05-20 | Split EXECUTION-MAP.md into three operational docs: `plan.md` (full plan + ordered backlog + open decisions), `execution-map.md` (next session's focused chunk only), `last-point.md` (session-boundary snapshot). Each has a paired `.claude/skills/` skill that codifies its update protocol (`updating-plan`, `updating-execution-map`, `writing-last-point`). | The single file was doing three jobs at once — full roadmap, next-up focus, and current-state snapshot — which made it hard to scan and prone to drift. Three sharper files, each with one purpose and a dedicated update skill, keep the operational docs trustworthy. | 4, 10, 13 |
+| 2026-05-20 | Tailwind v4 with CSS-first config (no `tailwind.config.ts`); design tokens live per-template in `apps/web/templates/<name>/tokens.css`; Inter via `next/font/google` with `latin-ext` subset for Turkish characters. Resolves OD-5. | v4's idiomatic config is the `@theme` block in CSS, not a JS file. Per-template tokens.css matches §2.5 ("each template has its own tokens.css") and avoids a Phase 2 migration when classic adds its palette. Inter has strong Latin Extended coverage and a wide weight range that future components will need. | 2.5, 4 |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
