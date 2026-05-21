@@ -26,7 +26,7 @@ Infrastructure (already done):
 
 Feature work (open):
 
-- [ ] Tailwind CSS v4 + token-driven theme variables (Chunk 1)
+- [x] Tailwind CSS v4 + token-driven theme variables (Chunk 1)
 - [ ] ESLint flat config — `packages/config-eslint` + per-app `eslint.config.mjs` (Chunk 2)
 - [ ] Husky + lint-staged pre-commit hooks (Chunk 3 — depends on OD-2)
 - [ ] Full Sanity schema — all doc types + reusable objects (Chunk 4)
@@ -70,7 +70,7 @@ The order is chosen so each chunk has its dependencies in place. Don't reorder w
 
 | # | Chunk | Depends on | Size | Notes |
 |---|---|---|---|---|
-| 1 | Tailwind v4 + token system in `apps/web` | — | S | Replace inline placeholder styles, set up CSS variables for tokens. |
+| ✓ 1 | Tailwind v4 + token system in `apps/web` | — | S | Shipped 2026-05-20 (commits `56a0b30`, `8ca0a3e`). |
 | 2 | ESLint flat config: `packages/config-eslint` + per-app `eslint.config.mjs` | — | S | `next lint` was removed in Next 16; we invoke ESLint directly. |
 | 3 | Husky + lint-staged pre-commit (eslint + typecheck on staged files) | 2 | S | See OD-2. |
 | 4 | **Sanity schema (Phase 1)** — all doc types + reusable objects | — | L | The keystone. Read `old-sites/` for content shape; design schema as a superset. |
@@ -100,7 +100,6 @@ Flagged here so we don't forget. Resolve before they block the corresponding chu
 | OD-2 | **Pre-commit hooks: Husky + lint-staged, or CI only?** | Hooks slow each commit but catch lint/type errors locally. CI catches them later but doesn't block the bad commit. | Chunk 3. |
 | OD-3 | **GitHub Actions CI: when?** | Should land after Chunk 2 (lint exists) and before Chunk 15 (deploy). | Before first push to a gated remote. |
 | OD-4 | **Studio hostname pattern: `<client>.sanity.studio` (default) or CNAMEd `studio.<client-domain>.com`?** | Affects onboarding playbook and DNS asks. | Chunk 15. |
-| OD-5 | **Where do `tokens.css` brand variables live in Phase 1?** | If only one template exists, putting tokens inside `templates/modern/` is fine. If a shared preset declares them, the template just consumes. Decide so we don't end up with two sources of truth. | During Chunk 1 / Chunk 10. |
 
 ---
 
