@@ -14,52 +14,58 @@
 ## Snapshot
 
 **Date:** 2026-05-21
-**Last commit on `main`:** `6c1d0a0 docs(execution-map): set Chunk 4 (Sanity schema) as next active chunk`
+**Last commit on `main`:** `702ba59 docs(execution-map): flag Chunk 4 as paused mid-brainstorm`
 **Working tree:** clean (this file is the only pending change, committed in the next `docs(last-point): ...` commit).
 
 ## What's running
 
 - Monorepo skeleton (pnpm workspaces + Turborepo) in place.
-- `apps/web` builds and dev-runs with **Tailwind v4** + Inter font + modern template tokens (from previous session). `pnpm --filter @vetkit/web build` → 2.4s compile, TS check passes, static prerender clean.
-- `apps/studio` wired to env-driven Sanity v3.99 config — **no schemas yet** (Chunk 4 is next).
-- **ESLint flat-config** live in both apps. `pnpm --filter @vetkit/web lint` and `pnpm --filter @vetkit/studio lint` both exit 0; `pnpm lint` at root runs both via Turbo (~2.9s cold, cached after).
-- **Husky + lint-staged** pre-commit hook active. Every commit auto-runs `eslint --fix` + `prettier --write` on staged JS/TS/MJS files and `prettier --write` on staged docs/styles. Hook is verified working — fired correctly across all commits in this session.
-- `pnpm typecheck` passes for both apps.
+- `apps/web` builds and dev-runs with **Tailwind v4** + Inter font + modern template tokens. `pnpm --filter @vetkit/web build` clean (last verified 2026-05-20).
+- `apps/studio` wired to env-driven Sanity v3.99 config — **no schemas yet**. Chunk 4 will bump to **v4** per OD-1 resolution (locked in brainstorm).
+- **ESLint flat-config + Husky + lint-staged** pre-commit fully active. Every commit auto-runs `eslint --fix` + `prettier --write` on staged JS/TS/MJS, `prettier --write` on docs/styles. Verified working across multiple sessions.
+- `pnpm typecheck` passes for both apps; `pnpm lint` at root runs both via Turbo (~2.9s cold).
 
 ## What was done in this session
 
-- **Shipped Chunk 2 — ESLint flat config**: added [`packages/config-eslint`](../packages/config-eslint/) with `base`, `nextjs`, and `react-library` exports (type-aware TS rules + Prettier compat). Added a root catch-all [`eslint.config.mjs`](../eslint.config.mjs) so files outside any app also lint. Wired both apps with one-line `eslint.config.mjs` re-exports and replaced their placeholder `lint` scripts with `eslint .`. Commits `c570f55`, `8d3187b`.
-- **Shipped Chunk 3 — Husky + lint-staged**: installed at root, `prepare: "husky"` sets up the git hooks path on every install, [`.husky/pre-commit`](../.husky/pre-commit) runs `pnpm exec lint-staged`. lint-staged config in root [`package.json`](../package.json) covers JS/TS (eslint+prettier) and docs/styles (prettier only). Resolves OD-2. Commit `0c20426`.
-- **Resolved OD-2** in [`plan.md`](./plan.md) §3 and logged the decision in [`CLAUDE.md`](../CLAUDE.md) §12. Commits `92a21c6`, `b9150a2`.
-- **Updated [`execution-map.md`](./execution-map.md)** to point at **Chunk 4 — Sanity schema** as the next active chunk, with a suggested 6-commit split and an explicit OD-1 blocker. Commit `6c1d0a0`.
-- Root [`.gitignore`](../.gitignore) now excludes `.husky/_/` (auto-generated husky internals).
-- Root [`package.json`](../package.json) now also declares `eslint` as a devDep so lint-staged finds the binary from the workspace root.
+This session spanned 2026-05-20 → 2026-05-21 and shipped two infrastructure chunks plus brainstormed the schema.
+
+- **Chunks 2-3 shipped earlier in the session** (ESLint flat-config + Husky pre-commit). See the previous last-point snapshot in git history (`docs(last-point): refresh after Chunks 2-3 (ESLint + Husky)`) for details — those commits are `c570f55`, `8d3187b`, `0c20426` and the doc commits around them.
+- **Chunk 4 brainstorm started, paused mid-design.** Locked decisions on Sanity version, i18n pattern, locales, and schema-shape rules. Ran the old-sites audit. Drafted a design overview (7 doc types, 11 reusable objects, Studio config). Did **not** finish: 6 open discussion points remain, and the final spec doc hasn't been written. Everything captured in [`project-documentation/working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md) — this is a **temporary file** that gets deleted when Chunk 4 ships.
+- **Updated [`execution-map.md`](./execution-map.md) §1** with a "paused mid-brainstorm" note pointing to the working-notes doc.
 
 ## What is NOT yet set up
 
-(Standing inventory of Phase 1 gaps — carry forward; cross off as they ship.)
+Standing inventory — cross off as items ship.
 
-- ~~Tailwind CSS v4~~ ✓ shipped 2026-05-20.
-- ~~ESLint flat config~~ ✓ shipped this session.
-- ~~Husky / lint-staged~~ ✓ shipped this session.
+- ~~Tailwind CSS v4~~ ✓ 2026-05-20.
+- ~~ESLint flat config~~ ✓ this session.
+- ~~Husky / lint-staged~~ ✓ this session.
+- **Sanity schema (Chunk 4) — design ~75% complete (paused), implementation not started.**
 - shadcn/ui.
-- **Sanity schema, GROQ queries, Sanity client wrapper, draft mode helpers. (Chunk 4 — next.)**
-- SEO helpers (`generateMetadata`, JSON-LD, sitemap, robots, OG image).
-- Template contract (`apps/web/types/template.ts`) and the rest of `templates/modern/` (Header, Hero, ServiceCard, BlogCard, TeamSection, Footer, `index.ts`).
-- Marketing pages beyond the placeholder home.
-- Contact form + Resend integration.
-- Revalidation route and Sanity webhook setup.
+- SEO helpers.
+- Sanity client wrapper, GROQ queries, draft mode helpers (Chunk 7).
+- Template contract + rest of `templates/modern/`.
+- Marketing pages.
+- Contact form + Resend.
+- Revalidation route + Sanity webhook (Chunk 13).
 - GitHub Actions CI.
-- Vercel deployment for any client.
+- Vercel deployment.
 
 ## Open decisions still pending
 
-See [`plan.md`](./plan.md) §3. Active set: **OD-1** (Sanity v3 vs v4 vs v5 — blocks Chunk 4), **OD-3** (CI timing), **OD-4** (Studio hostname pattern). OD-2 was resolved this session, OD-5 in the previous one.
+See [`plan.md`](./plan.md) §3 and the brainstorm doc.
+
+- **OD-1 (Sanity major version):** _resolved in brainstorm → **v4**_, but not yet promoted to CLAUDE.md §12 (will be on Chunk 4 ship).
+- **OD-3** (CI timing) — open.
+- **OD-4** (Studio hostname pattern) — open.
+- **6 Chunk 4 micro-decisions** in [working-notes brainstorm doc](./working-notes/2026-05-21-chunk-4-brainstorm.md): `service.pricing` UI visibility, `page` doc vs `aboutPage` singleton, `teamMember.name` localization, `emergencyBanner` location, `testimonial` Phase 1 inclusion, `service.responsibleVets` necessity.
 
 ## Heads-up for the next session
 
-- Active chunk is **Chunk 4 — Sanity schema (Phase 1)** (see [`execution-map.md`](./execution-map.md) §1). The 6-commit split is sketched there.
-- **OD-1 is a hard blocker** — do not write schema code until the Sanity major version is locked. Picking v3 vs v4 vs v5 changes the schema authoring API and how `siteSettings` singleton enforcement is wired. Open `apps/studio/package.json` to confirm current resolved version (`3.99.x` at last check).
-- Before starting Chunk 4, also **read both `old-sites/`** (`gigi-veteriner/`, `ovapark-veteriner/`) per CLAUDE.md §5 — extract content categories, hardcoded fields that should become editable, anything missing. The schema is the keystone; getting field shapes wrong now means painful Sanity migrations later when real client data exists.
-- Working tree should be clean before starting (this last-point.md refresh is the only thing left to commit). Run `git status` to confirm.
-- Husky pre-commit hook is now active — every commit auto-runs lint+format on staged files. If a commit takes 1-3s longer than before, that's expected.
+- Active chunk is still **Chunk 4 — Sanity schema**. Status: paused mid-brainstorm.
+- **First action:** read [`working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md) in full. It has all locked decisions, audit findings, design overview, and the 6 open points.
+- **Second action:** resolve the 6 open discussion points (quick yes/no for each — they're listed at the bottom of the brainstorm doc).
+- **Third action:** promote the design overview into a final spec doc at `project-documentation/specs/<today>-sanity-schema-design.md`, self-review per `writing-skills`, then ask the user to review.
+- **Fourth action (on approval):** invoke `superpowers:writing-plans` skill to draft the implementation plan, then execute per Chunk 4's suggested commit split in [`execution-map.md`](./execution-map.md) §1.
+- **Cleanup reminder:** when Chunk 4 ships, **delete** the working-notes brainstorm doc in the same commit that adds the final spec. Don't leave stale WIPs in `working-notes/`.
+- Husky pre-commit is active — every commit auto-runs lint+format. Already verified working.
