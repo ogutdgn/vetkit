@@ -1,0 +1,28 @@
+{
+  "name": "@vetkit/config-eslint",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base": "./base.mjs",
+    "./nextjs": "./nextjs.mjs",
+    "./react-library": "./react-library.mjs"
+  },
+  "files": [
+    "base.mjs",
+    "nextjs.mjs",
+    "react-library.mjs"
+  ],
+  "dependencies": {
+    "@eslint/js": "^9.16.0",
+    "@next/eslint-plugin-next": "^16.2.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.13.0",
+    "typescript-eslint": "^8.18.1"
+  },
+  "peerDependencies": {
+    "eslint": "^9.16.0"
+  }
+}
