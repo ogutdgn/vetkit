@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+@import '../templates/modern/tokens.css';
+
+/*
+ * Per-app base layer. Template-owned visual tokens live in
+ * templates/<name>/tokens.css and are imported above. Keep this file thin:
+ * only cross-template resets and accessibility defaults belong here.
+ */
+
+html {
+  font-family: var(--font-sans);
+  color: var(--color-ink-900);
+  background-color: var(--color-ink-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

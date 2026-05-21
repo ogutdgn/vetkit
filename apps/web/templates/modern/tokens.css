@@ -1,0 +1,51 @@
+/*
+ * Modern template — design tokens.
+ *
+ * Defines the default brand palette, typography, and shape tokens for the
+ * `modern` template. Templates own their tokens (CLAUDE.md §2.5); Phase 2's
+ * `classic` template will declare its own tokens.css alongside this one.
+ *
+ * Sanity siteSettings overrides (brand color, font) will be applied at the
+ * <html> element by a server component in Chunk 7+. Until then, these
+ * defaults render as-is.
+ *
+ * Tokens declared under @theme are picked up by Tailwind v4 and turned into
+ * utility classes automatically (e.g. `--color-brand-500` → `bg-brand-500`,
+ * `text-brand-500`, etc.).
+ */
+
+@theme {
+  /* Brand palette (warm coral — placeholder, overrideable from Sanity) */
+  --color-brand-50: oklch(0.97 0.02 25);
+  --color-brand-100: oklch(0.93 0.05 25);
+  --color-brand-200: oklch(0.86 0.09 25);
+  --color-brand-300: oklch(0.78 0.13 25);
+  --color-brand-400: oklch(0.7 0.16 25);
+  --color-brand-500: oklch(0.62 0.18 25);
+  --color-brand-600: oklch(0.54 0.17 25);
+  --color-brand-700: oklch(0.46 0.15 25);
+  --color-brand-800: oklch(0.38 0.12 25);
+  --color-brand-900: oklch(0.3 0.09 25);
+
+  /* Neutral / ink palette for text, borders, subtle surfaces */
+  --color-ink-50: oklch(0.98 0 0);
+  --color-ink-100: oklch(0.96 0 0);
+  --color-ink-200: oklch(0.92 0 0);
+  --color-ink-300: oklch(0.85 0 0);
+  --color-ink-400: oklch(0.72 0 0);
+  --color-ink-500: oklch(0.6 0 0);
+  --color-ink-700: oklch(0.4 0 0);
+  --color-ink-900: oklch(0.2 0 0);
+
+  /* Typography — `--font-inter` is provided by next/font/google in layout.tsx */
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font-sans);
+
+  /* Border radius scale */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
