@@ -16,6 +16,8 @@
 
 **Chunk 4 — Sanity schema (Phase 1) — the keystone.**
 
+> **⏸ STATUS: paused mid-brainstorm.** The design phase was started but not finished — locked decisions, audit findings, and the design overview are captured in [`working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md). **Read that file first** when resuming. It also lists 6 open discussion points to resolve before promoting the design to a final spec.
+
 **Goal:** Implement the full Phase 1 Sanity schema in `apps/studio/schemas/` per CLAUDE.md §5: all required document types, all reusable objects, singleton enforcement for `siteSettings`, and a Turkish-friendly document structure. Read `old-sites/gigi-veteriner/` and `old-sites/ovapark-veteriner/` first to inform field shapes (don't constrain to them — design as a _superset_ of what the old sites had).
 
 **Done when:**
