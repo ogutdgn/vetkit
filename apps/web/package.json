@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "echo 'lint placeholder — eslint flat config will land in a later step'",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,7 +19,9 @@
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vetkit/config-eslint": "workspace:*",
     "@vetkit/config-typescript": "workspace:*",
+    "eslint": "^9.16.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.6.3"
   }

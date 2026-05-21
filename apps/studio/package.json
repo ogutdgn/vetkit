@@ -7,7 +7,7 @@
     "build": "sanity build",
     "start": "sanity start",
     "deploy": "sanity deploy",
-    "lint": "echo 'lint placeholder — eslint flat config will land in a later step'",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -20,7 +20,9 @@
     "@sanity/vision": "^3.74.0",
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.0",
+    "@vetkit/config-eslint": "workspace:*",
     "@vetkit/config-typescript": "workspace:*",
+    "eslint": "^9.16.0",
     "typescript": "^5.6.3"
   }
 }
