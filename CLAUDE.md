@@ -263,7 +263,9 @@ vetkit/
 │   └── ovapark-veteriner/
 │
 ├── project-documentation/                # all committed project docs live here
-│   ├── EXECUTION-MAP.md                  # live operational plan — read first when picking up work
+│   ├── plan.md                           # master plan + ordered Phase 1 backlog + open decisions (checkboxes)
+│   ├── execution-map.md                  # next session's focused chunk — read first when picking up work
+│   ├── last-point.md                     # session-boundary snapshot (refreshed before chat close / big ops)
 │   ├── PROJECT-ARCHITECTURE.md           # repo skeleton walkthrough (commit/ignore, what each folder does)
 │   ├── ONBOARDING.md                     # step-by-step new client setup
 │   ├── SCHEMA.md                         # schema documentation
@@ -518,40 +520,21 @@ When this playbook gets repeated 3+ times, automate steps 1, 3, and 5 in `script
 
 ## 10. Phased roadmap
 
-> The high-level phases live here. The granular, current-state, ordered execution plan (active chunk, dependencies, open decisions) lives in [`project-documentation/EXECUTION-MAP.md`](project-documentation/EXECUTION-MAP.md) — read that for "what do I work on next?".
+The roadmap and ordered backlog live in [`project-documentation/plan.md`](project-documentation/plan.md), **not here**. That file carries all four phases with checkboxes, the granular Phase 1 ordered backlog (chunk-by-chunk with dependencies and sizes), and the open-decisions list. Read it for "what's in scope and what's still on the backlog."
 
-### Phase 1 — MVP (target: 4 weeks of focused work)
+Companion operational docs:
 
-- [ ] Initialize monorepo (Turborepo, pnpm workspaces)
-- [ ] Set up `apps/studio` with full Phase 1 schema (see section 5)
-- [ ] Set up `apps/web` with App Router scaffolding
-- [ ] Build all shared infrastructure: Sanity client, GROQ queries, SEO helpers, JSON-LD, sitemap, robots
-- [ ] Build `templates/modern/` fully — all components, polished
-- [ ] Build all marketing pages: home, about, services list, service detail, blog list, blog detail, gallery, FAQ, contact
-- [ ] Implement contact form with Resend
-- [ ] Implement on-demand revalidation via Sanity webhook
-- [ ] Localize Sanity Studio to Turkish, customize desk structure
-- [ ] Migrate gigi-veteriner content into Sanity manually
-- [ ] Deploy gigi-veteriner to Vercel with custom domain
-- [ ] Hand off to client, gather feedback for one week
+- [`project-documentation/execution-map.md`](project-documentation/execution-map.md) — the **next session's** focused chunk. Read first when picking up work.
+- [`project-documentation/last-point.md`](project-documentation/last-point.md) — **last session's** snapshot (last commit, working tree, what was done).
 
-### Phase 2 — Second client + second template (target: 2 weeks)
+CLAUDE.md (this file) remains the architectural source of truth for **decisions and conventions** (sections 2, 5, 6, 11, 12). plan.md is for *what gets built*; execution-map.md is for *what gets built next*; last-point.md is for *what was just built*.
 
-- [ ] Iterate on schema based on Phase 1 feedback (no breaking changes if possible)
-- [ ] Build `templates/classic/` — same component contract, different look
-- [ ] Migrate ovapark-veteriner content
-- [ ] Deploy ovapark-veteriner with `TEMPLATE=classic`
+Process skills under `.claude/skills/` codify the update protocols for each operational doc:
 
-### Phase 3 — Scale prep (only if 3rd client requires)
-
-- [ ] Build `templates/premium/` if a real client need justifies it
-- [ ] Build `scripts/new-tenant.ts` to automate onboarding
-- [ ] Write `project-documentation/CLIENT-GUIDE.md` properly (Turkish, with screenshots)
-
-### Phase 4 — Internal admin (only at 5+ clients)
-
-- [ ] Add Supabase for centralized form submission storage (if needed)
-- [ ] Build `apps/admin` for the developer to monitor all clients in one place
+- `updating-plan` — keep plan.md authoritative when chunks ship or decisions resolve.
+- `updating-execution-map` — set the next chunk at session boundaries.
+- `writing-last-point` — snapshot session-boundary state.
+- `writing-commits` — Conventional Commits style for every commit on this project.
 
 ---
 
@@ -602,7 +585,8 @@ These are temptations that will damage the project. Resist them.
 | 2026-05 | Project name: `vetkit` | Short, memorable, sector-flexible; clean npm scope | — |
 | 2026-05-06 | Next.js 16.2.4 (not 15) | Latest stable; Turbopack default, async params/cookies/headers, new `revalidateTag(tag, profile)` signature, `next lint` removed. Project-specific impact tracked in `project-documentation/NEXTJS-16.md` (local-only). | 3 |
 | 2026-05-06 | `project-documentation/` (not `docs/`) for committed docs | Renamed to make the folder's purpose explicit; all committed reference material (architecture, schema, onboarding, client guide) lives here. Personal/working notes (e.g. `NEXTJS-16.md`) sit in the same folder but are gitignored. | 4 |
-| 2026-05-06 | EXECUTION-MAP.md as live operational plan | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp. | 13, project-documentation/EXECUTION-MAP.md |
+| 2026-05-06 | EXECUTION-MAP.md as live operational plan | CLAUDE.md tracks decisions and conventions (what should be true); EXECUTION-MAP.md tracks current state and the next chunk of work (what to do next). Splitting them keeps each file's purpose sharp. | 13, project-documentation/EXECUTION-MAP.md (superseded 2026-05-20) |
+| 2026-05-20 | Split EXECUTION-MAP.md into three operational docs: `plan.md` (full plan + ordered backlog + open decisions), `execution-map.md` (next session's focused chunk only), `last-point.md` (session-boundary snapshot). Each has a paired `.claude/skills/` skill that codifies its update protocol (`updating-plan`, `updating-execution-map`, `writing-last-point`). | The single file was doing three jobs at once — full roadmap, next-up focus, and current-state snapshot — which made it hard to scan and prone to drift. Three sharper files, each with one purpose and a dedicated update skill, keep the operational docs trustworthy. | 4, 10, 13 |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
@@ -613,14 +597,23 @@ When making future decisions, append to this table with date, decision, rational
 If you are Claude Code joining this project:
 
 1. **Read this entire document first.** Do not skip sections.
-2. **Then read [`project-documentation/EXECUTION-MAP.md`](project-documentation/EXECUTION-MAP.md).** It is the live operational plan — current snapshot, the active chunk of work, the ordered Phase 1 backlog, and any open decisions still pending. This document captures *what to do*; CLAUDE.md captures *how and why*.
+2. **Then read the three operational docs in this order:**
+   - [`project-documentation/last-point.md`](project-documentation/last-point.md) — where the last session stopped (last commit, working tree, what was done).
+   - [`project-documentation/execution-map.md`](project-documentation/execution-map.md) — the active chunk for the next session.
+   - [`project-documentation/plan.md`](project-documentation/plan.md) — full roadmap, granular ordered Phase 1 backlog, open decisions.
+
+   CLAUDE.md (this file) captures *how and why* — architectural decisions and conventions. The three operational files above capture *what to do*, *what to do next*, and *what was just done*.
 3. **Read [`project-documentation/PROJECT-ARCHITECTURE.md`](project-documentation/PROJECT-ARCHITECTURE.md)** for the repo-skeleton walkthrough (what every folder and config is for, what's committed vs. generated).
 4. **Read `./old-sites/gigi-veteriner/` and `./old-sites/ovapark-veteriner/`** to understand the existing content and design baseline.
 5. **Confirm understanding before writing code.** Ask the project owner to confirm anything ambiguous.
 6. **Start with the monorepo skeleton** (Turborepo, pnpm workspaces, `apps/web`, `apps/studio`) before any feature work.
 7. **Build the Sanity schema next** — it's the keystone. Do not start `apps/web` features until the schema is reviewed and locked.
 8. **Implement the `modern` template last** in Phase 1, after all shared infrastructure exists.
-9. **Update CLAUDE.md whenever a decision changes; update EXECUTION-MAP.md after every working session.** Both are source-of-truth in their respective scopes.
+9. **Update CLAUDE.md whenever an architectural decision changes** (this file is source-of-truth for decisions and conventions). **Update the operational docs at their respective trigger moments:**
+   - `plan.md` whenever a chunk completes, a decision resolves, or scope shifts → use the `updating-plan` skill at `.claude/skills/updating-plan/SKILL.md`.
+   - `execution-map.md` at the start and end of every session → use the `updating-execution-map` skill.
+   - `last-point.md` before closing the chat or before any major operation → use the `writing-last-point` skill.
+   - For commits, follow the `writing-commits` skill at `.claude/skills/writing-commits/SKILL.md`.
 
 When in doubt, prefer:
 - **Less code over more code**
