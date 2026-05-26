@@ -11,6 +11,7 @@ import { localeText } from './objects/localeText';
 import { openingHours } from './objects/openingHours';
 import { seo } from './objects/seo';
 import { socialLinks } from './objects/socialLinks';
+import { siteSettings } from './singletons/siteSettings';
 
 export const schemaTypes = [
   // Locale primitives (declared first; everything else depends on them).
@@ -26,4 +27,6 @@ export const schemaTypes = [
   cta,
   contactInfo,
   emergencyBanner,
+  // Singletons.
+  siteSettings,
 ];
