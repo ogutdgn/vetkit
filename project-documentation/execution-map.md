@@ -14,35 +14,37 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 6 — `sanity-typegen` → `packages/sanity-types/`.**
+**Chunk 7 — Shared Sanity infra in `apps/web/lib/sanity/`.**
 
-**Goal:** Generate TypeScript types from the Sanity schema so the web app can consume them in a type-safe way. Land them in a shared workspace package (`packages/sanity-types/`) that `apps/web` imports via `@vetkit/sanity-types`. Re-run on every schema change.
+**Goal:** Give `apps/web` the small, type-safe set of helpers it needs to fetch Sanity content for server components and route handlers. This is the layer between the schema (Chunk 4) + generated types (Chunk 6) and the actual marketing pages (Chunk 11).
 
 **Done when:**
 
-- `packages/sanity-types/` exists with its own `package.json` (name `@vetkit/sanity-types`, `private: true`).
-- A generation step runs against `apps/studio/schemas/index.ts` and emits a `generated.ts` (or similar) into `packages/sanity-types/`. Use Sanity's official `sanity typegen` CLI (v5 ships with `sanity@5` — verify the exact command and flags before settling on `sanity-codegen` vs the built-in).
-- The emitted types cover all 8 document types and the 11 reusable objects.
-- `apps/web` is wired to import from `@vetkit/sanity-types` (a `pnpm-workspace.yaml` entry is already present for `packages/*`; just ensure `@vetkit/sanity-types` resolves).
-- A root npm script (e.g. `pnpm typegen` or `pnpm --filter @vetkit/studio typegen`) regenerates types; document it in the README or PROJECT-ARCHITECTURE.md.
-- The generated file is checked in (small, regenerable; checked-in to avoid an install-time codegen step in CI/Vercel).
+- `apps/web/lib/sanity/client.ts` exists, creates a Sanity client via `createClient` from `@sanity/client` or `sanity` core, reading `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` from env, with `useCdn: true` for published content and a draft-mode-aware variant that uses the `SANITY_API_READ_TOKEN`.
+- `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `groq\`…\``tagged template literals. At least three are written and exported:`getSiteSettings()`, `listServices(locale)`, `getServiceBySlug(slug, locale)`. (More land in Chunk 11; the goal here is a working shape.)
+- `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url`.
+- `apps/web/lib/sanity/live.ts` exists with a thin `draftMode()`-aware wrapper that flips the client used by queries (Next 16 — remember `await draftMode()`).
+- Running `pnpm --filter @vetkit/studio typegen` after the queries are added emits **GROQ query result types** alongside the schema types (the typegen config already globs `apps/web/**/*.{ts,tsx}`), and those types are usable from the query helpers.
 - `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
+- At least one page (e.g. `app/page.tsx`) imports a query helper to prove the chain end-to-end (still a placeholder render — the real pages land in Chunk 11).
 
-**Depends on:** Chunk 4 (schema in place).
+**Depends on:** Chunks 4 (schema), 6 (typegen).
 
 **Open decisions that affect this chunk:**
 
-- **`sanity-codegen` (community) vs `sanity typegen` (official, v5).** Verify which is the current best practice for Sanity v5. The plan note still says "sanity-codegen" but the official CLI may be the cleaner fit now. Resolve before writing the generation script.
-- None of OD-3 / OD-4 affect this chunk.
+- **`@sanity/client` vs `sanity` core's `createClient`** — they're the same API. Pick whichever ships fewer transitive deps; default to `next-sanity` if it offers tag-based caching helpers we'd use anyway. Verify before importing.
+- **Cache tags strategy** — we want the queries to emit predictable `next: { tags: [...] }` so the Chunk 13 webhook can `revalidateTag(tag, 'max')` selectively. Decide a tag convention up front (e.g. `sanity:siteSettings`, `sanity:service:<slug>`).
+- None of OD-3 / OD-4 block this chunk.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `chore(workspace): scaffold packages/sanity-types with package.json + tsconfig`
-2. `feat(studio): wire the typegen command (sanity typegen or sanity-codegen) and emit generated.ts`
-3. `feat(web): import sanity types from @vetkit/sanity-types`
-4. `docs(architecture): document the typegen workflow in PROJECT-ARCHITECTURE.md`
+1. `feat(web): add sanity client wrapper with draft-mode toggle`
+2. `feat(web): add image url builder helper`
+3. `feat(web): add initial groq queries (siteSettings, services list, service detail)`
+4. `feat(web): wire the home page to a sanity query as an end-to-end smoke test`
+5. `docs(architecture): document the apps/web/lib/sanity/ shape`
 
-Chunk 7 (shared Sanity infra in `apps/web/lib/sanity/`) is the natural follow-up — once types exist, the GROQ query helpers can be written against them.
+Chunk 8 (SEO helpers) is the natural follow-up — once queries return typed data, `generateMetadata` can lean on it.
 
 ---
 

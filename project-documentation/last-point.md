@@ -14,27 +14,29 @@
 ## Snapshot
 
 **Date:** 2026-05-26
-**Last commit on `main`:** `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome` (the snapshot itself ships next in `docs(project): set chunk 6 active and refresh last-point`).
-**Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json` (unrelated to chunk work).
+**Last commit on `main`:** `032de43 docs(architecture): document the sanity-types typegen workflow` (the snapshot itself ships next in `docs(project): mark chunk 6 done, set chunk 7 active`).
+**Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json`.
 
 ## What's running
 
-- Monorepo skeleton (pnpm workspaces + Turborepo), Tailwind v4 + Inter font + modern template tokens on `apps/web`, ESLint flat-config + Husky + lint-staged pre-commit — all carried over from prior chunks.
-- **Sanity v5 Studio with the full Phase 1 schema** (Chunk 4): 4 locale primitives, 7 reusable objects, `siteSettings` singleton, 7 documents.
-- Custom desk structure with `siteSettings` pinned + orderable lists (service / teamMember / faq / galleryImage / testimonial) + standard listings (blogPost / page).
-- `@sanity/language-filter` wired for **content-locale** filtering (TR + EN) using a name-prefix detector on `locale*` objects.
-- **`@sanity/locale-tr-tr@1.2.33` wired as `trTRLocale()`** (Chunk 5): translates the Studio chrome (top bar, menus, validation messages, empty states). Editors switch to Turkish from the language switcher in the top bar; the choice persists per browser. There is no `defineConfig`-level "force locale" hook in Sanity v5.
-- `pnpm --filter @vetkit/studio typecheck` / `lint` / `build` and `pnpm --filter @vetkit/web build` all pass.
+- Monorepo + Tailwind v4 + ESLint flat-config + Husky pre-commit + Sanity v5 Studio + Turkish locale bundle — all carried from prior chunks.
+- **`@vetkit/sanity-types` workspace package** (Chunk 6): `packages/sanity-types/` exposes the 43 schema types generated from `apps/studio/schemas/` by Sanity v5's official `sanity typegen` CLI. Files checked in: `package.json`, `tsconfig.json`, `index.ts` (re-export), `generated.ts` (auto-generated), `schema.json` (intermediate). `apps/web/types/sanity.ts` re-exports from `@vetkit/sanity-types` so route handlers can `import type { Service } from '@/types/sanity'`.
+- Studio scripts: `pnpm --filter @vetkit/studio typegen` regenerates `schema.json` + `generated.ts` in one shot.
+- `pnpm typecheck` / `lint` / `build` clean across studio + web + sanity-types.
 
 ## What was done in this session
 
-Session date: 2026-05-26. Shipped **Chunk 4 (Sanity schema)** end-to-end with 12 commits, then **Chunk 5 (Studio Turkish polish)** in a small follow-up:
+Session date: 2026-05-26. Shipped **Chunks 4, 5, and 6** end-to-end:
 
-Chunk 4 commits (in order): `118e81e`, `7dc1465`, `3934fe6`, `a1dbb49`, `9f0b52a`, `b52d3dd`, `57bfa61`, `28cffa0`, `e800343`, `5319292`, `a9e7e83`, `86f5a3c`. Brought Sanity v3.99 → v5.26.0 (incl. workspace fix-ups for jiti / config-typescript / sanity.cli rename / react bump / eslint), introduced 4 locale primitives + 7 reusable objects + siteSettings singleton + 7 docs + custom desk structure, wired language-filter, documented in SCHEMA.md, updated CLAUDE.md §12 (3 new decision rows + OD-1 resolved), and deleted the working-notes brainstorm.
+- **Chunk 4 (Sanity schema)** — 12 commits, see prior last-point history in git. v3.99 → v5.26.0, 4 locale primitives + 7 reusable objects + siteSettings singleton + 7 documents, custom desk structure with orderable lists, language-filter wiring, SCHEMA.md, CLAUDE.md decision log update, OD-1 resolved.
+- **Chunk 5 (Studio Turkish polish)** — 1 implementation commit + 1 docs commit:
+  - `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome` — added `@sanity/locale-tr-tr@^1.2.33`, wired `trTRLocale()` before `languageFilter` in `sanity.config.ts`. Distinction between Studio-UI locale and content-locale spelled out in SCHEMA.md.
+  - `8613db6 docs(project): mark chunk 5 done, set chunk 6 active, refresh last-point` — wrap-up docs.
+- **Chunk 6 (Sanity type generation)** — 2 commits:
+  - `9b23d43 feat(workspace): scaffold @vetkit/sanity-types and wire studio typegen` — packages/sanity-types/ scaffolded, `apps/studio/sanity-typegen.json` config, three typegen scripts (`typegen:extract`, `typegen:generate`, `typegen`), initial 43-type emit, apps/web wired via `apps/web/types/sanity.ts` shim.
+  - `032de43 docs(architecture): document the sanity-types typegen workflow` — PROJECT-ARCHITECTURE.md gained a real section for the package (was a stub) plus the regeneration workflow.
 
-Chunk 5 commit: `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome`. Plus this `docs(*)` trio.
-
-Chunk 5 scope ended up small because the bulk of its original scope (desk structure, singleton enforcement, Turkish field labels and descriptions, language-filter wiring) had spilled into Chunk 4. The residual was: install `@sanity/locale-tr-tr`, register `trTRLocale()`, document the distinction between Studio-UI locale and content locale in SCHEMA.md.
+Decision: used Sanity v5's **official `sanity typegen` CLI**, not the community `sanity-codegen` the plan originally named. The CLI ships with Sanity v5 itself (`sanity schemas extract` + `sanity typegen generate`) and produces typed schema + (later) GROQ query result types in one pipeline.
 
 ## What is NOT yet set up
 
@@ -45,17 +47,16 @@ Standing inventory — cross off as items ship.
 - ~~Husky / lint-staged~~ ✓ 2026-05-20.
 - ~~Sanity schema (Chunk 4)~~ ✓ 2026-05-26.
 - ~~Studio Turkish localization + custom desk (Chunk 5)~~ ✓ 2026-05-26.
-- **Sanity type generation (Chunk 6) — `packages/sanity-types/`** — active.
-- Shared Sanity infra in `apps/web/lib/sanity/` (Chunk 7).
+- ~~Sanity type generation (Chunk 6)~~ ✓ 2026-05-26.
+- **Shared Sanity infra in `apps/web/lib/sanity/` (Chunk 7)** — active.
 - SEO helpers (Chunk 8).
-- Template contract + `templates/modern/` components (Chunks 9-10).
+- Template contract + `templates/modern/` (Chunks 9-10).
 - Marketing pages (Chunk 11).
 - Contact form + Resend (Chunk 12).
 - Revalidation route + Sanity webhook (Chunk 13).
 - shadcn/ui init (Chunk 14).
 - GitHub Actions CI (OD-3 still open).
 - Vercel deployment (OD-4 still open).
-- Editorial dry-run against a scratch Sanity dataset (Chunk 5 done-when item that needs a live project; not blocking).
 
 ## Open decisions still pending
 
@@ -64,13 +65,14 @@ See [`plan.md`](./plan.md) §3.
 - **OD-1** (Sanity major version) — resolved 2026-05-26 → **v5**.
 - **OD-3** (CI timing) — open.
 - **OD-4** (Studio hostname pattern) — open.
-- **Chunk 6 sub-decision:** `sanity-codegen` (community) vs `sanity typegen` (official v5 CLI). Resolve at the top of Chunk 6.
+- **Chunk 7 sub-decisions** (to settle at the top of the next session): `@sanity/client` vs `next-sanity` for the client wrapper; the cache-tag naming convention used by queries so the Chunk 13 webhook can `revalidateTag(tag, 'max')` selectively.
 
 ## Heads-up for the next session
 
-- Active chunk is **Chunk 6 — Sanity type generation into `packages/sanity-types/`**. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
-- **First action:** decide `sanity-codegen` vs `sanity typegen`. The plan still says `sanity-codegen` but Sanity v5 ships an official `sanity typegen` CLI now — quick due-diligence first.
-- **Second action:** scaffold `packages/sanity-types/` (package.json + tsconfig + an empty `index.ts` placeholder).
-- **Third action:** wire the typegen command and emit the generated file. Check it in to avoid an install-time codegen step.
-- **Fourth action:** ensure `apps/web` resolves `@vetkit/sanity-types` and stub an import to prove the chain works (full GROQ-typed queries land in Chunk 7).
-- Husky pre-commit is active — every commit auto-runs lint+format. Already verified working.
+- Active chunk is **Chunk 7 — shared Sanity infra in `apps/web/lib/sanity/`**. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
+- **First action:** evaluate `next-sanity` (the Next-specific wrapper) vs vanilla `@sanity/client`. `next-sanity` typically adds nicer cache-tag integration; verify it still supports Sanity v5 / Next 16.
+- **Second action:** scaffold `apps/web/lib/sanity/client.ts` (public + draft variants, env-driven), `image.ts` (urlFor builder), `live.ts` (`await draftMode()` toggle for Next 16).
+- **Third action:** add `queries.ts` with the three initial GROQ queries (siteSettings, services list, service-by-slug). They should use the `defineQuery` helper from `next-sanity` (or `groq` template tag from `sanity`) so the next typegen run picks them up.
+- **Fourth action:** re-run `pnpm --filter @vetkit/studio typegen` to emit GROQ query result types alongside the schema types.
+- **Smoke:** wire the home page (`app/page.tsx`) to one query as an end-to-end proof. Real marketing pages land in Chunk 11.
+- Husky pre-commit is active — every commit auto-runs lint+format.
