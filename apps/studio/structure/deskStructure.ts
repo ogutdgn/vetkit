@@ -11,4 +11,9 @@ const siteSettingsItem = (S: StructureBuilder) =>
 export const deskStructure: StructureResolver = (S) =>
   S.list()
     .title('İçerik')
-    .items([siteSettingsItem(S), S.divider()]);
+    .items([
+      siteSettingsItem(S),
+      S.divider(),
+      S.documentTypeListItem('service').title('Hizmetler'),
+      S.documentTypeListItem('blogPost').title('Blog Yazıları'),
+    ]);

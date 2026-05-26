@@ -1,5 +1,7 @@
 // All schema types registered with the Studio. Imported by sanity.config.ts.
 
+import { blogPost } from './documents/blogPost';
+import { service } from './documents/service';
 import { address } from './objects/address';
 import { contactInfo } from './objects/contactInfo';
 import { cta } from './objects/cta';
@@ -14,7 +16,7 @@ import { socialLinks } from './objects/socialLinks';
 import { siteSettings } from './singletons/siteSettings';
 
 export const schemaTypes = [
-  // Locale primitives (declared first; everything else depends on them).
+  // Locale primitives.
   localeString,
   localeText,
   localeSlug,
@@ -29,4 +31,7 @@ export const schemaTypes = [
   emergencyBanner,
   // Singletons.
   siteSettings,
+  // Documents.
+  service,
+  blogPost,
 ];
