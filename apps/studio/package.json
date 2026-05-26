@@ -11,13 +11,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "sanity": "^3.74.0",
-    "styled-components": "^6.1.13"
+    "@sanity/language-filter": "^5.0.2",
+    "@sanity/orderable-document-list": "^1.5.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sanity": "^5.26.0",
+    "styled-components": "^6.1.15"
   },
   "devDependencies": {
-    "@sanity/vision": "^3.74.0",
+    "@sanity/vision": "^5.26.0",
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.0",
     "@vetkit/config-eslint": "workspace:*",

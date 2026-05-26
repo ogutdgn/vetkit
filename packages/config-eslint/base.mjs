@@ -19,6 +19,7 @@ export default tseslint.config(
     ignores: [
       '**/node_modules/**',
       '**/.next/**',
+      '**/.sanity/**',
       '**/dist/**',
       '**/build/**',
       '**/.turbo/**',
@@ -44,6 +45,12 @@ export default tseslint.config(
   {
     files: ['**/*.{js,mjs,cjs}'],
     ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
   },
   prettierConfig,
 );
