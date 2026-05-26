@@ -1,7 +1,12 @@
 // All schema types registered with the Studio. Imported by sanity.config.ts.
 
 import { blogPost } from './documents/blogPost';
+import { faq } from './documents/faq';
+import { galleryImage } from './documents/galleryImage';
+import { page } from './documents/page';
 import { service } from './documents/service';
+import { teamMember } from './documents/teamMember';
+import { testimonial } from './documents/testimonial';
 import { address } from './objects/address';
 import { contactInfo } from './objects/contactInfo';
 import { cta } from './objects/cta';
@@ -34,4 +39,9 @@ export const schemaTypes = [
   // Documents.
   service,
   blogPost,
+  teamMember,
+  faq,
+  galleryImage,
+  page,
+  testimonial,
 ];
