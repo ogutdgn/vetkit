@@ -14,41 +14,35 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 4 — Sanity schema (Phase 1) — the keystone.**
+**Chunk 5 — Sanity Studio Turkish polish + ergonomic cleanup.**
 
-> **⏸ STATUS: paused mid-brainstorm.** The design phase was started but not finished — locked decisions, audit findings, and the design overview are captured in [`working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md). **Read that file first** when resuming. It also lists 6 open discussion points to resolve before promoting the design to a final spec.
+The schema, custom desk structure, singleton enforcement, language-filter wiring, and orderable lists all shipped with Chunk 4 on 2026-05-26 — they were originally planned to spill into Chunk 5 but came along for the ride. Chunk 5's scope therefore narrows to the **Studio chrome and editor UX** that wasn't covered yet.
 
-**Goal:** Implement the full Phase 1 Sanity schema in `apps/studio/schemas/` per CLAUDE.md §5: all required document types, all reusable objects, singleton enforcement for `siteSettings`, and a Turkish-friendly document structure. Read `old-sites/gigi-veteriner/` and `old-sites/ovapark-veteriner/` first to inform field shapes (don't constrain to them — design as a _superset_ of what the old sites had).
+**Goal:** Make the Studio feel finished to a Turkish-speaking clinic owner who has never used a CMS before. Audit the rendered UI against a fresh dataset, surface remaining English strings (Sanity's own chrome, plugin labels, validation messages), and tighten any edit-state friction.
 
 **Done when:**
 
-- All document types from §5 exist: `siteSettings` (singleton), `service`, `blogPost`, `teamMember`, `faq`, `galleryImage`, `page`.
-- All reusable objects exist: `seo` (metaTitle/metaDescription/ogImage), `openingHours` (day-by-day), `socialLinks` (instagram/facebook/x/youtube/tiktok), `cta` (label/link).
-- Every public-URL document embeds the `seo` object.
-- Every image field has `hotspot: true`.
-- Rich-text (Portable Text) is constrained: marks `strong`/`em`/`link`, block styles `normal`/`h2`/`h3`/`blockquote` (no h1).
-- `siteSettings` enforced as a singleton via the Studio's custom desk structure (or stop-gap workaround) — exactly one document per Sanity project.
-- All schemas exported from `apps/studio/schemas/index.ts`.
-- `pnpm --filter @vetkit/studio dev` opens Studio with the new schemas visible; documents of each type can be created and saved.
-- `pnpm --filter @vetkit/studio typecheck` and `lint` both pass.
+- `pnpm --filter @vetkit/studio dev` opens Studio against a scratch dataset and the **left-rail menu, doc-type lists, field labels, field descriptions, validation messages, and language-filter dropdown** are all Turkish.
+- Sanity Studio's own chrome (top bar, menus) is set to Turkish via the v5 i18n bundle config in `sanity.config.ts` (Sanity v5 ships locale bundles; we register the `tr` bundle and set it as default).
+- Empty-state messages where a clinic has no `service` / `blogPost` / `teamMember` / `faq` / `galleryImage` / `testimonial` / `page` documents are friendly and in Turkish.
+- Each of the 8 doc types can be created and saved with the minimum required fields; required-field validation fires with Turkish messages.
+- One full editorial dry-run: create a `siteSettings` document, one `service`, one `blogPost` referencing a `teamMember`, one `page` — all save cleanly. Notes go into a follow-up working-notes doc only if friction is found.
+- `pnpm --filter @vetkit/studio typecheck` / `lint` / `build` still pass; `pnpm --filter @vetkit/web build` still passes (no cross-app breakage).
 
-**Depends on:** **OD-1 must be resolved first.** Picking Sanity v3 vs v4 vs v5 changes the schema authoring API and the singleton-enforcement plumbing. Don't start until the version is locked.
+**Depends on:** Chunk 4 (shipped 2026-05-26).
 
 **Open decisions that affect this chunk:**
 
-- **OD-1 (Sanity major version)** — blocker. Resolve before any schema code.
-- Field-level questions will surface as we go (e.g. should `service` have `pricing`? does `teamMember` need a `credentials` field?). Capture new ODs in `plan.md` §3 as they appear rather than deciding silently.
+- None directly. OD-3 (CI) and OD-4 (Studio hostname) are tracked in [`plan.md`](./plan.md) §3 but don't block Chunk 5.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `chore(studio): pin Sanity major version per OD-1 resolution` (if we upgrade)
-2. `feat(studio): add reusable objects (seo, openingHours, socialLinks, cta)`
-3. `feat(studio): add siteSettings singleton with desk-structure enforcement`
-4. `feat(studio): add service and blogPost document types with SEO`
-5. `feat(studio): add teamMember, galleryImage, faq, page document types`
-6. `docs(schema): document the Phase 1 schema in project-documentation/SCHEMA.md`
+1. `feat(studio): register the turkish i18n bundle and set it as default`
+2. `feat(studio): polish desk structure empty-state and list labels`
+3. `feat(studio): turkish-ify validation messages where defaults leak english`
+4. `docs(studio): note the editorial dry-run outcome in working-notes (if friction surfaced)`
 
-Chunk 5 (Turkish localization + polished desk structure) is the natural follow-up.
+Chunk 6 (`sanity-codegen` → `packages/sanity-types/`) is the natural follow-up — once the schema feels stable to editors, generate the TS types for the web app to consume.
 
 ---
 

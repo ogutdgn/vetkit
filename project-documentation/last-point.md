@@ -13,34 +13,45 @@
 
 ## Snapshot
 
-**Date:** 2026-05-21
-**Last commit on `main`:** `702ba59 docs(execution-map): flag Chunk 4 as paused mid-brainstorm`
-**Working tree:** clean (this file is the only pending change, committed in the next `docs(last-point): ...` commit).
+**Date:** 2026-05-26
+**Last commit on `main`:** `a9e7e83 docs(plan): mark chunk 4 done and clear od-1` (the snapshot itself ships next in `docs(project): set chunk 5 active and refresh last-point`).
+**Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json` (unrelated to chunk work).
 
 ## What's running
 
-- Monorepo skeleton (pnpm workspaces + Turborepo) in place.
-- `apps/web` builds and dev-runs with **Tailwind v4** + Inter font + modern template tokens. `pnpm --filter @vetkit/web build` clean (last verified 2026-05-20).
-- `apps/studio` wired to env-driven Sanity v3.99 config — **no schemas yet**. Chunk 4 will bump to **v4** per OD-1 resolution (locked in brainstorm).
-- **ESLint flat-config + Husky + lint-staged** pre-commit fully active. Every commit auto-runs `eslint --fix` + `prettier --write` on staged JS/TS/MJS, `prettier --write` on docs/styles. Verified working across multiple sessions.
-- `pnpm typecheck` passes for both apps; `pnpm lint` at root runs both via Turbo (~2.9s cold).
+- Monorepo skeleton (pnpm workspaces + Turborepo), Tailwind v4 + Inter font + modern template tokens on `apps/web`, ESLint flat-config + Husky + lint-staged pre-commit — all carried over from prior chunks.
+- **Sanity v5 Studio with the full Phase 1 schema:** 4 locale primitives (localeString/Text/Slug/PortableText), 7 reusable objects (seo, address, openingHours, socialLinks, cta, contactInfo, emergencyBanner), `siteSettings` singleton (pinned at `_id: 'siteSettings'`), and 7 documents (service, blogPost, teamMember, faq, galleryImage, page, testimonial).
+- Custom desk structure at `apps/studio/structure/deskStructure.ts` exposes `siteSettings` first, then orderable lists for service / teamMember / faq / galleryImage / testimonial, with blogPost and page as standard document-type lists.
+- `@sanity/language-filter` wired with TR + EN; editor-side locale detection uses a name-prefix check on `locale*` object types.
+- `pnpm --filter @vetkit/studio typecheck` / `lint` / `build` and `pnpm --filter @vetkit/web build` all pass.
 
 ## What was done in this session
 
-This session spanned 2026-05-20 → 2026-05-21 and shipped two infrastructure chunks plus brainstormed the schema.
+This session (2026-05-26) shipped Chunk 4 end-to-end. Twelve commits on `main`:
 
-- **Chunks 2-3 shipped earlier in the session** (ESLint flat-config + Husky pre-commit). See the previous last-point snapshot in git history (`docs(last-point): refresh after Chunks 2-3 (ESLint + Husky)`) for details — those commits are `c570f55`, `8d3187b`, `0c20426` and the doc commits around them.
-- **Chunk 4 brainstorm started, paused mid-design.** Locked decisions on Sanity version, i18n pattern, locales, and schema-shape rules. Ran the old-sites audit. Drafted a design overview (7 doc types, 11 reusable objects, Studio config). Did **not** finish: 6 open discussion points remain, and the final spec doc hasn't been written. Everything captured in [`project-documentation/working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md) — this is a **temporary file** that gets deleted when Chunk 4 ships.
-- **Updated [`execution-map.md`](./execution-map.md) §1** with a "paused mid-brainstorm" note pointing to the working-notes doc.
+1. `118e81e docs(schema): add phase 1 sanity schema design spec` — design spec written + self-reviewed.
+2. `7dc1465 docs(schema): add chunk 4 implementation plan` — task-by-task implementation plan.
+3. `3934fe6 chore(studio): upgrade sanity to v5 and add language-filter + orderable-document-list` — sanity v3.99 → v5.26.0, plus the workspace fix-ups required for v5's stricter jiti loader (flatten config-typescript presets, point root tsconfig at a relative path, add an `exports` map, rename `apps/studio/sanity.cli.ts` to `.js`, bump react to ^19.2.4, teach eslint about `.sanity/` and js globals).
+4. `a1dbb49 feat(studio): add locale primitives and turkish slugify helper` — the four locale types + `apps/studio/lib/locale.ts`.
+5. `9f0b52a feat(studio): add reusable objects (seo, address, hours, social, cta, contact, emergency)` — the seven non-locale reusable objects.
+6. `b52d3dd feat(studio): add siteSettings singleton with custom desk structure and language filter` — singleton, desk structure (initial form), language-filter wiring.
+7. `57bfa61 feat(studio): add service and blogPost document types with seo` — the two public-url workhorses + desk listings.
+8. `28cffa0 feat(studio): add teamMember faq galleryImage page testimonial doc types` — remaining 5 documents + orderable-list desk wiring.
+9. `e800343 docs(schema): document phase 1 schema in project-documentation/SCHEMA.md` — schema reference doc.
+10. `5319292 docs(claude): log chunk 4 decisions and resolve od-1` — three new decision-log rows for 2026-05-26.
+11. `a9e7e83 docs(plan): mark chunk 4 done and clear od-1` — plan §1/§2 checked off, §3 trimmed.
+12. _(this snapshot)_ + the `docs(execution-map): set chunk 5 active` and `docs(project): drop chunk 4 working notes` commits land alongside.
 
 ## What is NOT yet set up
 
 Standing inventory — cross off as items ship.
 
 - ~~Tailwind CSS v4~~ ✓ 2026-05-20.
-- ~~ESLint flat config~~ ✓ this session.
-- ~~Husky / lint-staged~~ ✓ this session.
-- **Sanity schema (Chunk 4) — design ~75% complete (paused), implementation not started.**
+- ~~ESLint flat config~~ ✓ 2026-05-20.
+- ~~Husky / lint-staged~~ ✓ 2026-05-20.
+- ~~Sanity schema (Chunk 4)~~ ✓ 2026-05-26.
+- **Studio chrome i18n + ergonomic polish (Chunk 5)** — active.
+- `sanity-codegen` into `packages/sanity-types/` (Chunk 6).
 - shadcn/ui.
 - SEO helpers.
 - Sanity client wrapper, GROQ queries, draft mode helpers (Chunk 7).
@@ -48,24 +59,24 @@ Standing inventory — cross off as items ship.
 - Marketing pages.
 - Contact form + Resend.
 - Revalidation route + Sanity webhook (Chunk 13).
-- GitHub Actions CI.
-- Vercel deployment.
+- GitHub Actions CI (OD-3 still open).
+- Vercel deployment (OD-4 still open).
 
 ## Open decisions still pending
 
-See [`plan.md`](./plan.md) §3 and the brainstorm doc.
+See [`plan.md`](./plan.md) §3.
 
-- **OD-1 (Sanity major version):** _resolved in brainstorm → **v4**_, but not yet promoted to CLAUDE.md §12 (will be on Chunk 4 ship).
+- **OD-1** (Sanity major version) — resolved 2026-05-26 → **v5**.
 - **OD-3** (CI timing) — open.
 - **OD-4** (Studio hostname pattern) — open.
-- **6 Chunk 4 micro-decisions** in [working-notes brainstorm doc](./working-notes/2026-05-21-chunk-4-brainstorm.md): `service.pricing` UI visibility, `page` doc vs `aboutPage` singleton, `teamMember.name` localization, `emergencyBanner` location, `testimonial` Phase 1 inclusion, `service.responsibleVets` necessity.
+
+The six Chunk 4 micro-decisions (`page` vs `aboutPage`, `service.responsibleVets`, `testimonial` inclusion, `emergencyBanner` location, `teamMember.name` locale, `service.pricing` visibility) all resolved 2026-05-26 — locked in the spec + decision log.
 
 ## Heads-up for the next session
 
-- Active chunk is still **Chunk 4 — Sanity schema**. Status: paused mid-brainstorm.
-- **First action:** read [`working-notes/2026-05-21-chunk-4-brainstorm.md`](./working-notes/2026-05-21-chunk-4-brainstorm.md) in full. It has all locked decisions, audit findings, design overview, and the 6 open points.
-- **Second action:** resolve the 6 open discussion points (quick yes/no for each — they're listed at the bottom of the brainstorm doc).
-- **Third action:** promote the design overview into a final spec doc at `project-documentation/specs/<today>-sanity-schema-design.md`, self-review per `writing-skills`, then ask the user to review.
-- **Fourth action (on approval):** invoke `superpowers:writing-plans` skill to draft the implementation plan, then execute per Chunk 4's suggested commit split in [`execution-map.md`](./execution-map.md) §1.
-- **Cleanup reminder:** when Chunk 4 ships, **delete** the working-notes brainstorm doc in the same commit that adds the final spec. Don't leave stale WIPs in `working-notes/`.
+- Active chunk is **Chunk 5 — Studio Turkish polish.** Scope is narrower than originally planned because the custom desk structure landed inside Chunk 4 already. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
+- **First action when picking up:** open Studio against a scratch dataset (`pnpm --filter @vetkit/studio dev` with `SANITY_STUDIO_PROJECT_ID` pointed somewhere safe), click through the 8 doc-type lists, and screenshot or note any English strings or rough edges.
+- **Second action:** register the Sanity v5 Turkish locale bundle in `sanity.config.ts` (`unstable_studio.i18n` API or the v5 equivalent — verify against docs since the api surface shifted between v3 and v5).
+- **Third action:** sweep validation messages — most are already Turkish via the custom `Rule.custom` paths, but Sanity's built-in `required()` / `email()` / `regex()` messages may default to English.
+- **Cleanup:** the `project-documentation/working-notes/2026-05-21-chunk-4-brainstorm.md` is deleted in this commit pair; if any new working notes are written during Chunk 5, remember to delete them when that chunk ships.
 - Husky pre-commit is active — every commit auto-runs lint+format. Already verified working.
