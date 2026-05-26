@@ -14,35 +14,35 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 5 — Sanity Studio Turkish polish + ergonomic cleanup.**
+**Chunk 6 — `sanity-typegen` → `packages/sanity-types/`.**
 
-The schema, custom desk structure, singleton enforcement, language-filter wiring, and orderable lists all shipped with Chunk 4 on 2026-05-26 — they were originally planned to spill into Chunk 5 but came along for the ride. Chunk 5's scope therefore narrows to the **Studio chrome and editor UX** that wasn't covered yet.
-
-**Goal:** Make the Studio feel finished to a Turkish-speaking clinic owner who has never used a CMS before. Audit the rendered UI against a fresh dataset, surface remaining English strings (Sanity's own chrome, plugin labels, validation messages), and tighten any edit-state friction.
+**Goal:** Generate TypeScript types from the Sanity schema so the web app can consume them in a type-safe way. Land them in a shared workspace package (`packages/sanity-types/`) that `apps/web` imports via `@vetkit/sanity-types`. Re-run on every schema change.
 
 **Done when:**
 
-- `pnpm --filter @vetkit/studio dev` opens Studio against a scratch dataset and the **left-rail menu, doc-type lists, field labels, field descriptions, validation messages, and language-filter dropdown** are all Turkish.
-- Sanity Studio's own chrome (top bar, menus) is set to Turkish via the v5 i18n bundle config in `sanity.config.ts` (Sanity v5 ships locale bundles; we register the `tr` bundle and set it as default).
-- Empty-state messages where a clinic has no `service` / `blogPost` / `teamMember` / `faq` / `galleryImage` / `testimonial` / `page` documents are friendly and in Turkish.
-- Each of the 8 doc types can be created and saved with the minimum required fields; required-field validation fires with Turkish messages.
-- One full editorial dry-run: create a `siteSettings` document, one `service`, one `blogPost` referencing a `teamMember`, one `page` — all save cleanly. Notes go into a follow-up working-notes doc only if friction is found.
-- `pnpm --filter @vetkit/studio typecheck` / `lint` / `build` still pass; `pnpm --filter @vetkit/web build` still passes (no cross-app breakage).
+- `packages/sanity-types/` exists with its own `package.json` (name `@vetkit/sanity-types`, `private: true`).
+- A generation step runs against `apps/studio/schemas/index.ts` and emits a `generated.ts` (or similar) into `packages/sanity-types/`. Use Sanity's official `sanity typegen` CLI (v5 ships with `sanity@5` — verify the exact command and flags before settling on `sanity-codegen` vs the built-in).
+- The emitted types cover all 8 document types and the 11 reusable objects.
+- `apps/web` is wired to import from `@vetkit/sanity-types` (a `pnpm-workspace.yaml` entry is already present for `packages/*`; just ensure `@vetkit/sanity-types` resolves).
+- A root npm script (e.g. `pnpm typegen` or `pnpm --filter @vetkit/studio typegen`) regenerates types; document it in the README or PROJECT-ARCHITECTURE.md.
+- The generated file is checked in (small, regenerable; checked-in to avoid an install-time codegen step in CI/Vercel).
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
 
-**Depends on:** Chunk 4 (shipped 2026-05-26).
+**Depends on:** Chunk 4 (schema in place).
 
 **Open decisions that affect this chunk:**
 
-- None directly. OD-3 (CI) and OD-4 (Studio hostname) are tracked in [`plan.md`](./plan.md) §3 but don't block Chunk 5.
+- **`sanity-codegen` (community) vs `sanity typegen` (official, v5).** Verify which is the current best practice for Sanity v5. The plan note still says "sanity-codegen" but the official CLI may be the cleaner fit now. Resolve before writing the generation script.
+- None of OD-3 / OD-4 affect this chunk.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(studio): register the turkish i18n bundle and set it as default`
-2. `feat(studio): polish desk structure empty-state and list labels`
-3. `feat(studio): turkish-ify validation messages where defaults leak english`
-4. `docs(studio): note the editorial dry-run outcome in working-notes (if friction surfaced)`
+1. `chore(workspace): scaffold packages/sanity-types with package.json + tsconfig`
+2. `feat(studio): wire the typegen command (sanity typegen or sanity-codegen) and emit generated.ts`
+3. `feat(web): import sanity types from @vetkit/sanity-types`
+4. `docs(architecture): document the typegen workflow in PROJECT-ARCHITECTURE.md`
 
-Chunk 6 (`sanity-codegen` → `packages/sanity-types/`) is the natural follow-up — once the schema feels stable to editors, generate the TS types for the web app to consume.
+Chunk 7 (shared Sanity infra in `apps/web/lib/sanity/`) is the natural follow-up — once types exist, the GROQ query helpers can be written against them.
 
 ---
 

@@ -14,33 +14,27 @@
 ## Snapshot
 
 **Date:** 2026-05-26
-**Last commit on `main`:** `a9e7e83 docs(plan): mark chunk 4 done and clear od-1` (the snapshot itself ships next in `docs(project): set chunk 5 active and refresh last-point`).
+**Last commit on `main`:** `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome` (the snapshot itself ships next in `docs(project): set chunk 6 active and refresh last-point`).
 **Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json` (unrelated to chunk work).
 
 ## What's running
 
 - Monorepo skeleton (pnpm workspaces + Turborepo), Tailwind v4 + Inter font + modern template tokens on `apps/web`, ESLint flat-config + Husky + lint-staged pre-commit — all carried over from prior chunks.
-- **Sanity v5 Studio with the full Phase 1 schema:** 4 locale primitives (localeString/Text/Slug/PortableText), 7 reusable objects (seo, address, openingHours, socialLinks, cta, contactInfo, emergencyBanner), `siteSettings` singleton (pinned at `_id: 'siteSettings'`), and 7 documents (service, blogPost, teamMember, faq, galleryImage, page, testimonial).
-- Custom desk structure at `apps/studio/structure/deskStructure.ts` exposes `siteSettings` first, then orderable lists for service / teamMember / faq / galleryImage / testimonial, with blogPost and page as standard document-type lists.
-- `@sanity/language-filter` wired with TR + EN; editor-side locale detection uses a name-prefix check on `locale*` object types.
+- **Sanity v5 Studio with the full Phase 1 schema** (Chunk 4): 4 locale primitives, 7 reusable objects, `siteSettings` singleton, 7 documents.
+- Custom desk structure with `siteSettings` pinned + orderable lists (service / teamMember / faq / galleryImage / testimonial) + standard listings (blogPost / page).
+- `@sanity/language-filter` wired for **content-locale** filtering (TR + EN) using a name-prefix detector on `locale*` objects.
+- **`@sanity/locale-tr-tr@1.2.33` wired as `trTRLocale()`** (Chunk 5): translates the Studio chrome (top bar, menus, validation messages, empty states). Editors switch to Turkish from the language switcher in the top bar; the choice persists per browser. There is no `defineConfig`-level "force locale" hook in Sanity v5.
 - `pnpm --filter @vetkit/studio typecheck` / `lint` / `build` and `pnpm --filter @vetkit/web build` all pass.
 
 ## What was done in this session
 
-This session (2026-05-26) shipped Chunk 4 end-to-end. Twelve commits on `main`:
+Session date: 2026-05-26. Shipped **Chunk 4 (Sanity schema)** end-to-end with 12 commits, then **Chunk 5 (Studio Turkish polish)** in a small follow-up:
 
-1. `118e81e docs(schema): add phase 1 sanity schema design spec` — design spec written + self-reviewed.
-2. `7dc1465 docs(schema): add chunk 4 implementation plan` — task-by-task implementation plan.
-3. `3934fe6 chore(studio): upgrade sanity to v5 and add language-filter + orderable-document-list` — sanity v3.99 → v5.26.0, plus the workspace fix-ups required for v5's stricter jiti loader (flatten config-typescript presets, point root tsconfig at a relative path, add an `exports` map, rename `apps/studio/sanity.cli.ts` to `.js`, bump react to ^19.2.4, teach eslint about `.sanity/` and js globals).
-4. `a1dbb49 feat(studio): add locale primitives and turkish slugify helper` — the four locale types + `apps/studio/lib/locale.ts`.
-5. `9f0b52a feat(studio): add reusable objects (seo, address, hours, social, cta, contact, emergency)` — the seven non-locale reusable objects.
-6. `b52d3dd feat(studio): add siteSettings singleton with custom desk structure and language filter` — singleton, desk structure (initial form), language-filter wiring.
-7. `57bfa61 feat(studio): add service and blogPost document types with seo` — the two public-url workhorses + desk listings.
-8. `28cffa0 feat(studio): add teamMember faq galleryImage page testimonial doc types` — remaining 5 documents + orderable-list desk wiring.
-9. `e800343 docs(schema): document phase 1 schema in project-documentation/SCHEMA.md` — schema reference doc.
-10. `5319292 docs(claude): log chunk 4 decisions and resolve od-1` — three new decision-log rows for 2026-05-26.
-11. `a9e7e83 docs(plan): mark chunk 4 done and clear od-1` — plan §1/§2 checked off, §3 trimmed.
-12. _(this snapshot)_ + the `docs(execution-map): set chunk 5 active` and `docs(project): drop chunk 4 working notes` commits land alongside.
+Chunk 4 commits (in order): `118e81e`, `7dc1465`, `3934fe6`, `a1dbb49`, `9f0b52a`, `b52d3dd`, `57bfa61`, `28cffa0`, `e800343`, `5319292`, `a9e7e83`, `86f5a3c`. Brought Sanity v3.99 → v5.26.0 (incl. workspace fix-ups for jiti / config-typescript / sanity.cli rename / react bump / eslint), introduced 4 locale primitives + 7 reusable objects + siteSettings singleton + 7 docs + custom desk structure, wired language-filter, documented in SCHEMA.md, updated CLAUDE.md §12 (3 new decision rows + OD-1 resolved), and deleted the working-notes brainstorm.
+
+Chunk 5 commit: `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome`. Plus this `docs(*)` trio.
+
+Chunk 5 scope ended up small because the bulk of its original scope (desk structure, singleton enforcement, Turkish field labels and descriptions, language-filter wiring) had spilled into Chunk 4. The residual was: install `@sanity/locale-tr-tr`, register `trTRLocale()`, document the distinction between Studio-UI locale and content locale in SCHEMA.md.
 
 ## What is NOT yet set up
 
@@ -50,17 +44,18 @@ Standing inventory — cross off as items ship.
 - ~~ESLint flat config~~ ✓ 2026-05-20.
 - ~~Husky / lint-staged~~ ✓ 2026-05-20.
 - ~~Sanity schema (Chunk 4)~~ ✓ 2026-05-26.
-- **Studio chrome i18n + ergonomic polish (Chunk 5)** — active.
-- `sanity-codegen` into `packages/sanity-types/` (Chunk 6).
-- shadcn/ui.
-- SEO helpers.
-- Sanity client wrapper, GROQ queries, draft mode helpers (Chunk 7).
-- Template contract + rest of `templates/modern/`.
-- Marketing pages.
-- Contact form + Resend.
+- ~~Studio Turkish localization + custom desk (Chunk 5)~~ ✓ 2026-05-26.
+- **Sanity type generation (Chunk 6) — `packages/sanity-types/`** — active.
+- Shared Sanity infra in `apps/web/lib/sanity/` (Chunk 7).
+- SEO helpers (Chunk 8).
+- Template contract + `templates/modern/` components (Chunks 9-10).
+- Marketing pages (Chunk 11).
+- Contact form + Resend (Chunk 12).
 - Revalidation route + Sanity webhook (Chunk 13).
+- shadcn/ui init (Chunk 14).
 - GitHub Actions CI (OD-3 still open).
 - Vercel deployment (OD-4 still open).
+- Editorial dry-run against a scratch Sanity dataset (Chunk 5 done-when item that needs a live project; not blocking).
 
 ## Open decisions still pending
 
@@ -69,14 +64,13 @@ See [`plan.md`](./plan.md) §3.
 - **OD-1** (Sanity major version) — resolved 2026-05-26 → **v5**.
 - **OD-3** (CI timing) — open.
 - **OD-4** (Studio hostname pattern) — open.
-
-The six Chunk 4 micro-decisions (`page` vs `aboutPage`, `service.responsibleVets`, `testimonial` inclusion, `emergencyBanner` location, `teamMember.name` locale, `service.pricing` visibility) all resolved 2026-05-26 — locked in the spec + decision log.
+- **Chunk 6 sub-decision:** `sanity-codegen` (community) vs `sanity typegen` (official v5 CLI). Resolve at the top of Chunk 6.
 
 ## Heads-up for the next session
 
-- Active chunk is **Chunk 5 — Studio Turkish polish.** Scope is narrower than originally planned because the custom desk structure landed inside Chunk 4 already. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
-- **First action when picking up:** open Studio against a scratch dataset (`pnpm --filter @vetkit/studio dev` with `SANITY_STUDIO_PROJECT_ID` pointed somewhere safe), click through the 8 doc-type lists, and screenshot or note any English strings or rough edges.
-- **Second action:** register the Sanity v5 Turkish locale bundle in `sanity.config.ts` (`unstable_studio.i18n` API or the v5 equivalent — verify against docs since the api surface shifted between v3 and v5).
-- **Third action:** sweep validation messages — most are already Turkish via the custom `Rule.custom` paths, but Sanity's built-in `required()` / `email()` / `regex()` messages may default to English.
-- **Cleanup:** the `project-documentation/working-notes/2026-05-21-chunk-4-brainstorm.md` is deleted in this commit pair; if any new working notes are written during Chunk 5, remember to delete them when that chunk ships.
+- Active chunk is **Chunk 6 — Sanity type generation into `packages/sanity-types/`**. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
+- **First action:** decide `sanity-codegen` vs `sanity typegen`. The plan still says `sanity-codegen` but Sanity v5 ships an official `sanity typegen` CLI now — quick due-diligence first.
+- **Second action:** scaffold `packages/sanity-types/` (package.json + tsconfig + an empty `index.ts` placeholder).
+- **Third action:** wire the typegen command and emit the generated file. Check it in to avoid an install-time codegen step.
+- **Fourth action:** ensure `apps/web` resolves `@vetkit/sanity-types` and stub an import to prove the chain works (full GROQ-typed queries land in Chunk 7).
 - Husky pre-commit is active — every commit auto-runs lint+format. Already verified working.
