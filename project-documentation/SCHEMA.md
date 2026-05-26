@@ -68,7 +68,8 @@ Every image field that carries an asset must have a `localeString` `alt`. For op
 
 - `structureTool({ structure: deskStructure })` — the Turkish desk pinning `siteSettings` and exposing the document-type lists.
 - `visionTool()` — GROQ playground.
-- `languageFilter({ supportedLanguages: [tr, en], defaultLanguages: ['tr'], documentTypes: [all 8] })` — editor-side locale filter using the name-prefix detector for locale objects.
+- `trTRLocale()` — Turkish translation bundle for the Studio chrome (menus, validation messages, empty states). Sanity v5 has no `defineConfig`-level "force locale" hook, so editors pick Turkish once via the language switcher in the top bar; the choice persists per browser. For single-tenant Studios (one per clinic) this is fine.
+- `languageFilter({ supportedLanguages: [tr, en], defaultLanguages: ['tr'], documentTypes: [all 8] })` — editor-side **content-locale** filter (not Studio UI; that's `trTRLocale`). Uses the name-prefix detector for locale objects.
 
 `apps/studio/sanity.cli.js` (renamed from `.ts` to sidestep Sanity v5's strict jiti tsconfig resolution in monorepos) carries projectId/dataset from env.
 

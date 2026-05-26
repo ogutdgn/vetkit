@@ -1,4 +1,5 @@
 import { languageFilter } from '@sanity/language-filter';
+import { trTRLocale } from '@sanity/locale-tr-tr';
 import { visionTool } from '@sanity/vision';
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
@@ -19,6 +20,10 @@ export default defineConfig({
   plugins: [
     structureTool({ structure: deskStructure }),
     visionTool(),
+    // Studio chrome translated into Turkish. Editors can still switch back to
+    // English via the language switcher; the bundle just adds Turkish to the
+    // list (Sanity v5 has no defineConfig-level "force locale" hook).
+    trTRLocale(),
     languageFilter({
       supportedLanguages: [
         { id: 'tr', title: 'Türkçe' },
