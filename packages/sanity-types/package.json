@@ -1,0 +1,24 @@
+{
+  "name": "@vetkit/sanity-types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./generated": "./generated.ts"
+  },
+  "files": [
+    "index.ts",
+    "generated.ts",
+    "schema.json"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vetkit/config-typescript": "workspace:*",
+    "typescript": "^5.6.3"
+  }
+}

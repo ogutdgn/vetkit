@@ -8,7 +8,10 @@
     "start": "sanity start",
     "deploy": "sanity deploy",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typegen:extract": "sanity schemas extract --enforce-required-fields --path ../../packages/sanity-types/schema.json",
+    "typegen:generate": "sanity typegen generate",
+    "typegen": "pnpm typegen:extract && pnpm typegen:generate"
   },
   "dependencies": {
     "@sanity/language-filter": "^5.0.2",

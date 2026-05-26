@@ -75,6 +75,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@vetkit/sanity-types':
+        specifier: workspace:*
+        version: link:../../packages/sanity-types
       next:
         specifier: 16.2.4
         version: 16.2.4(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -141,6 +144,15 @@ importers:
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
 
   packages/config-typescript: {}
+
+  packages/sanity-types:
+    devDependencies:
+      '@vetkit/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
 
 packages:
 
