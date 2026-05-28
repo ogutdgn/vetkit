@@ -13,30 +13,33 @@
 
 ## Snapshot
 
-**Date:** 2026-05-26
-**Last commit on `main`:** `032de43 docs(architecture): document the sanity-types typegen workflow` (the snapshot itself ships next in `docs(project): mark chunk 6 done, set chunk 7 active`).
+**Date:** 2026-05-28
+**Last commit on `main`:** `593722a docs(project): mark chunk 6 done, set chunk 7 active, refresh last-point` (the docs trio shipping next — `docs(claude): …`, `docs(plan): …`, `docs(project): …` — are the wrap of the 2026-05-28 decisions, no code changes since 2026-05-26).
 **Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json`.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. All commits through this wrap are pushed at the end of this session.
 
 ## What's running
 
-- Monorepo + Tailwind v4 + ESLint flat-config + Husky pre-commit + Sanity v5 Studio + Turkish locale bundle — all carried from prior chunks.
-- **`@vetkit/sanity-types` workspace package** (Chunk 6): `packages/sanity-types/` exposes the 43 schema types generated from `apps/studio/schemas/` by Sanity v5's official `sanity typegen` CLI. Files checked in: `package.json`, `tsconfig.json`, `index.ts` (re-export), `generated.ts` (auto-generated), `schema.json` (intermediate). `apps/web/types/sanity.ts` re-exports from `@vetkit/sanity-types` so route handlers can `import type { Service } from '@/types/sanity'`.
-- Studio scripts: `pnpm --filter @vetkit/studio typegen` regenerates `schema.json` + `generated.ts` in one shot.
-- `pnpm typecheck` / `lint` / `build` clean across studio + web + sanity-types.
+Carries over from the 2026-05-26 session (no code touched on 2026-05-28):
 
-## What was done in this session
+- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio with the full Phase 1 schema, custom desk structure with orderable lists, `@sanity/language-filter` for content-locale, `@sanity/locale-tr-tr` for Studio chrome.
+- `@vetkit/sanity-types` workspace package with 43 generated schema types; `apps/web` consumes via `apps/web/types/sanity.ts` re-export.
+- `pnpm typecheck` / `lint` / `build` clean across all packages.
 
-Session date: 2026-05-26. Shipped **Chunks 4, 5, and 6** end-to-end:
+## What was done in this (2026-05-28) wrap
 
-- **Chunk 4 (Sanity schema)** — 12 commits, see prior last-point history in git. v3.99 → v5.26.0, 4 locale primitives + 7 reusable objects + siteSettings singleton + 7 documents, custom desk structure with orderable lists, language-filter wiring, SCHEMA.md, CLAUDE.md decision log update, OD-1 resolved.
-- **Chunk 5 (Studio Turkish polish)** — 1 implementation commit + 1 docs commit:
-  - `1eb8bfc feat(studio): register the turkish locale bundle for studio chrome` — added `@sanity/locale-tr-tr@^1.2.33`, wired `trTRLocale()` before `languageFilter` in `sanity.config.ts`. Distinction between Studio-UI locale and content-locale spelled out in SCHEMA.md.
-  - `8613db6 docs(project): mark chunk 5 done, set chunk 6 active, refresh last-point` — wrap-up docs.
-- **Chunk 6 (Sanity type generation)** — 2 commits:
-  - `9b23d43 feat(workspace): scaffold @vetkit/sanity-types and wire studio typegen` — packages/sanity-types/ scaffolded, `apps/studio/sanity-typegen.json` config, three typegen scripts (`typegen:extract`, `typegen:generate`, `typegen`), initial 43-type emit, apps/web wired via `apps/web/types/sanity.ts` shim.
-  - `032de43 docs(architecture): document the sanity-types typegen workflow` — PROJECT-ARCHITECTURE.md gained a real section for the package (was a stub) plus the regeneration workflow.
+Two architectural decisions taken and logged:
 
-Decision: used Sanity v5's **official `sanity typegen` CLI**, not the community `sanity-codegen` the plan originally named. The CLI ships with Sanity v5 itself (`sanity schemas extract` + `sanity typegen generate`) and produces typed schema + (later) GROQ query result types in one pipeline.
+1. **`next-sanity` over vanilla `@sanity/client`** for the Chunk 7 client wrapper. Reasoning: Next 16 fetch cache + `revalidateTag` integration is load-bearing for the Chunk 13 webhook, `defineQuery` is picked up by `sanity typegen` for typed GROQ result types, draft-mode and live-preview helpers come included. Logged in `CLAUDE.md` §12.
+2. **OD-4 resolved → `studio.<client-domain>.com` via CNAME** for Studio hostnames. Reasoning: white-label feel for clinic owners; ~5 min extra onboarding step is acceptable at our scale. Logged in `CLAUDE.md` §12; removed from `plan.md` §3.
+
+One new open decision flagged:
+
+- **OD-5: cache-tag naming convention.** Recommendation `sanity:<type>:<id>` namespaced (stable across slug renames; `sanity:<type>:list` for collections; `sanity:siteSettings` for the singleton). Logged in `plan.md` §3 as a blocker for the **first** commit of Chunk 7 — once a tag shape ships in `queries.ts`, every consumer bakes it in and changing it later means a global sweep. Decide before writing the first query.
+
+`execution-map.md` updated to lock `next-sanity` for Chunk 7 and to flag OD-5 as a first-commit blocker.
+
+No code commits in this turn — only docs.
 
 ## What is NOT yet set up
 
@@ -55,24 +58,25 @@ Standing inventory — cross off as items ship.
 - Contact form + Resend (Chunk 12).
 - Revalidation route + Sanity webhook (Chunk 13).
 - shadcn/ui init (Chunk 14).
-- GitHub Actions CI (OD-3 still open).
-- Vercel deployment (OD-4 still open).
+- GitHub Actions CI (OD-3 open — recommendation: minimal workflow before Chunk 15).
+- Vercel deployment (Chunk 15 — Studio hostname OD-4 resolved → CNAME `studio.<client-domain>.com`).
 
 ## Open decisions still pending
 
 See [`plan.md`](./plan.md) §3.
 
 - **OD-1** (Sanity major version) — resolved 2026-05-26 → **v5**.
-- **OD-3** (CI timing) — open.
-- **OD-4** (Studio hostname pattern) — open.
-- **Chunk 7 sub-decisions** (to settle at the top of the next session): `@sanity/client` vs `next-sanity` for the client wrapper; the cache-tag naming convention used by queries so the Chunk 13 webhook can `revalidateTag(tag, 'max')` selectively.
+- **OD-3** (CI timing) — open. Recommendation: before Chunk 15.
+- **OD-4** (Studio hostname pattern) — resolved 2026-05-28 → **CNAME `studio.<client-domain>.com`**.
+- **OD-5** (cache-tag naming convention) — new on 2026-05-28; blocks the first Chunk 7 commit. Recommendation: `sanity:<type>:<id>` namespaced.
 
 ## Heads-up for the next session
 
-- Active chunk is **Chunk 7 — shared Sanity infra in `apps/web/lib/sanity/`**. See [`execution-map.md`](./execution-map.md) §1 for the new Done-when.
-- **First action:** evaluate `next-sanity` (the Next-specific wrapper) vs vanilla `@sanity/client`. `next-sanity` typically adds nicer cache-tag integration; verify it still supports Sanity v5 / Next 16.
-- **Second action:** scaffold `apps/web/lib/sanity/client.ts` (public + draft variants, env-driven), `image.ts` (urlFor builder), `live.ts` (`await draftMode()` toggle for Next 16).
-- **Third action:** add `queries.ts` with the three initial GROQ queries (siteSettings, services list, service-by-slug). They should use the `defineQuery` helper from `next-sanity` (or `groq` template tag from `sanity`) so the next typegen run picks them up.
-- **Fourth action:** re-run `pnpm --filter @vetkit/studio typegen` to emit GROQ query result types alongside the schema types.
-- **Smoke:** wire the home page (`app/page.tsx`) to one query as an end-to-end proof. Real marketing pages land in Chunk 11.
+- Active chunk is **Chunk 7 — shared Sanity infra in `apps/web/lib/sanity/`**. See [`execution-map.md`](./execution-map.md) §1 for the Done-when.
+- **First action: resolve OD-5.** Pick a cache-tag convention before writing the first GROQ query. My recommendation is `sanity:<type>:<id>` (namespaced, `_id`-based); decide explicitly so it doesn't get baked in by accident.
+- **Second action:** scaffold `apps/web/lib/sanity/client.ts` against `next-sanity` (public CDN-cached + draft-mode-aware variants).
+- **Third action:** `image.ts` (urlFor builder) and `live.ts` (`await draftMode()` toggle for Next 16).
+- **Fourth action:** `queries.ts` with three initial queries (`siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`) using `defineQuery` so `sanity typegen` emits typed results.
+- **Fifth action:** rerun `pnpm --filter @vetkit/studio typegen` and let it pick up the GROQ queries; commit the regenerated `generated.ts`.
+- **Smoke:** wire `app/page.tsx` to fetch and render one field from `siteSettingsQuery` as end-to-end proof. Real marketing pages land in Chunk 11.
 - Husky pre-commit is active — every commit auto-runs lint+format.

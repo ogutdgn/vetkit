@@ -18,12 +18,17 @@
 
 **Goal:** Give `apps/web` the small, type-safe set of helpers it needs to fetch Sanity content for server components and route handlers. This is the layer between the schema (Chunk 4) + generated types (Chunk 6) and the actual marketing pages (Chunk 11).
 
+**Locked decisions (settled 2026-05-28):**
+
+- **`next-sanity`** as the client wrapper (not vanilla `@sanity/client`). Reasoning in CLAUDE.md §12. Use `defineQuery` for queries so `sanity typegen` picks them up.
+
 **Done when:**
 
-- `apps/web/lib/sanity/client.ts` exists, creates a Sanity client via `createClient` from `@sanity/client` or `sanity` core, reading `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` from env, with `useCdn: true` for published content and a draft-mode-aware variant that uses the `SANITY_API_READ_TOKEN`.
-- `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `groq\`…\``tagged template literals. At least three are written and exported:`getSiteSettings()`, `listServices(locale)`, `getServiceBySlug(slug, locale)`. (More land in Chunk 11; the goal here is a working shape.)
-- `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url`.
-- `apps/web/lib/sanity/live.ts` exists with a thin `draftMode()`-aware wrapper that flips the client used by queries (Next 16 — remember `await draftMode()`).
+- `apps/web/lib/sanity/client.ts` exists, wraps `next-sanity`'s `createClient`, reads `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` from env. Two exports: a CDN-cached public client and a draft-mode-aware client that uses `SANITY_API_READ_TOKEN`.
+- `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `defineQuery(...)` calls. At least three are written and exported: `siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`. (More land in Chunk 11; the goal here is a working shape.)
+- `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url` (re-exported by `next-sanity`).
+- `apps/web/lib/sanity/live.ts` exists with an `await draftMode()`-aware wrapper that flips the client used by queries (Next 16's `draftMode` is async).
+- Every query call passes `next: { tags: [...] }` so the Chunk 13 webhook can selectively `revalidateTag`. **Tag-naming convention must be picked at the start of the chunk — see OD-5** (recommendation: `sanity:<type>:<id>` namespaced).
 - Running `pnpm --filter @vetkit/studio typegen` after the queries are added emits **GROQ query result types** alongside the schema types (the typegen config already globs `apps/web/**/*.{ts,tsx}`), and those types are usable from the query helpers.
 - `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
 - At least one page (e.g. `app/page.tsx`) imports a query helper to prove the chain end-to-end (still a placeholder render — the real pages land in Chunk 11).
@@ -32,17 +37,17 @@
 
 **Open decisions that affect this chunk:**
 
-- **`@sanity/client` vs `sanity` core's `createClient`** — they're the same API. Pick whichever ships fewer transitive deps; default to `next-sanity` if it offers tag-based caching helpers we'd use anyway. Verify before importing.
-- **Cache tags strategy** — we want the queries to emit predictable `next: { tags: [...] }` so the Chunk 13 webhook can `revalidateTag(tag, 'max')` selectively. Decide a tag convention up front (e.g. `sanity:siteSettings`, `sanity:service:<slug>`).
-- None of OD-3 / OD-4 block this chunk.
+- **OD-5 (cache-tag convention)** — blocker. Resolve in the first commit. Recommendation: `sanity:<type>:<id>` for single docs (e.g. `sanity:service:abc123`), `sanity:<type>:list` for collection queries, `sanity:siteSettings` for the singleton. `_id`-based instead of slug-based for stability.
+- OD-3 (CI timing) — open but does not block this chunk.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add sanity client wrapper with draft-mode toggle`
+1. `feat(web): add next-sanity client wrapper with draft-mode toggle`
 2. `feat(web): add image url builder helper`
-3. `feat(web): add initial groq queries (siteSettings, services list, service detail)`
-4. `feat(web): wire the home page to a sanity query as an end-to-end smoke test`
-5. `docs(architecture): document the apps/web/lib/sanity/ shape`
+3. `feat(web): add initial groq queries (siteSettings, services list, service detail) with cache tags`
+4. `chore(studio): regenerate sanity types to include groq query results`
+5. `feat(web): wire the home page to a sanity query as an end-to-end smoke test`
+6. `docs(architecture): document the apps/web/lib/sanity/ shape`
 
 Chunk 8 (SEO helpers) is the natural follow-up — once queries return typed data, `generateMetadata` can lean on it.
 
