@@ -18,9 +18,13 @@
 
 **Goal:** Give `apps/web` the small, type-safe set of helpers it needs to fetch Sanity content for server components and route handlers. This is the layer between the schema (Chunk 4) + generated types (Chunk 6) and the actual marketing pages (Chunk 11).
 
-**Locked decisions (settled 2026-05-28):**
+**⚠ Blocked on OD-6 (resolve first).** The i18n field shape is undecided: keep `{ tr, en }` (status quo) or simplify to plain single-language fields (owner leaning, recommended). This determines whether every query projects flat strings or uses `coalesce(field[$locale], …)`. **If Option 1 wins, a Chunk 4 schema-simplification pass runs before this chunk.** See [`plan.md`](./plan.md) §3 OD-6.
 
-- **`next-sanity`** as the client wrapper (not vanilla `@sanity/client`). Reasoning in CLAUDE.md §12. Use `defineQuery` for queries so `sanity typegen` picks them up.
+**Locked decisions:**
+
+- **`next-sanity`** as the client wrapper (not vanilla `@sanity/client`), settled 2026-05-28. Reasoning in CLAUDE.md §12. Use `defineQuery` for queries so `sanity typegen` picks them up.
+- **Cache tags = `sanity:<type>:<id>`** (OD-5 resolved 2026-05-30): single docs `sanity:service:abc123`, collections `sanity:<type>:list`, singleton `sanity:siteSettings`. `_id`-based, not slug-based.
+- **Dev sandbox Sanity project** to be created (`vetkit-dev`, public `production` dataset) so the smoke test is a real round-trip. Owner creates it once OD-6 is settled; projectId lands in gitignored `apps/web/.env.local` + `apps/studio/.env.local`.
 
 **Done when:**
 
@@ -28,7 +32,7 @@
 - `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `defineQuery(...)` calls. At least three are written and exported: `siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`. (More land in Chunk 11; the goal here is a working shape.)
 - `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url` (re-exported by `next-sanity`).
 - `apps/web/lib/sanity/live.ts` exists with an `await draftMode()`-aware wrapper that flips the client used by queries (Next 16's `draftMode` is async).
-- Every query call passes `next: { tags: [...] }` so the Chunk 13 webhook can selectively `revalidateTag`. **Tag-naming convention must be picked at the start of the chunk — see OD-5** (recommendation: `sanity:<type>:<id>` namespaced).
+- Every query call passes `next: { tags: [...] }` so the Chunk 13 webhook can selectively `revalidateTag`, using the resolved OD-5 convention `sanity:<type>:<id>` / `sanity:<type>:list` / `sanity:siteSettings`.
 - Running `pnpm --filter @vetkit/studio typegen` after the queries are added emits **GROQ query result types** alongside the schema types (the typegen config already globs `apps/web/**/*.{ts,tsx}`), and those types are usable from the query helpers.
 - `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
 - At least one page (e.g. `app/page.tsx`) imports a query helper to prove the chain end-to-end (still a placeholder render — the real pages land in Chunk 11).
@@ -37,7 +41,8 @@
 
 **Open decisions that affect this chunk:**
 
-- **OD-5 (cache-tag convention)** — blocker. Resolve in the first commit. Recommendation: `sanity:<type>:<id>` for single docs (e.g. `sanity:service:abc123`), `sanity:<type>:list` for collection queries, `sanity:siteSettings` for the singleton. `_id`-based instead of slug-based for stability.
+- **OD-6 (i18n field shape)** — hard blocker. Resolve before the first query. Owner leaning Option 1 (plain fields); if so, a Chunk 4 schema rework precedes this chunk. See [`plan.md`](./plan.md) §3.
+- OD-5 (cache-tag convention) — resolved 2026-05-30 → `sanity:<type>:<id>`. No longer open.
 - OD-3 (CI timing) — open but does not block this chunk.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
