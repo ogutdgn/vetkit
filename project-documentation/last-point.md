@@ -13,33 +13,30 @@
 
 ## Snapshot
 
-**Date:** 2026-05-28
-**Last commit on `main`:** `593722a docs(project): mark chunk 6 done, set chunk 7 active, refresh last-point` (the docs trio shipping next — `docs(claude): …`, `docs(plan): …`, `docs(project): …` — are the wrap of the 2026-05-28 decisions, no code changes since 2026-05-26).
-**Working tree:** clean apart from this snapshot and an untracked `.claude/settings.json`.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. All commits through this wrap are pushed at the end of this session.
+**Date:** 2026-05-30
+**Last commit on `main`:** `093c922 docs(project): lock next-sanity in chunk 7, flag od-5, refresh last-point`. No code commits since 2026-05-26; this session's wrap ships a docs trio (`docs(claude): …`, `docs(plan): …`, `docs(execution-map): …`) plus this `docs(last-point): …`.
+**Working tree:** apart from this session's doc edits (`last-point.md`, `execution-map.md`, `plan.md`, `CLAUDE.md`) and an untracked `.claude/settings.json`, clean.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Owner is pushing this wrap.
 
 ## What's running
 
-Carries over from the 2026-05-26 session (no code touched on 2026-05-28):
+Carries over from 2026-05-28 — no code touched this session:
 
-- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio with the full Phase 1 schema, custom desk structure with orderable lists, `@sanity/language-filter` for content-locale, `@sanity/locale-tr-tr` for Studio chrome.
-- `@vetkit/sanity-types` workspace package with 43 generated schema types; `apps/web` consumes via `apps/web/types/sanity.ts` re-export.
+- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio with the full Phase 1 schema, custom desk structure with orderable lists, `@sanity/language-filter` (tr/en), `@sanity/locale-tr-tr` for Studio chrome.
+- `@vetkit/sanity-types` workspace package with 43 generated schema types; `apps/web` consumes via `apps/web/types/sanity.ts`.
 - `pnpm typecheck` / `lint` / `build` clean across all packages.
+- **No Sanity project provisioned and no `.env.local` anywhere** — only `.env.example` placeholders. `apps/web/lib/` does not exist yet; `next-sanity` + `@sanity/image-url` are not installed.
 
-## What was done in this (2026-05-28) wrap
+## What was done in this (2026-05-30) session
 
-Two architectural decisions taken and logged:
+Planning and decisions only — no code:
 
-1. **`next-sanity` over vanilla `@sanity/client`** for the Chunk 7 client wrapper. Reasoning: Next 16 fetch cache + `revalidateTag` integration is load-bearing for the Chunk 13 webhook, `defineQuery` is picked up by `sanity typegen` for typed GROQ result types, draft-mode and live-preview helpers come included. Logged in `CLAUDE.md` §12.
-2. **OD-4 resolved → `studio.<client-domain>.com` via CNAME** for Studio hostnames. Reasoning: white-label feel for clinic owners; ~5 min extra onboarding step is acceptable at our scale. Logged in `CLAUDE.md` §12; removed from `plan.md` §3.
+1. **OD-5 resolved → cache-tag convention `sanity:<type>:<id>`** (namespaced, `_id`-based; `sanity:<type>:list` for collections, `sanity:siteSettings` for the singleton). `_id`-based survives slug renames; per-doc + per-list granularity lets the Chunk 13 webhook revalidate only affected pages. Logged in CLAUDE.md §12; removed from plan.md §3.
+2. **Dev sandbox Sanity project decided** — create a throwaway `vetkit-dev` tenant (public `production` dataset) so the Chunk 7 smoke test is a real round-trip, not a build-only check. Owner creates it via sanity.io/manage after OD-6 settles; projectId → gitignored `apps/web/.env.local` (+ a Viewer `SANITY_API_READ_TOKEN` for draft mode) and `apps/studio/.env.local` (`SANITY_STUDIO_PROJECT_ID`).
+3. **New OD-6 raised — blocks Chunk 7: i18n field shape.** Keep field-level `{ tr, en }` (the 2026-05-26 decision) or simplify to plain single-language fields (Option 1 — owner leaning, my recommendation). Plain fields are simpler for editors + queries and align with CLAUDE.md §3 / anti-pattern #12 (Turkish-only, no premature i18n), but reverse a logged decision and rework the Chunk 4 schema. Cost is ~zero now (no project, no content). Logged in plan.md §3.
+4. **Locale-projection approach (the old #3) parked behind OD-6** — if Option 1, queries are plain projections; if Option 2, queries use `coalesce(field[$locale], field[$defaultLocale])` with `$locale` from `siteSettings.defaultLocale`.
 
-One new open decision flagged:
-
-- **OD-5: cache-tag naming convention.** Recommendation `sanity:<type>:<id>` namespaced (stable across slug renames; `sanity:<type>:list` for collections; `sanity:siteSettings` for the singleton). Logged in `plan.md` §3 as a blocker for the **first** commit of Chunk 7 — once a tag shape ships in `queries.ts`, every consumer bakes it in and changing it later means a global sweep. Decide before writing the first query.
-
-`execution-map.md` updated to lock `next-sanity` for Chunk 7 and to flag OD-5 as a first-commit blocker.
-
-No code commits in this turn — only docs.
+Grounding: ran a two-agent map of `apps/web` + `apps/studio` to confirm current state (captured above and in execution-map §1).
 
 ## What is NOT yet set up
 
@@ -51,7 +48,8 @@ Standing inventory — cross off as items ship.
 - ~~Sanity schema (Chunk 4)~~ ✓ 2026-05-26.
 - ~~Studio Turkish localization + custom desk (Chunk 5)~~ ✓ 2026-05-26.
 - ~~Sanity type generation (Chunk 6)~~ ✓ 2026-05-26.
-- **Shared Sanity infra in `apps/web/lib/sanity/` (Chunk 7)** — active.
+- **Shared Sanity infra in `apps/web/lib/sanity/` (Chunk 7)** — active, but **BLOCKED on OD-6**.
+- **Dev sandbox Sanity project (`vetkit-dev`)** — not yet created (owner action).
 - SEO helpers (Chunk 8).
 - Template contract + `templates/modern/` (Chunks 9-10).
 - Marketing pages (Chunk 11).
@@ -59,7 +57,7 @@ Standing inventory — cross off as items ship.
 - Revalidation route + Sanity webhook (Chunk 13).
 - shadcn/ui init (Chunk 14).
 - GitHub Actions CI (OD-3 open — recommendation: minimal workflow before Chunk 15).
-- Vercel deployment (Chunk 15 — Studio hostname OD-4 resolved → CNAME `studio.<client-domain>.com`).
+- Vercel deployment (Chunk 15).
 
 ## Open decisions still pending
 
@@ -68,15 +66,14 @@ See [`plan.md`](./plan.md) §3.
 - **OD-1** (Sanity major version) — resolved 2026-05-26 → **v5**.
 - **OD-3** (CI timing) — open. Recommendation: before Chunk 15.
 - **OD-4** (Studio hostname pattern) — resolved 2026-05-28 → **CNAME `studio.<client-domain>.com`**.
-- **OD-5** (cache-tag naming convention) — new on 2026-05-28; blocks the first Chunk 7 commit. Recommendation: `sanity:<type>:<id>` namespaced.
+- **OD-5** (cache-tag naming convention) — resolved 2026-05-30 → **`sanity:<type>:<id>`**.
+- **OD-6** (i18n field shape) — **NEW, open. Hard blocker for Chunk 7.** Owner leaning **Option 1** (plain single-language fields).
 
 ## Heads-up for the next session
 
-- Active chunk is **Chunk 7 — shared Sanity infra in `apps/web/lib/sanity/`**. See [`execution-map.md`](./execution-map.md) §1 for the Done-when.
-- **First action: resolve OD-5.** Pick a cache-tag convention before writing the first GROQ query. My recommendation is `sanity:<type>:<id>` (namespaced, `_id`-based); decide explicitly so it doesn't get baked in by accident.
-- **Second action:** scaffold `apps/web/lib/sanity/client.ts` against `next-sanity` (public CDN-cached + draft-mode-aware variants).
-- **Third action:** `image.ts` (urlFor builder) and `live.ts` (`await draftMode()` toggle for Next 16).
-- **Fourth action:** `queries.ts` with three initial queries (`siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`) using `defineQuery` so `sanity typegen` emits typed results.
-- **Fifth action:** rerun `pnpm --filter @vetkit/studio typegen` and let it pick up the GROQ queries; commit the regenerated `generated.ts`.
-- **Smoke:** wire `app/page.tsx` to fetch and render one field from `siteSettingsQuery` as end-to-end proof. Real marketing pages land in Chunk 11.
+- **First action: settle OD-6.** Owner was leaning Option 1 (plain single-language fields). Decide explicitly before writing any Chunk 7 code.
+- **If Option 1 (plain fields):** run a **Chunk 4 schema-simplification pass first** — swap `localeString` / `localeText` / `localeSlug` / `localePortableText` for plain `string` / `text` / `slug` / portable-text array, drop the `@sanity/language-filter` plugin, simplify `siteSettings` (drop `activeLocales`), regen types (`pnpm --filter @vetkit/studio typegen`), and supersede the 2026-05-26 i18n decision in CLAUDE.md §12. Chunk 7 queries then become plain projections.
+- **If Option 2 (keep `{ tr, en }`):** Chunk 7 queries use `coalesce(field[$locale], field[$defaultLocale])`, `$locale` from `siteSettings.defaultLocale`.
+- **Then Chunk 7** per [`execution-map.md`](./execution-map.md) §1: install `next-sanity` + `@sanity/image-url`; build `client.ts` (CDN public + draft-aware via `SANITY_API_READ_TOKEN`), `image.ts` (`urlFor`), `live.ts` (`await draftMode()` — Next 16 async), `queries.ts` (`siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery` via `defineQuery`) with OD-5 cache tags; regen types; smoke-test `app/page.tsx`.
+- **Dev project:** owner creates `vetkit-dev`; the two gitignored `.env.local` files get the projectId. Create those files at scaffold time and confirm `.env.local` is gitignored before committing.
 - Husky pre-commit is active — every commit auto-runs lint+format.
