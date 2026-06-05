@@ -571,3 +571,122 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: siteSettingsQuery
+// Query: *[_type == "siteSettings"][0]
+export type SiteSettingsQueryResult = {
+  _id: string;
+  _type: 'siteSettings';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  clinicName: string;
+  tagline?: string;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  brandColor?: {
+    hex: string;
+    name?: string;
+  };
+  contact: ContactInfo;
+  address: Address;
+  openingHours: OpeningHours;
+  socialLinks?: SocialLinks;
+  emergencyBanner?: EmergencyBanner;
+  footerText?: string;
+  footerLinks?: Array<
+    {
+      _key: string;
+    } & Cta
+  >;
+  defaultSeo?: Seo;
+  vercelAnalyticsEnabled?: boolean;
+} | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: servicesListQuery
+// Query: *[_type == "service"] | order(orderRank asc) {    _id,    title,    "slug": slug.current,    shortDescription,    mainImage,    icon,    petTypes,    serviceLocation,    emergencyAvailable,    pricing  }
+export type ServicesListQueryResult = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  mainImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  icon: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+  } | null;
+  petTypes: Array<string> | null;
+  serviceLocation: 'both' | 'home-call' | 'in-clinic';
+  emergencyAvailable: boolean | null;
+  pricing: string | null;
+}>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: serviceBySlugQuery
+// Query: *[_type == "service" && slug.current == $slug][0] {    ...,    relatedFAQs[]-> {      _id,      question,      answer,      category    }  }
+export type ServiceBySlugQueryResult = {
+  _id: string;
+  _type: 'service';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  orderRank?: string;
+  title: string;
+  slug: Slug;
+  mainImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  icon?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+  };
+  shortDescription: string;
+  description: BlockContent;
+  petTypes?: Array<string>;
+  serviceLocation: 'both' | 'home-call' | 'in-clinic';
+  emergencyAvailable?: boolean;
+  relatedFAQs: Array<{
+    _id: string;
+    question: string;
+    answer: BlockContent;
+    category: 'acil' | 'asilama' | 'beslenme' | 'cerrahi' | 'genel' | null;
+  }> | null;
+  pricing?: string;
+  seo?: Seo;
+} | null;
+
+// Query TypeMap
+import '@sanity/client';
+declare module '@sanity/client' {
+  interface SanityQueries {
+    '*[_type == "siteSettings"][0]': SiteSettingsQueryResult;
+    '\n  *[_type == "service"] | order(orderRank asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    shortDescription,\n    mainImage,\n    icon,\n    petTypes,\n    serviceLocation,\n    emergencyAvailable,\n    pricing\n  }\n': ServicesListQueryResult;
+    '\n  *[_type == "service" && slug.current == $slug][0] {\n    ...,\n    relatedFAQs[]-> {\n      _id,\n      question,\n      answer,\n      category\n    }\n  }\n': ServiceBySlugQueryResult;
+  }
+}

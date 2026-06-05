@@ -149,6 +149,10 @@ importers:
   packages/config-typescript: {}
 
   packages/sanity-types:
+    dependencies:
+      '@sanity/client':
+        specifier: ^7.22.1
+        version: 7.22.1
     devDependencies:
       '@vetkit/config-typescript':
         specifier: workspace:*
