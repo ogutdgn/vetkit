@@ -1,3 +1,4 @@
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineField, defineType } from 'sanity';
 
 const FAQ_CATEGORIES = [
@@ -12,7 +13,9 @@ export const faq = defineType({
   name: 'faq',
   type: 'document',
   title: 'SSS',
+  orderings: [orderRankOrdering],
   fields: [
+    orderRankField({ type: 'faq' }),
     defineField({
       name: 'question',
       type: 'string',

@@ -1,15 +1,18 @@
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineField, defineType } from 'sanity';
 
 export const testimonial = defineType({
   name: 'testimonial',
   type: 'document',
   title: 'Görüş',
+  orderings: [orderRankOrdering],
   fields: [
+    orderRankField({ type: 'testimonial' }),
     defineField({
       name: 'authorName',
       type: 'string',
       title: 'Yazan kişi',
-      description: 'Özel isim; çevrilmez.',
+      description: 'Görüşü yazan kişinin adı.',
       validation: (rule) => rule.required(),
     }),
     defineField({

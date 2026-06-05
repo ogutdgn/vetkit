@@ -1,4 +1,7 @@
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineArrayMember, defineField, defineType } from 'sanity';
+
+import { turkishSlugify } from '../../lib/slug';
 
 const SPECIALTIES = [
   { title: 'Cerrahi', value: 'cerrahi' },
@@ -13,12 +16,14 @@ export const teamMember = defineType({
   name: 'teamMember',
   type: 'document',
   title: 'Ekip üyesi',
+  orderings: [orderRankOrdering],
   fields: [
+    orderRankField({ type: 'teamMember' }),
     defineField({
       name: 'name',
       type: 'string',
       title: 'Ad Soyad',
-      description: 'Özel isim; çevrilmez.',
+      description: 'Ekip üyesinin tam adı.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -32,7 +37,8 @@ export const teamMember = defineType({
       name: 'slug',
       type: 'slug',
       title: 'URL kimliği (opsiyonel)',
-      options: { source: 'name', maxLength: 96 },
+      description: 'URL adresinde görünecek kısa kimlik (örn. ayse-yilmaz).',
+      options: { source: 'name', slugify: turkishSlugify, maxLength: 96 },
     }),
     defineField({
       name: 'photo',

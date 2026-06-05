@@ -1,3 +1,4 @@
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 import { turkishSlugify } from '../../lib/slug';
@@ -14,7 +15,9 @@ export const service = defineType({
   name: 'service',
   type: 'document',
   title: 'Hizmet',
+  orderings: [orderRankOrdering],
   fields: [
+    orderRankField({ type: 'service' }),
     defineField({
       name: 'title',
       type: 'string',
@@ -48,7 +51,7 @@ export const service = defineType({
       name: 'icon',
       type: 'image',
       title: 'İkon (kart görselleri için, opsiyonel)',
-      options: { hotspot: false },
+      options: { hotspot: true },
     }),
     defineField({
       name: 'shortDescription',
