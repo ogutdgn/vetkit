@@ -14,47 +14,32 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 7 — Shared Sanity infra in `apps/web/lib/sanity/`.**
+**Chunk 6b — Schema i18n simplification (plain single-language fields).**
 
-**Goal:** Give `apps/web` the small, type-safe set of helpers it needs to fetch Sanity content for server components and route handlers. This is the layer between the schema (Chunk 4) + generated types (Chunk 6) and the actual marketing pages (Chunk 11).
-
-**⚠ Blocked on OD-6 (resolve first).** The i18n field shape is undecided: keep `{ tr, en }` (status quo) or simplify to plain single-language fields (owner leaning, recommended). This determines whether every query projects flat strings or uses `coalesce(field[$locale], …)`. **If Option 1 wins, a Chunk 4 schema-simplification pass runs before this chunk.** See [`plan.md`](./plan.md) §3 OD-6.
-
-**Locked decisions:**
-
-- **`next-sanity`** as the client wrapper (not vanilla `@sanity/client`), settled 2026-05-28. Reasoning in CLAUDE.md §12. Use `defineQuery` for queries so `sanity typegen` picks them up.
-- **Cache tags = `sanity:<type>:<id>`** (OD-5 resolved 2026-05-30): single docs `sanity:service:abc123`, collections `sanity:<type>:list`, singleton `sanity:siteSettings`. `_id`-based, not slug-based.
-- **Dev sandbox Sanity project** to be created (`vetkit-dev`, public `production` dataset) so the smoke test is a real round-trip. Owner creates it once OD-6 is settled; projectId lands in gitignored `apps/web/.env.local` + `apps/studio/.env.local`.
+**Goal:** Rework the Chunk 4 schema from field-level `{ tr, en }` locale objects to plain single-language fields, per OD-6 (resolved 2026-06-05 → Option 1, logged in CLAUDE.md §12). This unblocks Chunk 7: queries become plain projections instead of `coalesce(field[$locale], …)`.
 
 **Done when:**
 
-- `apps/web/lib/sanity/client.ts` exists, wraps `next-sanity`'s `createClient`, reads `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` from env. Two exports: a CDN-cached public client and a draft-mode-aware client that uses `SANITY_API_READ_TOKEN`.
-- `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `defineQuery(...)` calls. At least three are written and exported: `siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`. (More land in Chunk 11; the goal here is a working shape.)
-- `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url` (re-exported by `next-sanity`).
-- `apps/web/lib/sanity/live.ts` exists with an `await draftMode()`-aware wrapper that flips the client used by queries (Next 16's `draftMode` is async).
-- Every query call passes `next: { tags: [...] }` so the Chunk 13 webhook can selectively `revalidateTag`, using the resolved OD-5 convention `sanity:<type>:<id>` / `sanity:<type>:list` / `sanity:siteSettings`.
-- Running `pnpm --filter @vetkit/studio typegen` after the queries are added emits **GROQ query result types** alongside the schema types (the typegen config already globs `apps/web/**/*.{ts,tsx}`), and those types are usable from the query helpers.
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
-- At least one page (e.g. `app/page.tsx`) imports a query helper to prove the chain end-to-end (still a placeholder render — the real pages land in Chunk 11).
+- The four `locale*` object types (`localeString`, `localeText`, `localeSlug`, `localePortableText`) are deleted from `apps/studio/schemas/` and unregistered from `schemas/index.ts`.
+- Every document/object schema field that used a `locale*` type now uses plain `string` / `text` / `slug` / portable-text array. Turkish titles, descriptions, and validation survive the swap.
+- `@sanity/language-filter` is removed from `apps/studio/package.json` and `sanity.config.ts`; any locale-detection plumbing (the name-prefix check) is gone.
+- `siteSettings` no longer has `activeLocales` (nor any other field that existed only for i18n, e.g. `defaultLocale`).
+- `pnpm --filter @vetkit/studio typegen` regenerates `packages/sanity-types/` with no `Locale*` types in `generated.ts`; `apps/web/types/sanity.ts` still compiles.
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass across the workspace.
 
-**Depends on:** Chunks 4 (schema), 6 (typegen).
+**Depends on:** Chunks 4, 6 (both shipped 2026-05-26).
 
 **Open decisions that affect this chunk:**
 
-- **OD-6 (i18n field shape)** — hard blocker. Resolve before the first query. Owner leaning Option 1 (plain fields); if so, a Chunk 4 schema rework precedes this chunk. See [`plan.md`](./plan.md) §3.
-- OD-5 (cache-tag convention) — resolved 2026-05-30 → `sanity:<type>:<id>`. No longer open.
-- OD-3 (CI timing) — open but does not block this chunk.
+- None — OD-6 resolved 2026-06-05 (this chunk *is* the resolution's implementation). OD-3 (CI timing) is open but does not block.
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add next-sanity client wrapper with draft-mode toggle`
-2. `feat(web): add image url builder helper`
-3. `feat(web): add initial groq queries (siteSettings, services list, service detail) with cache tags`
-4. `chore(studio): regenerate sanity types to include groq query results`
-5. `feat(web): wire the home page to a sanity query as an end-to-end smoke test`
-6. `docs(architecture): document the apps/web/lib/sanity/ shape`
+1. `refactor(studio): replace locale object fields with plain single-language fields`
+2. `refactor(studio): drop language-filter plugin and locale plumbing`
+3. `chore(studio): regenerate sanity types after i18n simplification`
 
-Chunk 8 (SEO helpers) is the natural follow-up — once queries return typed data, `generateMetadata` can lean on it.
+Chunk 7 (shared Sanity infra in `apps/web/lib/sanity/`) follows immediately — its locked decisions (`next-sanity`, OD-5 cache tags `sanity:<type>:<id>`, `vetkit-dev` sandbox project) are in plan.md §2 row 7 and CLAUDE.md §12. The owner creates `vetkit-dev` once this chunk ships; projectId lands in gitignored `apps/web/.env.local` + `apps/studio/.env.local`.
 
 ---
 
