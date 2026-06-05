@@ -81,10 +81,10 @@ export interface Testimonial {
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt?: LocaleString;
+    alt?: string;
     _type: 'image';
   };
-  content: LocalePortableText;
+  content: BlockContent;
   rating?: number;
   source: 'manual' | 'google' | 'trustmary';
   sourceUrl?: string;
@@ -92,53 +92,25 @@ export interface Testimonial {
   featured?: boolean;
 }
 
-export interface LocalePortableText {
-  _type: 'localePortableText';
-  tr?: {
-    children?: {
-      marks?: string[];
-      text?: string;
-      _type: 'span';
-      _key: string;
-    }[];
-    style?: 'normal' | 'h2' | 'h3' | 'blockquote';
-    listItem?: 'bullet' | 'number';
-    markDefs?: {
-      href: string;
-      newTab?: boolean;
-      _type: 'link';
-      _key: string;
-    }[];
-    level?: number;
-    _type: 'block';
+export type BlockContent = {
+  children?: {
+    marks?: string[];
+    text?: string;
+    _type: 'span';
     _key: string;
   }[];
-  en?: {
-    children?: {
-      marks?: string[];
-      text?: string;
-      _type: 'span';
-      _key: string;
-    }[];
-    style?: 'normal' | 'h2' | 'h3' | 'blockquote';
-    listItem?: 'bullet' | 'number';
-    markDefs?: {
-      href: string;
-      newTab?: boolean;
-      _type: 'link';
-      _key: string;
-    }[];
-    level?: number;
-    _type: 'block';
+  style?: 'normal' | 'h2' | 'h3' | 'blockquote';
+  listItem?: 'bullet' | 'number';
+  markDefs?: {
+    href: string;
+    newTab?: boolean;
+    _type: 'link';
     _key: string;
   }[];
-}
-
-export interface LocaleString {
-  _type: 'localeString';
-  tr?: string;
-  en?: string;
-}
+  level?: number;
+  _type: 'block';
+  _key: string;
+}[];
 
 export interface SanityImageCrop {
   _type: 'sanity.imageCrop';
@@ -169,17 +141,17 @@ export interface Page {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  title: LocaleString;
-  slug: LocaleSlug;
+  title: string;
+  slug: Slug;
   heroImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt?: LocaleString;
+    alt?: string;
     _type: 'image';
   };
-  body: LocalePortableText;
+  body: BlockContent;
   featuredTeamMembers?: ({
     _key: string;
   } & TeamMemberReference)[];
@@ -191,23 +163,23 @@ export interface Page {
 
 export interface Seo {
   _type: 'seo';
-  metaTitle?: LocaleString;
-  metaDescription?: LocaleText;
+  metaTitle?: string;
+  metaDescription?: string;
   ogImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
   noIndex?: boolean;
 }
 
-export interface LocaleSlug {
-  _type: 'localeSlug';
-  tr?: Slug;
-  en?: Slug;
+export interface Slug {
+  _type: 'slug';
+  current: string;
+  source?: string;
 }
 
 export interface GalleryImage {
@@ -221,10 +193,10 @@ export interface GalleryImage {
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
-  caption?: LocaleString;
+  caption?: string;
   category?: 'klinik-ici' | 'tedavi' | 'ekip' | 'hastalar';
 }
 
@@ -234,8 +206,8 @@ export interface Faq {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  question: LocaleString;
-  answer: LocalePortableText;
+  question: string;
+  answer: BlockContent;
   category?: 'genel' | 'asilama' | 'cerrahi' | 'beslenme' | 'acil';
 }
 
@@ -259,16 +231,16 @@ export interface BlogPost {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  title: LocaleString;
-  slug: LocaleSlug;
-  excerpt: LocaleText;
-  body: LocalePortableText;
+  title: string;
+  slug: Slug;
+  excerpt: string;
+  body: BlockContent;
   coverImage: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
   author: TeamMemberReference;
@@ -291,22 +263,20 @@ export interface TeamMember {
   _updatedAt: string;
   _rev: string;
   name: string;
-  title: LocaleString;
+  title: string;
   slug?: Slug;
   photo: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
-  credentials?: ({
-    _key: string;
-  } & LocaleString)[];
+  credentials?: string[];
   specialties?: string[];
-  shortBio?: LocaleText;
-  bio?: LocalePortableText;
+  shortBio?: string;
+  bio?: BlockContent;
   email?: string;
   phone?: string;
   socialLinks?: SocialLinks;
@@ -322,18 +292,6 @@ export interface SocialLinks {
   whatsapp?: string;
 }
 
-export interface LocaleText {
-  _type: 'localeText';
-  tr?: string;
-  en?: string;
-}
-
-export interface Slug {
-  _type: 'slug';
-  current: string;
-  source?: string;
-}
-
 export interface FaqReference {
   _ref: string;
   _type: 'reference';
@@ -347,14 +305,14 @@ export interface Service {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  title: LocaleString;
-  slug: LocaleSlug;
+  title: string;
+  slug: Slug;
   mainImage: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
   icon?: {
@@ -364,15 +322,15 @@ export interface Service {
     crop?: SanityImageCrop;
     _type: 'image';
   };
-  shortDescription: LocaleText;
-  description: LocalePortableText;
+  shortDescription: string;
+  description: BlockContent;
   petTypes?: string[];
   serviceLocation: 'in-clinic' | 'home-call' | 'both';
   emergencyAvailable?: boolean;
   relatedFAQs?: ({
     _key: string;
   } & FaqReference)[];
-  pricing?: LocaleString;
+  pricing?: string;
   seo?: Seo;
 }
 
@@ -382,28 +340,26 @@ export interface SiteSettings {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  clinicName: LocaleString;
-  tagline?: LocaleString;
+  clinicName: string;
+  tagline?: string;
   logo: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt: LocaleString;
+    alt: string;
     _type: 'image';
   };
   brandColor?: {
     hex: string;
     name?: string;
   };
-  activeLocales: string[];
-  defaultLocale: 'tr' | 'en';
   contact: ContactInfo;
   address: Address;
   openingHours: OpeningHours;
   socialLinks?: SocialLinks;
   emergencyBanner?: EmergencyBanner;
-  footerText?: LocaleText;
+  footerText?: string;
   footerLinks?: ({
     _key: string;
   } & Cta)[];
@@ -414,7 +370,7 @@ export interface SiteSettings {
 export interface EmergencyBanner {
   _type: 'emergencyBanner';
   enabled?: boolean;
-  text?: LocaleString;
+  text?: string;
   phone?: string;
   variant?: 'top' | 'sticky';
 }
@@ -429,12 +385,12 @@ export interface OpeningHours {
   friday?: Friday;
   saturday?: Saturday;
   sunday?: Sunday;
-  emergencyNote?: LocaleString;
+  emergencyNote?: string;
 }
 
 export interface Address {
   _type: 'address';
-  street: LocaleString;
+  street: string;
   district: string;
   city: string;
   postalCode?: string;
@@ -454,7 +410,7 @@ export interface ContactInfo {
 
 export interface Cta {
   _type: 'cta';
-  label: LocaleString;
+  label: string;
   href: string;
   variant?: 'primary' | 'secondary' | 'ghost';
   newTab?: boolean;
@@ -568,14 +524,13 @@ export type AllSanitySchemaTypes =
   | Sunday
   | SanityImageAssetReference
   | Testimonial
-  | LocalePortableText
-  | LocaleString
+  | BlockContent
   | SanityImageCrop
   | SanityImageHotspot
   | TeamMemberReference
   | Page
   | Seo
-  | LocaleSlug
+  | Slug
   | GalleryImage
   | Faq
   | ServiceReference
@@ -583,8 +538,6 @@ export type AllSanitySchemaTypes =
   | BlogPost
   | TeamMember
   | SocialLinks
-  | LocaleText
-  | Slug
   | FaqReference
   | Service
   | SiteSettings
