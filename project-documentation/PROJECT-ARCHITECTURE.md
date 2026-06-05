@@ -63,11 +63,22 @@ Key files (current state of the skeleton):
 
 | Path                             | Purpose                                                                                                                                                                      |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/layout.tsx`, `app/page.tsx` | Root App Router entries. Currently a placeholder landing page; the marketing pages and templates land in later phases.                                                       |
+| `app/layout.tsx`, `app/page.tsx` | Root App Router entries. `page.tsx` is the Chunk 7 smoke test (fetches siteSettings + services through the lib); the real marketing pages land in Chunk 11.                  |
+| `lib/sanity/`                    | The shared Sanity data layer — see breakdown below.                                                                                                                          |
 | `next.config.ts`                 | Next.js configuration. `images.remotePatterns` is set to allow Sanity's CDN (`cdn.sanity.io`) — required since `images.domains` was deprecated in Next 16.                   |
 | `tsconfig.json`                  | Extends `@vetkit/config-typescript/nextjs.json`.                                                                                                                             |
 | `next-env.d.ts`                  | Auto-managed by Next.js (do not edit).                                                                                                                                       |
 | `.env.example`                   | Documents which environment variables the app needs (Sanity credentials, site identity, template choice, Resend key). The real `.env.local` is per-developer and gitignored. |
+
+**`lib/sanity/` — the data layer (Chunk 7).** Every Sanity read in `apps/web` flows through these five modules; pages never touch `@sanity/client` directly:
+
+| Module       | Purpose                                                                                                                                                                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `client.ts`  | Two `next-sanity` clients from env: `client` (CDN, `published` perspective) and `draftClient` (no CDN, `drafts` perspective, `SANITY_API_READ_TOKEN`). Pins `apiVersion` — bump deliberately.                                          |
+| `live.ts`    | `sanityFetch({ query, params, tags })` — the single fetch path. Checks Next 16's async `draftMode()`: drafts → token client + `cache: 'no-store'`; visitors → CDN client + `next: { tags }`. Returns typed results via `ClientReturn`. |
+| `queries.ts` | GROQ queries as `defineQuery(...)` so `pnpm --filter @vetkit/studio typegen` emits result types (`SiteSettingsQueryResult` etc.) and augments `SanityQueries` for typed `fetch`.                                                       |
+| `tags.ts`    | OD-5 cache-tag builders: `siteSettingsTag`, `listTag(type)` → `sanity:<type>:list`, `docTag(type, id)` → `sanity:<type>:<id>`. The Chunk 13 webhook revalidates exactly these.                                                         |
+| `image.ts`   | `urlFor(source)` via `@sanity/image-url` (`auto('format')`, `fit('max')` defaults), bound to the CDN client.                                                                                                                           |
 
 ### [`apps/studio/`](../apps/studio/)
 
