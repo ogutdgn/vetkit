@@ -45,3 +45,13 @@ export const serviceBySlugQuery = defineQuery(`
     }
   }
 `);
+
+/**
+ * Every public slug + its last update, for app/sitemap.ts. Fetch with the
+ * three list tags (service/blogPost/page) so publishes refresh the sitemap.
+ */
+export const sitemapEntriesQuery = defineQuery(`{
+  "services": *[_type == "service" && defined(slug.current)] { "slug": slug.current, _updatedAt },
+  "posts": *[_type == "blogPost" && defined(slug.current)] { "slug": slug.current, _updatedAt },
+  "pages": *[_type == "page" && defined(slug.current)] { "slug": slug.current, _updatedAt }
+}`);
