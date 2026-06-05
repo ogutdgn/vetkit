@@ -46,5 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticEntries, ...serviceEntries, ...postEntries, ...pageEntries];
+  // Dedupe by URL — a page doc whose slug matches a static route (e.g. the
+  // "Hakkımızda" page doc at /hakkimizda) would otherwise appear twice. Doc
+  // entries come last so they win and keep their real lastModified.
+  const byUrl = new Map<string, MetadataRoute.Sitemap[number]>();
+  for (const entry of [...staticEntries, ...serviceEntries, ...postEntries, ...pageEntries]) {
+    byUrl.set(entry.url, entry);
+  }
+  return [...byUrl.values()];
 }
