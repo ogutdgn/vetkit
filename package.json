@@ -33,5 +33,13 @@
     "*.{md,mdx,json,css}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "sanity",
+        "styled-components"
+      ]
+    }
   }
 }
