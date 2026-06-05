@@ -14,29 +14,24 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 8 — SEO helpers in `apps/web/lib/seo/` + the SEO route files.**
+**Chunk 9 — Template contract (`apps/web/types/template.ts`).**
 
-**Goal:** Give every page typed, consistent SEO output: `generateMetadata` helpers that merge a document's embedded `seo` object with `siteSettings.defaultSeo` fallbacks, JSON-LD structured data for local SEO, and the sitewide SEO route files (`sitemap.ts`, `robots.ts`, `manifest.ts`, `opengraph-image.tsx`). This was one of the three problems vetkit exists to solve (CLAUDE.md §1.3) and Chunk 11's pages consume these helpers directly.
+**Goal:** Lock the TypeScript contract every template must satisfy: the shared prop interfaces and the `ThemeComponents` interface from CLAUDE.md §6. This is deliberately small — it forces the data-shape decisions (what does a `Header` actually receive?) before the `modern` template (Chunk 10) is built against them, and it makes a misnamed/misshapen template a compile error by definition.
 
 **Locked context:**
 
-- Data comes through Chunk 7's layer: `sanityFetch` + `defineQuery` + OD-5 tags (`sanity:<type>:list` for sitemap queries). Published client is origin-only (`useCdn: false`).
-- JSON-LD types per CLAUDE.md §4: `LocalBusiness` / `VeterinaryCare` built from `siteSettings` (address, phone, openingHours, coordinates).
-- OG images via Next 16's `ImageResponse` (plan.md row 8 note).
-- The `seo` object shape (SCHEMA.md): `metaTitle` (string), `metaDescription` (text), `ogImage` (image, alt required), `noIndex` (boolean).
-- Turkish-only sites: `NEXT_PUBLIC_DEFAULT_LOCALE=tr-TR` is the html-lang/OG locale.
+- CLAUDE.md §6 sketches the contract: `HeaderProps` (settings + navItems), `HeroProps`, `ServiceCardProps`, `BlogCardProps`, `TeamSectionProps`, `FooterProps` → `ThemeComponents` with exactly those component names. §2.4: no template-specific fields; one schema for all templates.
+- **Design point to settle while writing (not an OD — decide in-chunk):** props should be typed against the _query-result_ shapes pages actually fetch (e.g. `ServicesListQueryResult[number]`), not raw document types — a card never receives a full `Service` doc. Keep the contract aligned with `queries.ts` projections; add projections to queries if a template genuinely needs more.
+- Folder structure ships day-one per §2.4: `templates/classic/README.md` and `templates/premium/README.md` placeholders ("not yet implemented"); `templates/modern/` already holds `tokens.css`.
+- The `getTemplate()` loader (`lib/template.ts`, CLAUDE.md §6) needs `templates/modern/index.ts` to exist — that lands with Chunk 10, not here.
 
 **Done when:**
 
-- `apps/web/lib/seo/metadata.ts` exists: a helper that builds Next `Metadata` from (per-doc `seo` object, page fallbacks, `siteSettings.defaultSeo`), handling title template (`%s | <clinicName>`), description, canonical from `NEXT_PUBLIC_SITE_URL`, OG/Twitter images (via `urlFor`), and `robots: { index: false }` when `noIndex`.
-- `apps/web/lib/seo/schema.ts` exists: JSON-LD builders returning `VeterinaryCare` (with address, geo, openingHoursSpecification, telephone from `siteSettings`) plus a small `<JsonLd>`-style serializer helper for pages to embed.
-- `apps/web/app/sitemap.ts` exists: pulls service/blogPost/page slugs via tagged queries in `queries.ts` (new `defineQuery` entries are fine; regen typegen after).
-- `apps/web/app/robots.ts` exists, referencing the sitemap URL.
-- `apps/web/app/manifest.ts` exists with name/colors from sensible static values (siteSettings-driven theming can wait for Chunk 10 tokens).
-- `apps/web/app/opengraph-image.tsx` exists: dynamic OG via `ImageResponse` (clinic name + tagline; brand styling lands properly in Chunk 10).
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; the build emits `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, and the OG image route.
+- `apps/web/types/template.ts` exists and exports every prop interface plus `ThemeComponents`, typed against generated Sanity query-result types (no `any`, no template-specific fields).
+- `apps/web/templates/classic/README.md` and `apps/web/templates/premium/README.md` exist as placeholders explaining "not yet implemented" (per CLAUDE.md §2.4).
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass.
 
-**Depends on:** Chunk 7 (shipped 2026-06-05).
+**Depends on:** Chunks 6 (types), 7 (query shapes) — both shipped.
 
 **Open decisions that affect this chunk:**
 
@@ -44,14 +39,10 @@
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add seo metadata helpers`
-2. `feat(web): add json-ld structured data builders`
-3. `feat(web): add sitemap, robots, and manifest routes`
-4. `feat(web): add dynamic opengraph image route`
-5. `chore(studio): regenerate sanity types for sitemap queries`
-6. `docs(architecture): document the apps/web/lib/seo/ shape`
+1. `feat(web): add theme components template contract`
+2. `chore(web): add classic and premium template placeholders`
 
-Chunk 9 (template contract `types/template.ts`) is the natural follow-up — it's small and unblocks the `modern` template build (Chunk 10).
+Chunk 10 (`templates/modern/` — all components, polished, L-size) follows: the first visual work in the project. Consider seeding `vetkit-dev` with a siteSettings doc + a few services first so components render real content during development.
 
 ---
 
