@@ -29,7 +29,19 @@ function openingHoursSpecification(hours: OpeningHours): Record<string, unknown>
   }
   return DAYS.flatMap(([field, schemaDay]) => {
     const day = hours[field];
-    if (!day || day.closed || !day.openTime || !day.closeTime) return [];
+    if (!day) return [];
+    if (day.closed) {
+      // Google's documented pattern for "closed all day": opens == closes == 00:00.
+      return [
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: schemaDay,
+          opens: '00:00',
+          closes: '00:00',
+        },
+      ];
+    }
+    if (!day.openTime || !day.closeTime) return [];
     return [
       {
         '@type': 'OpeningHoursSpecification',
