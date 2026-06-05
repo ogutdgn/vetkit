@@ -2,6 +2,8 @@
 
 > **Status:** Approved by project owner on 2026-05-26 for implementation. Replaces and supersedes the in-progress brainstorm at `project-documentation/working-notes/2026-05-21-chunk-4-brainstorm.md`; that brainstorm is deleted in the final docs commit of Chunk 4 (see §12), not here, so cross-references stay valid during the implementation commits.
 >
+> **Superseded in part (2026-06-05):** the field-level i18n design (locale primitives, `activeLocales`/`defaultLocale`, `@sanity/language-filter`) was removed per **OD-6** (CLAUDE.md §12); all fields are now plain single-language types. See [`../SCHEMA.md`](../SCHEMA.md) for the current schema.
+>
 > **Scope:** Implement the full Phase 1 Sanity schema in `apps/studio/schemas/` per CLAUDE.md §5 — all document types, all reusable objects, singleton enforcement, field-level i18n primitives, and a Turkish-friendly Studio structure.
 >
 > **Reading order:**
