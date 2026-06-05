@@ -82,15 +82,15 @@ Key files (current state of the skeleton):
 
 ### [`apps/studio/`](../apps/studio/)
 
-The Sanity v3 admin panel. Each client gets a separate Sanity project (free tier per project), and this Studio is deployed to `<client>.sanity.studio` for them to manage content.
+The Sanity v5 admin panel. Each client gets a separate Sanity project (free tier per project), and this Studio is reachable at `studio.<client-domain>.com` (CNAME to the Sanity-hosted Studio — OD-4, CLAUDE.md §12) for them to manage content.
 
-| Path               | Purpose                                                                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sanity.config.ts` | Studio config. Reads `SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` from env so the same code runs against any tenant.                                                         |
-| `sanity.cli.ts`    | Sanity CLI config (used by `sanity deploy`).                                                                                                                                           |
-| `schemas/index.ts` | Currently exports an empty array. Phase 1 will populate it with `siteSettings`, `service`, `blogPost`, `teamMember`, `galleryImage`, `faq`, `page` (see [CLAUDE.md §5](../CLAUDE.md)). |
-| `tsconfig.json`    | Extends `@vetkit/config-typescript/react-library.json`.                                                                                                                                |
-| `.env.example`     | Documents the two Studio env vars.                                                                                                                                                     |
+| Path               | Purpose                                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sanity.config.ts` | Studio config. Reads `SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` from env so the same code runs against any tenant.                                                                   |
+| `sanity.cli.js`    | Sanity CLI config (used by `sanity deploy`; `.js` to satisfy Sanity v5's strict jiti loader in monorepos). Also carries the `typegen` config block (path/schema/generates).                      |
+| `schemas/index.ts` | Exports the full Phase 1 `schemaTypes`: `siteSettings`, `service`, `blogPost`, `teamMember`, `galleryImage`, `faq`, `page`, `testimonial` plus the shared objects. See [SCHEMA.md](./SCHEMA.md). |
+| `tsconfig.json`    | Extends `@vetkit/config-typescript/react-library.json`.                                                                                                                                          |
+| `.env.example`     | Documents the two Studio env vars.                                                                                                                                                               |
 
 ---
 
@@ -128,7 +128,7 @@ pnpm --filter @vetkit/studio typegen
 
 That runs `sanity schemas extract` (writes `schema.json`) then `sanity typegen generate` (reads `schema.json` plus the `typegen` block in `apps/studio/sanity.cli.js`, writes `generated.ts`). Commit the two regenerated files alongside the schema changes that prompted them. The watch mode (`sanity typegen generate --watch`) is available for iterative work, but the standard flow is run-on-demand. `generated.ts` is excluded from ESLint (see `packages/config-eslint/base.mjs`) so the checked-in file stays byte-identical to raw typegen output.
 
-GROQ query types come later — the typegen `path` glob points at `apps/web/{app,components,lib,templates,types}/**/*.{ts,tsx}` so once Chunk 7 introduces `defineQuery(...)` calls in `apps/web/lib/sanity/queries.ts`, the next typegen run will pick them up automatically.
+GROQ query result types are generated too — the typegen `path` glob points at `apps/web/{app,components,lib,templates,types}/**/*.{ts,tsx}`, and the `defineQuery(...)` calls in `apps/web/lib/sanity/queries.ts` produce `*QueryResult` types plus a `SanityQueries` module augmentation (which is why this package depends on `@sanity/client`). New queries are picked up on the next typegen run automatically.
 
 ### Future packages (not yet created)
 
