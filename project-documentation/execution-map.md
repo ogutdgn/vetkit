@@ -14,29 +14,29 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 7 — Shared Sanity infra in `apps/web/lib/sanity/`.**
+**Chunk 8 — SEO helpers in `apps/web/lib/seo/` + the SEO route files.**
 
-**Goal:** Give `apps/web` the small, type-safe set of helpers it needs to fetch Sanity content for server components and route handlers. This is the layer between the schema (Chunks 4/6b) + generated types (Chunk 6) and the actual marketing pages (Chunk 11). Unblocked 2026-06-05: Chunk 6b shipped, so all queries are plain projections — no `$locale` / `coalesce`.
+**Goal:** Give every page typed, consistent SEO output: `generateMetadata` helpers that merge a document's embedded `seo` object with `siteSettings.defaultSeo` fallbacks, JSON-LD structured data for local SEO, and the sitewide SEO route files (`sitemap.ts`, `robots.ts`, `manifest.ts`, `opengraph-image.tsx`). This was one of the three problems vetkit exists to solve (CLAUDE.md §1.3) and Chunk 11's pages consume these helpers directly.
 
-**Locked decisions:**
+**Locked context:**
 
-- **`next-sanity`** as the client wrapper (not vanilla `@sanity/client`), settled 2026-05-28. Reasoning in CLAUDE.md §12. Use `defineQuery` for queries so `sanity typegen` picks them up.
-- **Cache tags = `sanity:<type>:<id>`** (OD-5 resolved 2026-05-30): single docs `sanity:service:abc123`, collections `sanity:<type>:list`, singleton `sanity:siteSettings`. `_id`-based, not slug-based.
-- **Plain single-language fields** (OD-6 resolved 2026-06-05): queries project flat strings.
-- **Dev sandbox Sanity project** (`vetkit-dev`, public `production` dataset) so the smoke test is a real round-trip. **Owner action, now unblocked:** create via sanity.io/manage; projectId lands in gitignored `apps/web/.env.local` (+ a Viewer `SANITY_API_READ_TOKEN`) and `apps/studio/.env.local` (`SANITY_STUDIO_PROJECT_ID`). Confirm `.env.local` is gitignored before committing anything.
+- Data comes through Chunk 7's layer: `sanityFetch` + `defineQuery` + OD-5 tags (`sanity:<type>:list` for sitemap queries). Published client is origin-only (`useCdn: false`).
+- JSON-LD types per CLAUDE.md §4: `LocalBusiness` / `VeterinaryCare` built from `siteSettings` (address, phone, openingHours, coordinates).
+- OG images via Next 16's `ImageResponse` (plan.md row 8 note).
+- The `seo` object shape (SCHEMA.md): `metaTitle` (string), `metaDescription` (text), `ogImage` (image, alt required), `noIndex` (boolean).
+- Turkish-only sites: `NEXT_PUBLIC_DEFAULT_LOCALE=tr-TR` is the html-lang/OG locale.
 
 **Done when:**
 
-- `apps/web/lib/sanity/client.ts` exists, wraps `next-sanity`'s `createClient`, reads `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` from env. Two exports: a CDN-cached public client and a draft-mode-aware client that uses `SANITY_API_READ_TOKEN`.
-- `apps/web/lib/sanity/queries.ts` exists, holds the GROQ queries as `defineQuery(...)` calls. At least three are written and exported: `siteSettingsQuery`, `servicesListQuery`, `serviceBySlugQuery`. (More land in Chunk 11; the goal here is a working shape.)
-- `apps/web/lib/sanity/image.ts` exists, exporting a `urlFor(image)` builder using `@sanity/image-url` (re-exported by `next-sanity`).
-- `apps/web/lib/sanity/live.ts` exists with an `await draftMode()`-aware wrapper that flips the client used by queries (Next 16's `draftMode` is async).
-- Every query call passes `next: { tags: [...] }` so the Chunk 13 webhook can selectively `revalidateTag`, using the OD-5 convention `sanity:<type>:<id>` / `sanity:<type>:list` / `sanity:siteSettings`.
-- Running `pnpm --filter @vetkit/studio typegen` after the queries are added emits **GROQ query result types** alongside the schema types (the typegen `path` glob in `apps/studio/sanity.cli.js` covers `apps/web/lib/`), and those types are usable from the query helpers.
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` all pass.
-- At least one page (e.g. `app/page.tsx`) imports a query helper to prove the chain end-to-end (still a placeholder render — the real pages land in Chunk 11).
+- `apps/web/lib/seo/metadata.ts` exists: a helper that builds Next `Metadata` from (per-doc `seo` object, page fallbacks, `siteSettings.defaultSeo`), handling title template (`%s | <clinicName>`), description, canonical from `NEXT_PUBLIC_SITE_URL`, OG/Twitter images (via `urlFor`), and `robots: { index: false }` when `noIndex`.
+- `apps/web/lib/seo/schema.ts` exists: JSON-LD builders returning `VeterinaryCare` (with address, geo, openingHoursSpecification, telephone from `siteSettings`) plus a small `<JsonLd>`-style serializer helper for pages to embed.
+- `apps/web/app/sitemap.ts` exists: pulls service/blogPost/page slugs via tagged queries in `queries.ts` (new `defineQuery` entries are fine; regen typegen after).
+- `apps/web/app/robots.ts` exists, referencing the sitemap URL.
+- `apps/web/app/manifest.ts` exists with name/colors from sensible static values (siteSettings-driven theming can wait for Chunk 10 tokens).
+- `apps/web/app/opengraph-image.tsx` exists: dynamic OG via `ImageResponse` (clinic name + tagline; brand styling lands properly in Chunk 10).
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; the build emits `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, and the OG image route.
 
-**Depends on:** Chunks 4 (schema), 6 (typegen), 6b (plain fields) — all shipped.
+**Depends on:** Chunk 7 (shipped 2026-06-05).
 
 **Open decisions that affect this chunk:**
 
@@ -44,14 +44,14 @@
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add next-sanity client wrapper with draft-mode toggle`
-2. `feat(web): add image url builder helper`
-3. `feat(web): add initial groq queries (siteSettings, services list, service detail) with cache tags`
-4. `chore(studio): regenerate sanity types to include groq query results`
-5. `feat(web): wire the home page to a sanity query as an end-to-end smoke test`
-6. `docs(architecture): document the apps/web/lib/sanity/ shape`
+1. `feat(web): add seo metadata helpers`
+2. `feat(web): add json-ld structured data builders`
+3. `feat(web): add sitemap, robots, and manifest routes`
+4. `feat(web): add dynamic opengraph image route`
+5. `chore(studio): regenerate sanity types for sitemap queries`
+6. `docs(architecture): document the apps/web/lib/seo/ shape`
 
-Chunk 8 (SEO helpers) is the natural follow-up — once queries return typed data, `generateMetadata` can lean on it.
+Chunk 9 (template contract `types/template.ts`) is the natural follow-up — it's small and unblocks the `modern` template build (Chunk 10).
 
 ---
 
