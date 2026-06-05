@@ -315,7 +315,7 @@ The schema is the most critical design artifact in this project. A bad schema is
 ### Core principles
 
 1. **One schema, all templates.** No template-specific fields. If a field exists, it must be meaningful to all three templates (even if rendered differently).
-2. **Every document type that has a public URL must have an embedded `seo` object.** This includes services, blog posts, and pages. The `seo` object contains: `metaTitle`, `metaDescription`, `ogImage`. These override defaults computed from the document body.
+2. **Every document type that has a public URL must have an embedded `seo` object.** This includes services, blog posts, and pages. The `seo` object contains: `metaTitle`, `metaDescription`, `ogImage`, `noIndex`. These override defaults computed from the document body.
 3. **Every Turkish field must have a Turkish description in the schema.** Clinic owners are not developers. A field labeled "slug" with no description is useless to them. Use `description: 'URL adresinde görünecek kısa kimlik (örn: kedi-asilamasi)'`.
 4. **Every image field must have `hotspot: true`** so clinic owners can crop their own images.
 5. **Rich text (Portable Text) limits:** Allowed marks: `strong`, `em`, `link`. Allowed block styles: `normal`, `h2`, `h3`, `blockquote`. **Disallow `h1`** — the page title is already an h1, and clinic owners will accidentally create multiple h1s, hurting SEO.
@@ -336,7 +336,7 @@ The schema is the most critical design artifact in this project. A bad schema is
 
 ### Reusable objects
 
-- `seo` (metaTitle, metaDescription, ogImage)
+- `seo` (metaTitle, metaDescription, ogImage, noIndex)
 - `openingHours` (day-by-day open/close, plus closed flag)
 - `socialLinks` (instagram, facebook, x, youtube, tiktok — all optional)
 - `cta` (label, link — used in hero, footer, etc.)
