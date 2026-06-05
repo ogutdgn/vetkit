@@ -20,7 +20,7 @@ export const galleryImage = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) => rule.required(),
         }),
@@ -29,7 +29,7 @@ export const galleryImage = defineType({
     }),
     defineField({
       name: 'caption',
-      type: 'localeString',
+      type: 'string',
       title: 'Başlık (opsiyonel)',
     }),
     defineField({
@@ -40,7 +40,7 @@ export const galleryImage = defineType({
     }),
   ],
   preview: {
-    select: { title: 'caption.tr', subtitle: 'category', media: 'image' },
+    select: { title: 'caption', subtitle: 'category', media: 'image' },
     prepare: (selection) => {
       const { title, subtitle, media } = selection as {
         title?: string;

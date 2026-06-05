@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
+import { turkishSlugify } from '../../lib/slug';
+
 export const page = defineType({
   name: 'page',
   type: 'document',
@@ -8,14 +10,16 @@ export const page = defineType({
   fields: [
     defineField({
       name: 'title',
-      type: 'localeString',
+      type: 'string',
       title: 'Sayfa başlığı',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
-      type: 'localeSlug',
+      type: 'slug',
       title: 'URL kimliği',
+      description: 'URL adresinde görünecek kısa kimlik (örn. hakkimizda).',
+      options: { source: 'title', slugify: turkishSlugify, maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -26,21 +30,20 @@ export const page = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) =>
             rule.custom((value, ctx) => {
               const parent = ctx.parent as { asset?: unknown } | undefined;
               if (!parent?.asset) return true;
-              const tr = (value as { tr?: string } | undefined)?.tr;
-              return tr ? true : 'Görsel varsa alt metin zorunludur.';
+              return value ? true : 'Görsel varsa alt metin zorunludur.';
             }),
         }),
       ],
     }),
     defineField({
       name: 'body',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'İçerik',
       validation: (rule) => rule.required(),
     }),
@@ -68,7 +71,7 @@ export const page = defineType({
     }),
   ],
   preview: {
-    select: { title: 'title.tr', media: 'heroImage' },
+    select: { title: 'title', media: 'heroImage' },
     prepare: (selection) => {
       const { title, media } = selection as {
         title?: string;

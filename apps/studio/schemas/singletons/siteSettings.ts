@@ -10,17 +10,13 @@ export const siteSettings = defineType({
     // Identity
     defineField({
       name: 'clinicName',
-      type: 'localeString',
+      type: 'string',
       title: 'Klinik adı',
-      validation: (rule) =>
-        rule.required().custom((value) => {
-          const tr = (value as { tr?: string } | undefined)?.tr;
-          return tr ? true : 'Türkçe klinik adı zorunlu.';
-        }),
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'tagline',
-      type: 'localeString',
+      type: 'string',
       title: 'Slogan',
     }),
     defineField({
@@ -31,7 +27,7 @@ export const siteSettings = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) => rule.required(),
         }),
@@ -56,41 +52,6 @@ export const siteSettings = defineType({
           title: 'Renk adı (opsiyonel)',
         }),
       ],
-    }),
-
-    // Localization
-    defineField({
-      name: 'activeLocales',
-      type: 'array',
-      title: 'Aktif diller',
-      of: [defineArrayMember({ type: 'string' })],
-      options: {
-        list: [
-          { title: 'Türkçe', value: 'tr' },
-          { title: 'English', value: 'en' },
-        ],
-      },
-      initialValue: ['tr'],
-      validation: (rule) => rule.required().min(1),
-    }),
-    defineField({
-      name: 'defaultLocale',
-      type: 'string',
-      title: 'Varsayılan dil',
-      initialValue: 'tr',
-      options: {
-        list: [
-          { title: 'Türkçe', value: 'tr' },
-          { title: 'English', value: 'en' },
-        ],
-        layout: 'radio',
-      },
-      validation: (rule) =>
-        rule.required().custom((value, ctx) => {
-          const active = (ctx.document?.activeLocales ?? []) as string[];
-          if (active.length === 0) return true;
-          return active.includes(value!) ? true : 'Varsayılan dil, aktif diller arasında olmalı.';
-        }),
     }),
 
     // Contact & address
@@ -126,8 +87,9 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: 'footerText',
-      type: 'localeText',
+      type: 'text',
       title: 'Footer metni',
+      rows: 4,
     }),
     defineField({
       name: 'footerLinks',
@@ -153,7 +115,7 @@ export const siteSettings = defineType({
     }),
   ],
   preview: {
-    select: { title: 'clinicName.tr' },
+    select: { title: 'clinicName' },
     prepare: ({ title }) => ({
       title: (title as string | undefined) ?? 'Klinik Bilgileri',
     }),

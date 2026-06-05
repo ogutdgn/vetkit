@@ -7,7 +7,7 @@ export const cta = defineType({
   fields: [
     defineField({
       name: 'label',
-      type: 'localeString',
+      type: 'string',
       title: 'Buton metni',
       validation: (rule) => rule.required(),
     }),

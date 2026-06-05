@@ -8,14 +8,15 @@ export const seo = defineType({
   fields: [
     defineField({
       name: 'metaTitle',
-      type: 'localeString',
+      type: 'string',
       title: 'Meta başlık',
       description: 'Boş bırakılırsa sayfa başlığı kullanılır.',
     }),
     defineField({
       name: 'metaDescription',
-      type: 'localeText',
+      type: 'text',
       title: 'Meta açıklama',
+      rows: 4,
       description: 'Boş bırakılırsa içerikten otomatik üretilir. 155 karakter önerilir.',
     }),
     defineField({
@@ -26,7 +27,7 @@ export const seo = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alternatif metin',
           validation: (rule) => rule.required().error('Alt metin a11y için zorunludur.'),
         }),

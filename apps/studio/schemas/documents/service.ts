@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
+import { turkishSlugify } from '../../lib/slug';
+
 const PET_TYPES = [
   { title: 'Köpek', value: 'dog' },
   { title: 'Kedi', value: 'cat' },
@@ -15,14 +17,16 @@ export const service = defineType({
   fields: [
     defineField({
       name: 'title',
-      type: 'localeString',
+      type: 'string',
       title: 'Hizmet adı',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
-      type: 'localeSlug',
+      type: 'slug',
       title: 'URL kimliği',
+      description: 'URL adresinde görünecek kısa kimlik (örn. kedi-asilamasi).',
+      options: { source: 'title', slugify: turkishSlugify, maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -33,7 +37,7 @@ export const service = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) => rule.required(),
         }),
@@ -48,13 +52,14 @@ export const service = defineType({
     }),
     defineField({
       name: 'shortDescription',
-      type: 'localeText',
+      type: 'text',
       title: 'Kısa açıklama (kart için)',
+      rows: 4,
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'description',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'Detay açıklama',
       validation: (rule) => rule.required(),
     }),
@@ -94,7 +99,7 @@ export const service = defineType({
     }),
     defineField({
       name: 'pricing',
-      type: 'localeString',
+      type: 'string',
       title: 'Fiyat bilgisi (opsiyonel)',
       description: 'Örn. "300 TL\'den başlayan fiyatlarla". Boş kalabilir.',
     }),
@@ -106,7 +111,7 @@ export const service = defineType({
   ],
   preview: {
     select: {
-      title: 'title.tr',
+      title: 'title',
       media: 'mainImage',
     },
     prepare: (selection) => {

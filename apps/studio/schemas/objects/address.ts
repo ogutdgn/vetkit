@@ -7,7 +7,7 @@ export const address = defineType({
   fields: [
     defineField({
       name: 'street',
-      type: 'localeString',
+      type: 'string',
       title: 'Cadde ve numara',
       validation: (rule) => rule.required(),
     }),

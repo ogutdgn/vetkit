@@ -67,7 +67,7 @@ export const openingHours = defineType({
     ...dayFields,
     defineField({
       name: 'emergencyNote',
-      type: 'localeString',
+      type: 'string',
       title: 'Acil not',
       description: 'Hafta sonu / mesai dışı için kısa not.',
     }),

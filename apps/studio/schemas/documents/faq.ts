@@ -15,13 +15,13 @@ export const faq = defineType({
   fields: [
     defineField({
       name: 'question',
-      type: 'localeString',
+      type: 'string',
       title: 'Soru',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'answer',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'Cevap',
       validation: (rule) => rule.required(),
     }),
@@ -33,7 +33,7 @@ export const faq = defineType({
     }),
   ],
   preview: {
-    select: { title: 'question.tr', subtitle: 'category' },
+    select: { title: 'question', subtitle: 'category' },
     prepare: (selection) => {
       const { title, subtitle } = selection as {
         title?: string;

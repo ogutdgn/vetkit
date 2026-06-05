@@ -16,7 +16,7 @@ export const emergencyBanner = defineType({
     }),
     defineField({
       name: 'text',
-      type: 'localeString',
+      type: 'string',
       title: 'Banner metni',
       description: 'Örn. "7/24 Acil Servis"',
       hidden: ({ parent }) => (parent as { enabled?: boolean } | undefined)?.enabled !== true,

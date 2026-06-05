@@ -20,21 +20,20 @@ export const testimonial = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) =>
             rule.custom((value, ctx) => {
               const parent = ctx.parent as { asset?: unknown } | undefined;
               if (!parent?.asset) return true;
-              const tr = (value as { tr?: string } | undefined)?.tr;
-              return tr ? true : 'Fotoğraf varsa alt metin zorunludur.';
+              return value ? true : 'Fotoğraf varsa alt metin zorunludur.';
             }),
         }),
       ],
     }),
     defineField({
       name: 'content',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'Yorum',
       validation: (rule) => rule.required(),
     }),

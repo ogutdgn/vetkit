@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
+import { turkishSlugify } from '../../lib/slug';
+
 const CATEGORIES = [
   { title: 'Genel', value: 'genel' },
   { title: 'Beslenme', value: 'beslenme' },
@@ -15,25 +17,28 @@ export const blogPost = defineType({
   fields: [
     defineField({
       name: 'title',
-      type: 'localeString',
+      type: 'string',
       title: 'Başlık',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
-      type: 'localeSlug',
+      type: 'slug',
       title: 'URL kimliği',
+      description: 'URL adresinde görünecek kısa kimlik (örn. kedi-asilamasi).',
+      options: { source: 'title', slugify: turkishSlugify, maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'excerpt',
-      type: 'localeText',
+      type: 'text',
       title: 'Özet',
+      rows: 4,
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'body',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'İçerik',
       validation: (rule) => rule.required(),
     }),
@@ -45,7 +50,7 @@ export const blogPost = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) => rule.required(),
         }),
@@ -106,7 +111,7 @@ export const blogPost = defineType({
   ],
   preview: {
     select: {
-      title: 'title.tr',
+      title: 'title',
       media: 'coverImage',
       date: 'publishedAt',
     },

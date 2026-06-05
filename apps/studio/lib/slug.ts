@@ -1,7 +1,4 @@
-// Locale primitives and helpers used by the locale-aware schema types.
-
-export const SUPPORTED_LOCALES = ['tr', 'en'] as const;
-export type Locale = (typeof SUPPORTED_LOCALES)[number];
+// Turkish-aware slug helper used by slug fields.
 
 const TURKISH_CHAR_MAP: Record<string, string> = {
   ç: 'c',
@@ -27,14 +24,6 @@ export function turkishSlugify(input: string): string {
     .map((ch) => TURKISH_CHAR_MAP[ch] ?? ch)
     .join('');
   return stripDiacritics(normalized)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 96);
-}
-
-export function defaultSlugify(input: string): string {
-  return stripDiacritics(input)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')

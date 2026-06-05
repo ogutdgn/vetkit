@@ -8,25 +8,18 @@ import { service } from './documents/service';
 import { teamMember } from './documents/teamMember';
 import { testimonial } from './documents/testimonial';
 import { address } from './objects/address';
+import { blockContent } from './objects/blockContent';
 import { contactInfo } from './objects/contactInfo';
 import { cta } from './objects/cta';
 import { emergencyBanner } from './objects/emergencyBanner';
-import { localePortableText } from './objects/localePortableText';
-import { localeSlug } from './objects/localeSlug';
-import { localeString } from './objects/localeString';
-import { localeText } from './objects/localeText';
 import { openingHours } from './objects/openingHours';
 import { seo } from './objects/seo';
 import { socialLinks } from './objects/socialLinks';
 import { siteSettings } from './singletons/siteSettings';
 
 export const schemaTypes = [
-  // Locale primitives.
-  localeString,
-  localeText,
-  localeSlug,
-  localePortableText,
   // Reusable objects.
+  blockContent,
   seo,
   address,
   openingHours,

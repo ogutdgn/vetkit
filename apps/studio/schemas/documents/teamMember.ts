@@ -23,9 +23,9 @@ export const teamMember = defineType({
     }),
     defineField({
       name: 'title',
-      type: 'localeString',
+      type: 'string',
       title: 'Unvan',
-      description: 'Örn. "Veteriner Hekim" / "Veterinarian"',
+      description: 'Örn. "Veteriner Hekim"',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -42,7 +42,7 @@ export const teamMember = defineType({
       fields: [
         defineField({
           name: 'alt',
-          type: 'localeString',
+          type: 'string',
           title: 'Alt metin',
           validation: (rule) => rule.required(),
         }),
@@ -53,7 +53,7 @@ export const teamMember = defineType({
       name: 'credentials',
       type: 'array',
       title: 'Eğitim / sertifika',
-      of: [defineArrayMember({ type: 'localeString' })],
+      of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({
       name: 'specialties',
@@ -64,12 +64,13 @@ export const teamMember = defineType({
     }),
     defineField({
       name: 'shortBio',
-      type: 'localeText',
+      type: 'text',
       title: 'Kısa biyografi (kart için)',
+      rows: 4,
     }),
     defineField({
       name: 'bio',
-      type: 'localePortableText',
+      type: 'blockContent',
       title: 'Detaylı biyografi',
     }),
     defineField({
@@ -90,7 +91,7 @@ export const teamMember = defineType({
     }),
   ],
   preview: {
-    select: { title: 'name', subtitle: 'title.tr', media: 'photo' },
+    select: { title: 'name', subtitle: 'title', media: 'photo' },
     prepare: (selection) => {
       const { title, subtitle, media } = selection as {
         title?: string;
