@@ -15,66 +15,67 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: ../../packages/sanity-types/schema.json
-export interface Coordinates {
+export type Coordinates = {
   lat?: number;
   lng?: number;
-}
+};
 
-export interface Monday {
+export type Monday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Tuesday {
+export type Tuesday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Wednesday {
+export type Wednesday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Thursday {
+export type Thursday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Friday {
+export type Friday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Saturday {
+export type Saturday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface Sunday {
+export type Sunday = {
   closed?: boolean;
   openTime?: string;
   closeTime?: string;
-}
+};
 
-export interface SanityImageAssetReference {
+export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'sanity.imageAsset';
-}
+};
 
-export interface Testimonial {
+export type Testimonial = {
   _id: string;
   _type: 'testimonial';
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  orderRank?: string;
   authorName: string;
   authorPhoto?: {
     asset?: SanityImageAssetReference;
@@ -90,52 +91,52 @@ export interface Testimonial {
   sourceUrl?: string;
   publishedAt?: string;
   featured?: boolean;
-}
+};
 
-export type BlockContent = {
-  children?: {
-    marks?: string[];
+export type BlockContent = Array<{
+  children?: Array<{
+    marks?: Array<string>;
     text?: string;
     _type: 'span';
     _key: string;
-  }[];
+  }>;
   style?: 'normal' | 'h2' | 'h3' | 'blockquote';
   listItem?: 'bullet' | 'number';
-  markDefs?: {
+  markDefs?: Array<{
     href: string;
     newTab?: boolean;
     _type: 'link';
     _key: string;
-  }[];
+  }>;
   level?: number;
   _type: 'block';
   _key: string;
-}[];
+}>;
 
-export interface SanityImageCrop {
+export type SanityImageCrop = {
   _type: 'sanity.imageCrop';
   top: number;
   bottom: number;
   left: number;
   right: number;
-}
+};
 
-export interface SanityImageHotspot {
+export type SanityImageHotspot = {
   _type: 'sanity.imageHotspot';
   x: number;
   y: number;
   height: number;
   width: number;
-}
+};
 
-export interface TeamMemberReference {
+export type TeamMemberReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'teamMember';
-}
+};
 
-export interface Page {
+export type Page = {
   _id: string;
   _type: 'page';
   _createdAt: string;
@@ -152,16 +153,20 @@ export interface Page {
     _type: 'image';
   };
   body: BlockContent;
-  featuredTeamMembers?: ({
-    _key: string;
-  } & TeamMemberReference)[];
-  ctaButtons?: ({
-    _key: string;
-  } & Cta)[];
+  featuredTeamMembers?: Array<
+    {
+      _key: string;
+    } & TeamMemberReference
+  >;
+  ctaButtons?: Array<
+    {
+      _key: string;
+    } & Cta
+  >;
   seo?: Seo;
-}
+};
 
-export interface Seo {
+export type Seo = {
   _type: 'seo';
   metaTitle?: string;
   metaDescription?: string;
@@ -174,20 +179,21 @@ export interface Seo {
     _type: 'image';
   };
   noIndex?: boolean;
-}
+};
 
-export interface Slug {
+export type Slug = {
   _type: 'slug';
   current: string;
   source?: string;
-}
+};
 
-export interface GalleryImage {
+export type GalleryImage = {
   _id: string;
   _type: 'galleryImage';
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  orderRank?: string;
   image: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -198,34 +204,35 @@ export interface GalleryImage {
   };
   caption?: string;
   category?: 'klinik-ici' | 'tedavi' | 'ekip' | 'hastalar';
-}
+};
 
-export interface Faq {
+export type Faq = {
   _id: string;
   _type: 'faq';
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  orderRank?: string;
   question: string;
   answer: BlockContent;
   category?: 'genel' | 'asilama' | 'cerrahi' | 'beslenme' | 'acil';
-}
+};
 
-export interface ServiceReference {
+export type ServiceReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'service';
-}
+};
 
-export interface BlogPostReference {
+export type BlogPostReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'blogPost';
-}
+};
 
-export interface BlogPost {
+export type BlogPost = {
   _id: string;
   _type: 'blogPost';
   _createdAt: string;
@@ -246,22 +253,27 @@ export interface BlogPost {
   author: TeamMemberReference;
   publishedAt: string;
   category?: 'genel' | 'beslenme' | 'asilama' | 'davranis' | 'acil';
-  tags?: string[];
-  relatedServices?: ({
-    _key: string;
-  } & ServiceReference)[];
-  relatedPosts?: ({
-    _key: string;
-  } & BlogPostReference)[];
+  tags?: Array<string>;
+  relatedServices?: Array<
+    {
+      _key: string;
+    } & ServiceReference
+  >;
+  relatedPosts?: Array<
+    {
+      _key: string;
+    } & BlogPostReference
+  >;
   seo?: Seo;
-}
+};
 
-export interface TeamMember {
+export type TeamMember = {
   _id: string;
   _type: 'teamMember';
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  orderRank?: string;
   name: string;
   title: string;
   slug?: Slug;
@@ -273,16 +285,16 @@ export interface TeamMember {
     alt: string;
     _type: 'image';
   };
-  credentials?: string[];
-  specialties?: string[];
+  credentials?: Array<string>;
+  specialties?: Array<string>;
   shortBio?: string;
   bio?: BlockContent;
   email?: string;
   phone?: string;
   socialLinks?: SocialLinks;
-}
+};
 
-export interface SocialLinks {
+export type SocialLinks = {
   _type: 'socialLinks';
   instagram?: string;
   facebook?: string;
@@ -290,21 +302,22 @@ export interface SocialLinks {
   youtube?: string;
   tiktok?: string;
   whatsapp?: string;
-}
+};
 
-export interface FaqReference {
+export type FaqReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'faq';
-}
+};
 
-export interface Service {
+export type Service = {
   _id: string;
   _type: 'service';
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  orderRank?: string;
   title: string;
   slug: Slug;
   mainImage: {
@@ -324,17 +337,19 @@ export interface Service {
   };
   shortDescription: string;
   description: BlockContent;
-  petTypes?: string[];
+  petTypes?: Array<string>;
   serviceLocation: 'in-clinic' | 'home-call' | 'both';
   emergencyAvailable?: boolean;
-  relatedFAQs?: ({
-    _key: string;
-  } & FaqReference)[];
+  relatedFAQs?: Array<
+    {
+      _key: string;
+    } & FaqReference
+  >;
   pricing?: string;
   seo?: Seo;
-}
+};
 
-export interface SiteSettings {
+export type SiteSettings = {
   _id: string;
   _type: 'siteSettings';
   _createdAt: string;
@@ -360,22 +375,24 @@ export interface SiteSettings {
   socialLinks?: SocialLinks;
   emergencyBanner?: EmergencyBanner;
   footerText?: string;
-  footerLinks?: ({
-    _key: string;
-  } & Cta)[];
+  footerLinks?: Array<
+    {
+      _key: string;
+    } & Cta
+  >;
   defaultSeo?: Seo;
   vercelAnalyticsEnabled?: boolean;
-}
+};
 
-export interface EmergencyBanner {
+export type EmergencyBanner = {
   _type: 'emergencyBanner';
   enabled?: boolean;
   text?: string;
   phone?: string;
   variant?: 'top' | 'sticky';
-}
+};
 
-export interface OpeningHours {
+export type OpeningHours = {
   _type: 'openingHours';
   isAlwaysOpen?: boolean;
   monday?: Monday;
@@ -386,9 +403,9 @@ export interface OpeningHours {
   saturday?: Saturday;
   sunday?: Sunday;
   emergencyNote?: string;
-}
+};
 
-export interface Address {
+export type Address = {
   _type: 'address';
   street: string;
   district: string;
@@ -397,34 +414,34 @@ export interface Address {
   country?: 'TR';
   googleMapsUrl?: string;
   coordinates?: Coordinates;
-}
+};
 
-export interface ContactInfo {
+export type ContactInfo = {
   _type: 'contactInfo';
   primaryPhone: string;
   emergencyPhone?: string;
   whatsapp?: string;
   email: string;
-  secondaryEmails?: string[];
-}
+  secondaryEmails?: Array<string>;
+};
 
-export interface Cta {
+export type Cta = {
   _type: 'cta';
   label: string;
   href: string;
   variant?: 'primary' | 'secondary' | 'ghost';
   newTab?: boolean;
-}
+};
 
-export interface SanityImagePaletteSwatch {
+export type SanityImagePaletteSwatch = {
   _type: 'sanity.imagePaletteSwatch';
   background?: string;
   foreground?: string;
   population?: number;
   title?: string;
-}
+};
 
-export interface SanityImagePalette {
+export type SanityImagePalette = {
   _type: 'sanity.imagePalette';
   darkMuted?: SanityImagePaletteSwatch;
   lightVibrant?: SanityImagePaletteSwatch;
@@ -433,16 +450,16 @@ export interface SanityImagePalette {
   dominant?: SanityImagePaletteSwatch;
   lightMuted?: SanityImagePaletteSwatch;
   muted?: SanityImagePaletteSwatch;
-}
+};
 
-export interface SanityImageDimensions {
+export type SanityImageDimensions = {
   _type: 'sanity.imageDimensions';
   height: number;
   width: number;
   aspectRatio: number;
-}
+};
 
-export interface SanityImageMetadata {
+export type SanityImageMetadata = {
   _type: 'sanity.imageMetadata';
   location?: Geopoint;
   dimensions?: SanityImageDimensions;
@@ -452,9 +469,9 @@ export interface SanityImageMetadata {
   thumbHash?: string;
   hasAlpha?: boolean;
   isOpaque?: boolean;
-}
+};
 
-export interface SanityFileAsset {
+export type SanityFileAsset = {
   _id: string;
   _type: 'sanity.fileAsset';
   _createdAt: string;
@@ -474,16 +491,16 @@ export interface SanityFileAsset {
   path: string;
   url: string;
   source?: SanityAssetSourceData;
-}
+};
 
-export interface SanityAssetSourceData {
+export type SanityAssetSourceData = {
   _type: 'sanity.assetSourceData';
   name?: string;
   id?: string;
   url?: string;
-}
+};
 
-export interface SanityImageAsset {
+export type SanityImageAsset = {
   _id: string;
   _type: 'sanity.imageAsset';
   _createdAt: string;
@@ -504,14 +521,14 @@ export interface SanityImageAsset {
   url: string;
   metadata?: SanityImageMetadata;
   source?: SanityAssetSourceData;
-}
+};
 
-export interface Geopoint {
+export type Geopoint = {
   _type: 'geopoint';
   lat?: number;
   lng?: number;
   alt?: number;
-}
+};
 
 export type AllSanitySchemaTypes =
   | Coordinates
