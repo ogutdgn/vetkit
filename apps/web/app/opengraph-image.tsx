@@ -6,9 +6,11 @@ import { ImageResponse } from 'next/og';
 import { client } from '@/lib/sanity/client';
 import { siteSettingsQuery } from '@/lib/sanity/queries';
 import { siteSettingsTag } from '@/lib/sanity/tags';
-import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '@/lib/seo/metadata';
+import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH, siteNameFallback } from '@/lib/seo/metadata';
 
-export const alt = process.env.NEXT_PUBLIC_SITE_NAME ?? 'Veteriner Kliniği';
+// Module-level export can't read Sanity; shares the same fallback as the
+// in-image text so alt and pixels can only diverge when clinicName is set.
+export const alt = siteNameFallback;
 export const size = { width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT };
 export const contentType = 'image/png';
 
@@ -18,8 +20,7 @@ export const contentType = 'image/png';
 export default async function OpenGraphImage() {
   const settings = await client.fetch(siteSettingsQuery, {}, { next: { tags: [siteSettingsTag] } });
 
-  const clinicName =
-    settings?.clinicName ?? process.env.NEXT_PUBLIC_SITE_NAME ?? 'Veteriner Kliniği';
+  const clinicName = settings?.clinicName ?? siteNameFallback;
   const tagline = settings?.tagline;
   const accent = settings?.brandColor?.hex ?? '#0f766e';
 
@@ -45,10 +46,11 @@ export default async function OpenGraphImage() {
           marginBottom: 48,
         }}
       />
+      {/* No fontWeight: next/og bundles a single 400-weight face; a real
+          bold face loads with the brand styling pass in Chunk 10. */}
       <div
         style={{
           fontSize: 72,
-          fontWeight: 700,
           color: '#111827',
           textAlign: 'center',
           lineHeight: 1.15,

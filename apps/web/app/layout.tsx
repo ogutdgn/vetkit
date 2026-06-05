@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { sanityFetch } from '@/lib/sanity/live';
 import { siteSettingsQuery } from '@/lib/sanity/queries';
 import { siteSettingsTag } from '@/lib/sanity/tags';
-import { buildRootMetadata } from '@/lib/seo/metadata';
+import { buildRootMetadata, htmlLang } from '@/lib/seo/metadata';
 import { buildVeterinaryCareJsonLd, serializeJsonLd } from '@/lib/seo/schema';
 
 import './globals.css';
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const jsonLd = buildVeterinaryCareJsonLd(settings);
 
   return (
-    <html lang="tr" className={inter.variable}>
+    <html lang={htmlLang} className={inter.variable}>
       <body>
         {jsonLd ? (
           <script
