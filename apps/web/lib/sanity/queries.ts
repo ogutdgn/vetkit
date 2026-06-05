@@ -30,7 +30,9 @@ export const servicesListQuery = defineQuery(`
  * Tagging note (OD-5): the per-doc tag `sanity:service:<id>` needs the `_id`,
  * which a by-slug fetch only knows afterwards. The detail pages (Chunk 11)
  * resolve this with a cheap slug→_id lookup tagged `sanity:service:list`,
- * then fetch the full document tagged `docTag('service', _id)`.
+ * then fetch the full document tagged `docTag('service', _id)` — plus
+ * `listTag('faq')`, because this query dereferences relatedFAQs and FAQ
+ * edits must bust the page too (see ./tags.ts rule 2).
  */
 export const serviceBySlugQuery = defineQuery(`
   *[_type == "service" && slug.current == $slug][0] {

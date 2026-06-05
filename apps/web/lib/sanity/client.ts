@@ -13,15 +13,21 @@ if (!projectId) {
 export const apiVersion = '2026-06-01';
 
 /**
- * Public, CDN-cached client for published content. Regular page fetches go
- * through this via `sanityFetch` (./live.ts), which attaches the cache tags
- * from ./tags.ts so the revalidation webhook (Chunk 13) can bust selectively.
+ * Public client for published content. Regular page fetches go through this
+ * via `sanityFetch` (./live.ts), which attaches the cache tags from ./tags.ts
+ * so the revalidation webhook (Chunk 13) can bust selectively.
+ *
+ * `useCdn: false` is deliberate: Next's tag-pinned data cache is the caching
+ * layer (origin is only hit at build/revalidation time), and the Sanity CDN
+ * in front of it would race the webhook — a `revalidateTag` triggers exactly
+ * one refetch, which could read a not-yet-invalidated CDN response and pin
+ * stale content until the next publish.
  */
 export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true,
+  useCdn: false,
   perspective: 'published',
 });
 
