@@ -681,6 +681,24 @@ export type ServiceBySlugQueryResult = {
   seo?: Seo;
 } | null;
 
+// Source: ../web/lib/sanity/queries.ts
+// Variable: sitemapEntriesQuery
+// Query: {  "services": *[_type == "service" && defined(slug.current)] { "slug": slug.current, _updatedAt },  "posts": *[_type == "blogPost" && defined(slug.current)] { "slug": slug.current, _updatedAt },  "pages": *[_type == "page" && defined(slug.current)] { "slug": slug.current, _updatedAt }}
+export type SitemapEntriesQueryResult = {
+  services: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  posts: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  pages: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+};
+
 // Query TypeMap
 import '@sanity/client';
 declare module '@sanity/client' {
@@ -688,5 +706,6 @@ declare module '@sanity/client' {
     '*[_type == "siteSettings"][0]': SiteSettingsQueryResult;
     '\n  *[_type == "service"] | order(orderRank asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    shortDescription,\n    mainImage,\n    icon,\n    petTypes,\n    serviceLocation,\n    emergencyAvailable,\n    pricing\n  }\n': ServicesListQueryResult;
     '\n  *[_type == "service" && slug.current == $slug][0] {\n    ...,\n    relatedFAQs[]-> {\n      _id,\n      question,\n      answer,\n      category\n    }\n  }\n': ServiceBySlugQueryResult;
+    '{\n  "services": *[_type == "service" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "posts": *[_type == "blogPost" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "pages": *[_type == "page" && defined(slug.current)] { "slug": slug.current, _updatedAt }\n}': SitemapEntriesQueryResult;
   }
 }
