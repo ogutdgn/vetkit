@@ -3,9 +3,24 @@ import type { Metadata } from 'next';
 import { urlFor } from '@/lib/sanity/image';
 import type { Seo, SiteSettingsQueryResult } from '@/types/sanity';
 
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// Fail loudly in production builds: a missing site URL would silently ship
+// localhost canonicals, og:urls, and sitemap entries for the tenant.
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+if (!rawSiteUrl && process.env.NODE_ENV === 'production') {
+  throw new Error(
+    'Missing NEXT_PUBLIC_SITE_URL — set it in the Vercel project env (see apps/web/.env.example).',
+  );
+}
+export const siteUrl = rawSiteUrl ?? 'http://localhost:3000';
 
-const siteNameFallback = process.env.NEXT_PUBLIC_SITE_NAME ?? 'vetkit';
+/** Shared fallback when neither Sanity clinicName nor env site name is available. */
+export const siteNameFallback = process.env.NEXT_PUBLIC_SITE_NAME ?? 'Veteriner Kliniği';
+
+// Single locale source (CLAUDE.md §8). Sites are Turkish-only (anti-pattern
+// #12); these just keep html lang / og:locale / manifest lang in one place.
+export const defaultLocale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'tr-TR';
+export const htmlLang = defaultLocale.split('-')[0] ?? 'tr';
+export const ogLocale = defaultLocale.replace('-', '_');
 
 // schema.org/OG standard dimensions; opengraph-image.tsx uses the same.
 export const OG_IMAGE_WIDTH = 1200;
@@ -26,9 +41,12 @@ function ogImageOf(ogImage: Seo['ogImage']): NonNullable<Metadata['openGraph']>[
 
 /**
  * Sitewide metadata for the root layout: title template (`%s | <clinic>`),
- * canonical base, OG/Twitter defaults. Per-page values override via
- * `buildPageMetadata`. When `defaultSeo.ogImage` is unset, the file-convention
- * `app/opengraph-image.tsx` is the OG-image fallback.
+ * metadataBase, OG/Twitter defaults. Deliberately NO `alternates` and no
+ * openGraph `url` here — both are inherited verbatim by child routes in
+ * Next's metadata merge, which would canonicalize every page to the homepage.
+ * Pages set their own via `buildPageMetadata`. When `defaultSeo.ogImage` is
+ * unset, the file-convention `app/opengraph-image.tsx` is the OG-image
+ * fallback.
  */
 export function buildRootMetadata(settings: SiteSettingsQueryResult): Metadata {
   const clinicName = settings?.clinicName ?? siteNameFallback;
@@ -44,12 +62,10 @@ export function buildRootMetadata(settings: SiteSettingsQueryResult): Metadata {
       template: `%s | ${clinicName}`,
     },
     description,
-    alternates: { canonical: '/' },
     openGraph: {
       type: 'website',
       siteName: clinicName,
-      locale: 'tr_TR',
-      url: siteUrl,
+      locale: ogLocale,
       ...(images ? { images } : {}),
     },
     twitter: { card: 'summary_large_image' },
@@ -65,21 +81,41 @@ interface PageMetadataInput {
   seo?: Seo | null;
   /** Canonical path for this page, e.g. `/hizmetler/kedi-asilamasi`. */
   path: string;
+  /** Clinic name for og:site_name — pass it when settings are in scope (see openGraph note below). */
+  clinicName?: string;
 }
 
 /**
  * Per-page metadata: merges the document's embedded `seo` object over the
- * page-computed fallbacks. Root-layout defaults (template, OG site fields)
- * apply automatically via Next's metadata merging.
+ * page-computed fallbacks. Two Next merge mechanics shape this function
+ * (verified against next@16.2.4 resolve-metadata.js):
+ *
+ * - A key explicitly set to `undefined` still overrides the parent (set to
+ *   null), so optional fields use conditional spread — never `key: maybe`.
+ * - A child `openGraph` replaces the root one WHOLESALE (no deep merge), so
+ *   this block is always complete (type/locale/url), not an images-only delta.
  */
-export function buildPageMetadata({ title, description, seo, path }: PageMetadataInput): Metadata {
+export function buildPageMetadata({
+  title,
+  description,
+  seo,
+  path,
+  clinicName,
+}: PageMetadataInput): Metadata {
   const images = ogImageOf(seo?.ogImage);
+  const resolvedDescription = seo?.metaDescription ?? description;
 
   return {
     title: seo?.metaTitle ?? title,
-    description: seo?.metaDescription ?? description,
+    ...(resolvedDescription ? { description: resolvedDescription } : {}),
     alternates: { canonical: path },
-    ...(images ? { openGraph: { images } } : {}),
+    openGraph: {
+      type: 'website',
+      locale: ogLocale,
+      url: path,
+      ...(clinicName ? { siteName: clinicName } : {}),
+      ...(images ? { images } : {}),
+    },
     ...(seo?.noIndex ? { robots: { index: false, follow: false } } : {}),
   };
 }
