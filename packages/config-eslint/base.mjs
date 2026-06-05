@@ -25,6 +25,9 @@ export default tseslint.config(
       '**/.turbo/**',
       '**/coverage/**',
       '**/next-env.d.ts',
+      // Machine-written by `sanity typegen` — eslint --fix would drift it
+      // from raw typegen output and make every regen a noisy diff.
+      'packages/sanity-types/generated.ts',
     ],
   },
   js.configs.recommended,
