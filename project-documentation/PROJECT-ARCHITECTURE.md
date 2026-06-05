@@ -115,9 +115,9 @@ Files:
 pnpm --filter @vetkit/studio typegen
 ```
 
-That runs `sanity schemas extract` (writes `schema.json`) then `sanity typegen generate` (reads `schema.json` plus `apps/studio/sanity-typegen.json`, writes `generated.ts`). Commit the two regenerated files alongside the schema changes that prompted them. The watch mode (`sanity typegen generate --watch`) is available for iterative work, but the standard flow is run-on-demand.
+That runs `sanity schemas extract` (writes `schema.json`) then `sanity typegen generate` (reads `schema.json` plus the `typegen` block in `apps/studio/sanity.cli.js`, writes `generated.ts`). Commit the two regenerated files alongside the schema changes that prompted them. The watch mode (`sanity typegen generate --watch`) is available for iterative work, but the standard flow is run-on-demand. `generated.ts` is excluded from ESLint (see `packages/config-eslint/base.mjs`) so the checked-in file stays byte-identical to raw typegen output.
 
-GROQ query types come later — `sanity-typegen.json` already points at `apps/web/**/*.{ts,tsx}` so once Chunk 7 introduces `groq\`…\``template literals in`apps/web/lib/sanity/queries.ts`, the next typegen run will pick them up automatically.
+GROQ query types come later — the typegen `path` glob points at `apps/web/{app,components,lib,templates,types}/**/*.{ts,tsx}` so once Chunk 7 introduces `defineQuery(...)` calls in `apps/web/lib/sanity/queries.ts`, the next typegen run will pick them up automatically.
 
 ### Future packages (not yet created)
 

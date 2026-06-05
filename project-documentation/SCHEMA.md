@@ -66,7 +66,7 @@ Every image field that carries an asset must have a `string` `alt`. For optional
 - `visionTool()` — GROQ playground.
 - `trTRLocale()` — Turkish translation bundle for the Studio chrome (menus, validation messages, empty states). Sanity v5 has no `defineConfig`-level "force locale" hook, so editors pick Turkish once via the language switcher in the top bar; the choice persists per browser. For single-tenant Studios (one per clinic) this is fine.
 
-`apps/studio/sanity.cli.js` (renamed from `.ts` to sidestep Sanity v5's strict jiti tsconfig resolution in monorepos) carries projectId/dataset from env.
+`apps/studio/sanity.cli.js` (renamed from `.ts` to sidestep Sanity v5's strict jiti tsconfig resolution in monorepos) carries projectId/dataset from env plus the `typegen` config block (path/schema/generates).
 
 ## Out of scope (Phase 1)
 
