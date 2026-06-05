@@ -54,7 +54,7 @@ Every decision below has been deliberated. Do not change without reading the rat
 - Sanity ships with a polished content management UI out of the box: rich text editor, image hotspot/cropping, draft/publish workflow, document preview, references. Building this UI from scratch is 2-3 weeks of work that adds zero customer value.
 - Free tier per project: 3 users, 10GB assets, 500K API CDN requests/month. A vet clinic site stays well within this. So 5 clients = 5 free Sanity projects = $0/month for CMS.
 - Managed service — no hosting, no DB backups, no monitoring overhead.
-- TypeScript codegen via `sanity-codegen` produces types from schema, enabling type-safe data fetching in Next.js.
+- TypeScript codegen via the official `sanity typegen` CLI produces types from schema and GROQ queries, enabling type-safe data fetching in Next.js.
 
 **Rejected alternatives:**
 
@@ -139,7 +139,7 @@ Email:           Resend + React Email (for templates)
 Hosting:         Vercel (separate project per client, same GitHub repo)
 Monorepo:        Turborepo + pnpm workspaces
 Node version:    v24 LTS "Krypton" (pinned in .nvmrc — Vercel default; Next 16 minimum is 20.9)
-Type generation: sanity-codegen (schema → TS types)
+Type generation: sanity typegen — official CLI (schema + GROQ queries → TS types)
 Linting:         ESLint flat config (eslint.config.mjs) + Prettier — `next lint` removed in 16
 Git hooks:       Husky + lint-staged (pre-commit eslint + typecheck)
 ```
@@ -210,9 +210,10 @@ vetkit/
 │   │   ├── lib/
 │   │   │   ├── sanity/
 │   │   │   │   ├── client.ts             # createClient using env projectId
-│   │   │   │   ├── queries.ts            # GROQ queries
+│   │   │   │   ├── queries.ts            # GROQ queries (defineQuery)
+│   │   │   │   ├── tags.ts               # OD-5 cache-tag builders
 │   │   │   │   ├── image.ts              # urlFor builder
-│   │   │   │   └── live.ts               # draft mode helpers
+│   │   │   │   └── live.ts               # sanityFetch + draft mode
 │   │   │   ├── seo/
 │   │   │   │   ├── metadata.ts           # generateMetadata helpers
 │   │   │   │   └── schema.ts             # JSON-LD: LocalBusiness, VeterinaryCare
@@ -254,8 +255,10 @@ vetkit/
 │       └── package.json
 │
 ├── packages/                             # shared code (lazy — add only when needed)
-│   ├── sanity-types/                     # generated TS types from schema
+│   ├── sanity-types/                     # generated TS types from schema + queries
+│   │   ├── index.ts
 │   │   ├── generated.ts
+│   │   ├── schema.json
 │   │   └── package.json
 │   ├── config-eslint/
 │   ├── config-typescript/
@@ -587,7 +590,7 @@ These are temptations that will damage the project. Resist them.
 
 13. **Do not add analytics by default.** Vercel Analytics is opt-in per client. Privacy and bundle size matter.
 
-14. **Do not skip the schema documentation step.** Every schema change must update `project-documentation/SCHEMA.md` and re-run `sanity-codegen`.
+14. **Do not skip the schema documentation step.** Every schema change must update `project-documentation/SCHEMA.md` and re-run `pnpm --filter @vetkit/studio typegen`.
 
 ---
 
@@ -614,7 +617,8 @@ These are temptations that will damage the project. Resist them.
 | 2026-05-28 | **`next-sanity` as the Sanity client wrapper in `apps/web`** (over vanilla `@sanity/client`).                                                                                                                                                                                                                                                                                                                           | Official Sanity-maintained Next.js wrapper. Integrates with Next 16's fetch cache and `revalidateTag` (load-bearing for the Chunk 13 webhook), ships `defineQuery` which `sanity typegen` recognises for typed GROQ result types, and includes draft-mode + live-preview helpers. Small layer over `@sanity/client`, no meaningful bundle cost.                                                                                                                                 | 3, 7                                                               |
 | 2026-05-28 | **Studio hostname pattern: `studio.<client-domain>.com` via CNAME** (resolves **OD-4**).                                                                                                                                                                                                                                                                                                                                | More professional white-label feel for clinic owners than `<client>.sanity.studio`. The ~5 minute extra onboarding step (CNAME DNS record + Sanity custom-domain config) is acceptable at our scale (2-5 clinics). The onboarding playbook in CLAUDE.md §9 will be updated when Chunk 15 ships.                                                                                                                                                                                 | 9                                                                  |
 | 2026-05-30 | **OD-5 resolved → cache-tag convention `sanity:<type>:<id>`** (namespaced, `_id`-based): single docs → `sanity:service:abc123`; collection queries → `sanity:<type>:list`; singleton → `sanity:siteSettings`.                                                                                                                                                                                                           | `_id`-based tags survive slug renames (a slug-based tag would orphan when an editor renames the slug, leaving the page stale); per-doc + per-list granularity lets the Chunk 13 webhook revalidate only the affected pages instead of busting a whole type. Coarse per-type (`sanity:<type>`) rejected as wasteful at growing content volumes.                                                                                                                                  | 7, 13                                                              |
-| 2026-06-05 | **OD-6 resolved → plain single-language fields** (supersedes the 2026-05-26 field-level i18n decision). Drop `localeString` / `localeText` / `localeSlug` / `localePortableText`, `@sanity/language-filter`, and `siteSettings.activeLocales`; all text fields become plain `string` / `text` / `slug` / portable-text array. A Chunk 4 schema-simplification pass (backlog row 6b) runs before Chunk 7.                | Sites are Turkish-only per §3 and anti-pattern #12; field-level `{ tr, en }` doubled every editor field and forced `coalesce(field[$locale], …)` into every Chunk 7+ query for a bilingual client that doesn't exist. No Sanity project or content exists yet, so migration cost is ~zero — the cheapest possible moment to reverse. If a bilingual client appears, that's the trigger to re-add i18n (and document-level vs field-level gets re-evaluated then).                | 3, 5                                                               |
+| 2026-06-05 | **OD-6 resolved → plain single-language fields** (supersedes the 2026-05-26 field-level i18n decision). Drop `localeString` / `localeText` / `localeSlug` / `localePortableText`, `@sanity/language-filter`, and `siteSettings.activeLocales`; all text fields become plain `string` / `text` / `slug` / portable-text array. A Chunk 4 schema-simplification pass (backlog row 6b) runs before Chunk 7.                | Sites are Turkish-only per §3 and anti-pattern #12; field-level `{ tr, en }` doubled every editor field and forced `coalesce(field[$locale], …)` into every Chunk 7+ query for a bilingual client that doesn't exist. No Sanity project or content exists yet, so migration cost is ~zero — the cheapest possible moment to reverse. If a bilingual client appears, that's the trigger to re-add i18n (and document-level vs field-level gets re-evaluated then).               | 3, 5                                                               |
+| 2026-06-05 | **Cache-layer refinements (Chunk 7 review):** (a) the published Sanity client runs `useCdn: false`; (b) the Chunk 13 webhook busts BOTH `sanity:<type>:<id>` AND `sanity:<type>:list` on every create/update/delete; (c) a query that dereferences another type also tags that dependency (e.g. service detail carries `sanity:faq:list`).                                                                              | With tag-only revalidation, Next's tag-pinned data cache is the caching layer and origin is hit only at build/revalidation; the Sanity CDN in front would race `revalidateTag` (single refetch can read a not-yet-invalidated CDN response and pin stale content until the next publish). List projections carry mutable fields, so plain edits must bust lists; dereferenced content otherwise never reaches dependent pages.                                                  | 7 (lib/sanity), 13                                                 |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
