@@ -745,6 +745,209 @@ export type SitemapEntriesQueryResult = {
   }>;
 };
 
+// Source: ../web/lib/sanity/queries.ts
+// Variable: serviceIdBySlugQuery
+// Query: *[_type == "service" && slug.current == $slug][0]._id
+export type ServiceIdBySlugQueryResult = string | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: blogPostIdBySlugQuery
+// Query: *[_type == "blogPost" && slug.current == $slug][0]._id
+export type BlogPostIdBySlugQueryResult = string | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: pageIdBySlugQuery
+// Query: *[_type == "page" && slug.current == $slug][0]._id
+export type PageIdBySlugQueryResult = string | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: serviceSlugsQuery
+// Query: *[_type == "service" && defined(slug.current)].slug.current
+export type ServiceSlugsQueryResult = Array<string>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: blogPostSlugsQuery
+// Query: *[_type == "blogPost" && defined(slug.current)].slug.current
+export type BlogPostSlugsQueryResult = Array<string>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: pageSlugsQuery
+// Query: *[_type == "page" && defined(slug.current)].slug.current
+export type PageSlugsQueryResult = Array<string>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: pageByIdQuery
+// Query: *[_type == "page" && _id == $id][0] {    _id,    title,    "slug": slug.current,    heroImage,    body,    featuredTeamMembers[]-> {      _id,      name,      title,      "slug": slug.current,      photo,      specialties,      shortBio    },    ctaButtons,    seo  }
+export type PageByIdQueryResult = {
+  _id: string;
+  title: string;
+  slug: string;
+  heroImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  } | null;
+  body: BlockContent;
+  featuredTeamMembers: Array<{
+    _id: string;
+    name: string;
+    title: string;
+    slug: string | null;
+    photo: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt: string;
+      _type: 'image';
+    };
+    specialties: Array<string> | null;
+    shortBio: string | null;
+  }> | null;
+  ctaButtons: Array<
+    {
+      _key: string;
+    } & Cta
+  > | null;
+  seo: Seo | null;
+} | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: blogPostByIdQuery
+// Query: *[_type == "blogPost" && _id == $id][0] {    _id,    title,    "slug": slug.current,    excerpt,    body,    coverImage,    publishedAt,    category,    tags,    author-> {      _id,      name,      title    },    relatedServices[]-> {      _id,      title,      "slug": slug.current    },    relatedPosts[]-> {      _id,      title,      "slug": slug.current    },    seo  }
+export type BlogPostByIdQueryResult = {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: BlockContent;
+  coverImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  publishedAt: string;
+  category: 'acil' | 'asilama' | 'beslenme' | 'davranis' | 'genel' | null;
+  tags: Array<string> | null;
+  author: {
+    _id: string;
+    name: string;
+    title: string;
+  };
+  relatedServices: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+  }> | null;
+  relatedPosts: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+  }> | null;
+  seo: Seo | null;
+} | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: serviceByIdQuery
+// Query: *[_type == "service" && _id == $id][0] {    ...,    "slug": slug.current,    relatedFAQs[]-> {      _id,      question,      answer,      category    }  }
+export type ServiceByIdQueryResult = {
+  _id: string;
+  _type: 'service';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  orderRank?: string;
+  title: string;
+  slug: string;
+  mainImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  icon?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+  };
+  shortDescription: string;
+  description: BlockContent;
+  petTypes?: Array<string>;
+  serviceLocation: 'both' | 'home-call' | 'in-clinic';
+  emergencyAvailable?: boolean;
+  relatedFAQs: Array<{
+    _id: string;
+    question: string;
+    answer: BlockContent;
+    category: 'acil' | 'asilama' | 'beslenme' | 'cerrahi' | 'genel' | null;
+  }> | null;
+  pricing?: string;
+  seo?: Seo;
+} | null;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: faqsListQuery
+// Query: *[_type == "faq"] | order(orderRank asc) {    _id,    question,    answer,    category  }
+export type FaqsListQueryResult = Array<{
+  _id: string;
+  question: string;
+  answer: BlockContent;
+  category: 'acil' | 'asilama' | 'beslenme' | 'cerrahi' | 'genel' | null;
+}>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: galleryImagesQuery
+// Query: *[_type == "galleryImage"] | order(orderRank asc) {    _id,    image,    caption,    category  }
+export type GalleryImagesQueryResult = Array<{
+  _id: string;
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  caption: string | null;
+  category: 'ekip' | 'hastalar' | 'klinik-ici' | 'tedavi' | null;
+}>;
+
+// Source: ../web/lib/sanity/queries.ts
+// Variable: homeBlogPostsQuery
+// Query: *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) [0...4] {    _id,    title,    "slug": slug.current,    excerpt,    coverImage,    publishedAt,    category,    tags,    author-> {      _id,      name,      title    }  }
+export type HomeBlogPostsQueryResult = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  publishedAt: string;
+  category: 'acil' | 'asilama' | 'beslenme' | 'davranis' | 'genel' | null;
+  tags: Array<string> | null;
+  author: {
+    _id: string;
+    name: string;
+    title: string;
+  };
+}>;
+
 // Query TypeMap
 import '@sanity/client';
 declare module '@sanity/client' {
@@ -755,5 +958,17 @@ declare module '@sanity/client' {
     '\n  *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) {\n    _id,\n    title,\n    "slug": slug.current,\n    excerpt,\n    coverImage,\n    publishedAt,\n    category,\n    tags,\n    author-> {\n      _id,\n      name,\n      title\n    }\n  }\n': BlogPostsListQueryResult;
     '\n  *[_type == "teamMember"] | order(orderRank asc) {\n    _id,\n    name,\n    title,\n    "slug": slug.current,\n    photo,\n    specialties,\n    shortBio\n  }\n': TeamMembersListQueryResult;
     '{\n  "services": *[_type == "service" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "posts": *[_type == "blogPost" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "pages": *[_type == "page" && defined(slug.current)] { "slug": slug.current, _updatedAt }\n}': SitemapEntriesQueryResult;
+    '*[_type == "service" && slug.current == $slug][0]._id': ServiceIdBySlugQueryResult;
+    '*[_type == "blogPost" && slug.current == $slug][0]._id': BlogPostIdBySlugQueryResult;
+    '*[_type == "page" && slug.current == $slug][0]._id': PageIdBySlugQueryResult;
+    '*[_type == "service" && defined(slug.current)].slug.current': ServiceSlugsQueryResult;
+    '*[_type == "blogPost" && defined(slug.current)].slug.current': BlogPostSlugsQueryResult;
+    '*[_type == "page" && defined(slug.current)].slug.current': PageSlugsQueryResult;
+    '\n  *[_type == "page" && _id == $id][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    heroImage,\n    body,\n    featuredTeamMembers[]-> {\n      _id,\n      name,\n      title,\n      "slug": slug.current,\n      photo,\n      specialties,\n      shortBio\n    },\n    ctaButtons,\n    seo\n  }\n': PageByIdQueryResult;
+    '\n  *[_type == "blogPost" && _id == $id][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    excerpt,\n    body,\n    coverImage,\n    publishedAt,\n    category,\n    tags,\n    author-> {\n      _id,\n      name,\n      title\n    },\n    relatedServices[]-> {\n      _id,\n      title,\n      "slug": slug.current\n    },\n    relatedPosts[]-> {\n      _id,\n      title,\n      "slug": slug.current\n    },\n    seo\n  }\n': BlogPostByIdQueryResult;
+    '\n  *[_type == "service" && _id == $id][0] {\n    ...,\n    "slug": slug.current,\n    relatedFAQs[]-> {\n      _id,\n      question,\n      answer,\n      category\n    }\n  }\n': ServiceByIdQueryResult;
+    '\n  *[_type == "faq"] | order(orderRank asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': FaqsListQueryResult;
+    '\n  *[_type == "galleryImage"] | order(orderRank asc) {\n    _id,\n    image,\n    caption,\n    category\n  }\n': GalleryImagesQueryResult;
+    '\n  *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) [0...4] {\n    _id,\n    title,\n    "slug": slug.current,\n    excerpt,\n    coverImage,\n    publishedAt,\n    category,\n    tags,\n    author-> {\n      _id,\n      name,\n      title\n    }\n  }\n': HomeBlogPostsQueryResult;
   }
 }
