@@ -196,6 +196,7 @@ vetkit/
 │   │   ├── templates/
 │   │   │   ├── modern/                   # Phase 1 — implemented
 │   │   │   │   ├── Header.tsx
+│   │   │   │   ├── MobileNav.tsx         # client-side menu (internal to Header)
 │   │   │   │   ├── Hero.tsx
 │   │   │   │   ├── ServiceCard.tsx
 │   │   │   │   ├── BlogCard.tsx
@@ -219,6 +220,8 @@ vetkit/
 │   │   │   │   └── schema.ts             # JSON-LD: LocalBusiness, VeterinaryCare
 │   │   │   ├── email/
 │   │   │   │   └── resend.ts             # Resend client wrapper
+│   │   │   ├── branding.ts               # §2.5 pipeline: brandColor hex → --color-brand-* vars
+│   │   │   ├── navigation.ts             # NAV_ITEMS shared by all marketing pages
 │   │   │   └── template.ts               # selects template based on TEMPLATE env
 │   │   ├── types/
 │   │   │   ├── template.ts               # ThemeComponents contract
@@ -420,9 +423,11 @@ export async function getTemplate(): Promise<ThemeComponents> {
     case 'modern':
       return (await import('@/templates/modern')).default;
     case 'classic':
-      return (await import('@/templates/classic')).default;
     case 'premium':
-      return (await import('@/templates/premium')).default;
+      // Placeholder folders hold only READMEs until Phase 2/3 — a static
+      // import specifier would break the build. Swap each case for the
+      // dynamic import once that template ships a real index.ts.
+      throw new Error(`Template "${name}" is not yet implemented.`);
     default:
       throw new Error(`Unknown template: ${name}`);
   }
