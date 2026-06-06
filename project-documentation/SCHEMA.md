@@ -47,7 +47,7 @@ Defined in `apps/studio/schemas/documents/*.ts` and `apps/studio/schemas/singlet
 
 ### Required image `alt`
 
-Every image field that carries an asset must have a `string` `alt`. For optional images (heroImage on `page`, authorPhoto on `testimonial`), alt is required only when the asset slot is filled — enforced via `Rule.custom` reading `ctx.parent.asset`.
+Every image field that carries an asset must have a `string` `alt`. `page.heroImage.alt` is plain-required (so typegen emits `alt: string` and the image stays assignable to the template contract's `SanityImageWithAlt`); only `testimonial.authorPhoto` keeps the conditional rule (alt required when the asset slot is filled, via `Rule.custom` reading `ctx.parent.asset`) since it is outside the contract.
 
 ### Validation rules
 
