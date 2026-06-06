@@ -106,7 +106,9 @@ export function buildPageMetadata({
   const resolvedDescription = seo?.metaDescription ?? description;
 
   return {
-    title: seo?.metaTitle ?? title,
+    // An editor-set metaTitle is the exact intended title — bypass the root
+    // `%s | clinic` template (editors usually include the clinic themselves).
+    title: seo?.metaTitle ? { absolute: seo.metaTitle } : title,
     ...(resolvedDescription ? { description: resolvedDescription } : {}),
     alternates: { canonical: path },
     openGraph: {
