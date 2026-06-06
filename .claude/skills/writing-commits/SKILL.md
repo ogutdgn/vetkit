@@ -20,19 +20,19 @@ vetkit uses a strict commit style. Every commit must use a Conventional Commits 
 - **type** (required): `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`, `perf`, `build`, `ci`
 - **scope** (required when one obviously applies): the area touched — `web`, `studio`, `readme`, `claude`, `execution-map`, `architecture`, `eslint`, `tailwind`, `deps`, `monorepo`, `packages`, etc.
 - **summary**: imperative mood (`add`, `drop`, `fix`, `rename`), lowercase first letter, no trailing period
-- **body**: optional. Skip entirely for one-liners. Add only when the *why* is non-obvious.
+- **body**: optional. Skip entirely for one-liners. Add only when the _why_ is non-obvious.
 
 ## Hard rules
 
-| Rule | Why |
-|---|---|
-| English only | Project convention. |
-| Conventional prefix required on every commit | Enables changelog/release tooling later. |
-| Total message ≤ 3-4 sentences | Long commit messages don't get read. |
-| One topic per commit | If summary needs "and" twice, split into separate commits. |
-| **No `Co-Authored-By: Claude` footer** | Project owner's explicit instruction. |
-| **No `🤖 Generated with Claude Code` line** | Same. |
-| **No "based on Claude's suggestion", "AI-assisted", etc.** | Same. |
+| Rule                                                       | Why                                                                                                                                                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| English only                                               | Project convention.                                                                                                                                                                               |
+| Conventional prefix required on every commit               | Enables changelog/release tooling later.                                                                                                                                                          |
+| Total message ≤ 3-4 sentences                              | Long commit messages don't get read.                                                                                                                                                              |
+| One topic per commit                                       | If summary needs "and" twice, split into separate commits. **Exception (owner, 2026-06-06):** session-wrap doc updates bundle into ONE combined docs commit (e.g. `docs(project): wrap chunk N`). |
+| **No `Co-Authored-By: Claude` footer**                     | Project owner's explicit instruction.                                                                                                                                                             |
+| **No `🤖 Generated with Claude Code` line**                | Same.                                                                                                                                                                                             |
+| **No "based on Claude's suggestion", "AI-assisted", etc.** | Same.                                                                                                                                                                                             |
 
 ## Good examples (from this repo's history)
 
@@ -94,7 +94,7 @@ Exception: tightly coupled changes that don't make sense apart (e.g. `feat(web):
 1. Run `git status` and `git diff --staged` to confirm what's actually staged.
 2. Group changes by topic — would this be one commit or several? Split if needed.
 3. For each topic, pick `<type>(<scope>)` and write a one-line lowercase imperative summary.
-4. Add a body **only** if the *why* isn't visible from the diff. Max 3 short sentences.
+4. Add a body **only** if the _why_ isn't visible from the diff. Max 3 short sentences.
 5. For multi-line messages, use a single-quoted HEREDOC so PowerShell/$ aren't expanded:
 
 ```bash
@@ -122,11 +122,11 @@ EOF
 
 ## Common rationalizations
 
-| Excuse | Reality |
-|--------|---------|
-| "It's a tiny change, prefix is overkill" | Every commit gets a prefix. Consistency > brevity. |
-| "Co-Authored-By is the polite default" | Owner explicitly forbids it for this project. |
-| "These 3 changes are related, one commit is cleaner" | Reviewability beats commit count. Split. |
-| "Turkish summary is clearer for the owner" | Owner asked for English. Not your call. |
-| "Longer body shows thoroughness" | If the diff already explains it, body is noise. |
-| "No scope fits perfectly" | Pick the closest. `chore` with no scope is fine when truly cross-cutting. |
+| Excuse                                               | Reality                                                                   |
+| ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| "It's a tiny change, prefix is overkill"             | Every commit gets a prefix. Consistency > brevity.                        |
+| "Co-Authored-By is the polite default"               | Owner explicitly forbids it for this project.                             |
+| "These 3 changes are related, one commit is cleaner" | Reviewability beats commit count. Split.                                  |
+| "Turkish summary is clearer for the owner"           | Owner asked for English. Not your call.                                   |
+| "Longer body shows thoroughness"                     | If the diff already explains it, body is noise.                           |
+| "No scope fits perfectly"                            | Pick the closest. `chore` with no scope is fine when truly cross-cutting. |

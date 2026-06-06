@@ -7,59 +7,47 @@
 > - [`execution-map.md`](./execution-map.md) — what to work on next.
 > - [`plan.md`](./plan.md) — the full plan and backlog.
 >
-> **Maintenance:** Refresh before chat closes, before any big operation (multi-file refactor, deploy, schema migration), or whenever the working tree is about to shift significantly. Skill `writing-last-point` at `.claude/skills/writing-last-point/SKILL.md` codifies the protocol. The last commit referenced below is the last _meaningful_ commit before this snapshot was written; the snapshot itself ships in a `docs(last-point): ...` commit immediately after.
+> **Maintenance:** Refresh before chat closes, before any big operation (multi-file refactor, deploy, schema migration), or whenever the working tree is about to shift significantly. Skill `writing-last-point` at `.claude/skills/writing-last-point/SKILL.md` codifies the protocol.
 
 ---
 
 ## Snapshot
 
-**Date:** 2026-06-05 (Chunks 6b, 7, 8, 9, 10 shipped + dataset seeded — one very long day)
-**Last commit on `main`:** `2b9eade docs(architecture): document the template loader and modern template`. This wrap ships `docs(plan): ...`, `docs(execution-map): ...`, then this `docs(last-point): ...`, then pushes.
-**Working tree:** apart from this wrap's doc edits and untracked `.claude/` local files, clean.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `6bc1be8`; the Chunk 10 batch + this wrap push at wrap end.
+**Date:** 2026-06-06
+**Last commit on `main`:** `4e804f2 fix(web): apply chunk 11 review fixes`. This wrap ships as ONE combined `docs(project): wrap chunk 11` commit (new owner convention), then pushes.
+**Working tree:** apart from this wrap's doc/skill edits and untracked `.claude/` local files, clean.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `ddcf329`; Chunk 11 batch + wrap push at wrap end.
 
 ## What's running
 
-- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (5.30), plain-field schema.
-- **`vetkit-dev` now carries REAL Ovapark content** (2026-06-06 re-seed, replacing the Pati fixtures): siteSettings (Ovapark Veteriner Kliniği, brand `#F15E42`, real Keçiören address/phones/Instagram, `isAlwaysOpen`), 6 real services with real patient photos, 4 FAQs, hakkımızda page (real about + mission), 6 gallery photos. **No team/blog/testimonial docs** — the old site has only template filler there, so those home sections render empty (correct behavior). Seed builder at `/tmp/ovapark-seed/` (uncommitted).
-- **`old-sites/` is populated locally** (gigi-veteriner + ovapark-veteriner cloned from github.com/ogutdgn, gitignored). Design note from owner: the old sites' hero carousels (Slider Revolution) are liked — consider a hero-slider option in the Chunk 11 design polish (needs a schema-first discussion per §2.4).
-- **Chunk 7 data layer** (`lib/sanity/`): origin-only client, `sanityFetch`, 6 typed queries (lists now filter `defined(slug.current)` → non-null slug types), OD-5 tags.
-- **Chunk 8 SEO layer** (`lib/seo/` + 4 route files); manifest + viewport `theme-color` now Sanity-driven.
-- **Chunk 9 contract** (`types/template.ts`), **Chunk 10 `templates/modern/`**: six components + `MobileNav` (Escape/outside-click dismissal, focus return), `getTemplate()` loader (classic/premium throw), §2.5 brand pipeline (`lib/branding.ts`: hex→OKLCH full-scale re-ramp with achromatic guard + contrast-floor clamp), skip link, brand `theme-color`. Home page renders through the template.
-- **Browser-verified** (agent-browser): teal `#0F766E` brand live across the site, mobile menu + Escape, icon tel button below `sm`, skip link, single h1, `lang=tr`, landmarks.
-- `pnpm typecheck` / `lint` / `build` clean.
+- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config (ignores `old-sites/**`), Husky, Sanity v5 Studio (5.30), plain-field schema.
+- **`vetkit-dev` = real Ovapark content** (siteSettings `#F15E42`, 6 services + photos, 4 FAQs, hakkımızda, 6 gallery; no team/blog/testimonials — old site had only filler). `old-sites/` populated locally (gitignored).
+- **The full public site works end-to-end**: `(marketing)` route group — home, hakkımızda, hizmetler + 6 SSG detail pages, blog (+detail, empty state), galeri, sss, iletisim (form shell). OD-5 two-step tagging on details; `PortableTextRenderer` + `ImageGallery` shared components; per-tenant dynamic favicons; sitemap guards unrouted page slugs.
+- Chunks 1–11 ✓ (see plan.md §2). `pnpm typecheck` / `lint` / `build` clean; 15 routes emit; HTTP walk all 200 + clean 404.
 
-## What was done in this (2026-06-05, Chunk 10) session
+## What was done in this (2026-06-06, Chunk 11) session
 
-1. **Chunk 10 shipped** (`4d962cc`–`9fabfdb`): loader, six modern components + MobileNav, brand pipeline (OKLCH math numerically verified against references), home through the template. Screenshots delivered to owner.
-2. **Adversarial review** (4 lenses, 39 agents) → 26 confirmed findings, all fixed (`a24e7a5`-era batch through `2b9eade`):
-   - **Branding guard rails:** achromatic brands no longer get a noise-hue tint; exact brand substitution restricted to steps 400–700 and clamped to the step's lightness (white-text contrast floor).
-   - **Slug integrity:** list queries filter `defined(slug.current)` (typegen narrows slug to `string`; dead fallbacks removed).
-   - **A11y:** Escape/outside-click menu dismissal with focus return, skip link → `#icerik`, focus-visible rings everywhere, icon-only tel button below `sm`, BlogCard meta contrast (ink-700), team bios unclamped.
-   - **Schema fidelity:** `emergencyBanner.variant === 'sticky'` honored; `footerLinks` `newTab` honored; BlogCard dates pinned to `Europe/Istanbul`.
-   - **Chrome surfaces:** manifest name/theme_color + viewport themeColor from siteSettings (icons re-homed to Chunk 11 polish).
-   - Docs: CLAUDE.md §4 tree (MobileNav, branding.ts, navigation.ts) + §6 loader sketch synced; tokens.css comments live + SCALE-sync warning; PROJECT-ARCHITECTURE rows.
-3. **Wrap:** plan.md row 10 checked, execution-map → Chunk 11, this file.
+1. **Ovapark re-seed + old-sites pull** (see ddcf329's last-point entry): real client content now drives dev; design note — owner likes the old hero carousels (Slider Revolution), discuss for a design-polish pass.
+2. **Chunk 11 shipped** (`a8cc1b2`–`754704e`, consolidated commits): 12 new queries (OD-5 two-step recipes), shared renderers, the 9 marketing pages, brand favicon routes, eslint old-sites ignore, absolute-title fix for editor metaTitles.
+3. **Adversarial review** (4 lenses, 36 agents) → 22 confirmed, all fixed in ONE commit (`4e804f2`): **blocker** — home page had no generateMetadata (no canonical/og:url on the homepage); OG-image fallback was disabled on all inner pages by the wholesale openGraph replacement (now named explicitly); blog detail missing `listTag('blogPost')` for relatedPosts deref; dead queries removed; sitemap unrouted-slug guard; Turkish-locale favicon uppercase; `dl`→`ul` a11y; sr-only h2s.
+4. **Owner convention change:** session-wrap docs now bundle into ONE combined docs commit (skills + execution-map §3 updated; memory saved).
 
 ## What is NOT yet set up
 
-Standing inventory — cross off as items ship.
-
-- ~~Chunks 1–6, 6b, 7, 8, 9, 10~~ ✓ (plan.md §2 has dates/commits). ~~Dataset seeding~~ ✓.
-- **Marketing pages (Chunk 11)** — active next; the largest remaining chunk. Load-bearing recipes are in execution-map §1 (metadata args, OD-5 detail-page tagging, Portable Text renderer, async params).
-- Contact form + Resend (Chunk 12). Revalidation webhook (Chunk 13). shadcn/ui (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15).
-- Manifest icons + favicons — folded into Chunk 11 polish.
-- gigi-veteriner content migration (manual, pre-Chunk 15).
+- ~~Chunks 1–11~~ ✓. ~~Dataset seeding~~ ✓ (Ovapark).
+- **Contact form + Resend (Chunk 12)** — active next; iletisim shell + comment in place. Owner action when ready: Resend API key (+ verified sender for real sends).
+- Revalidation webhook (Chunk 13) — closes the local stale-cache gotcha; bust BOTH doc and list tags.
+- shadcn/ui + branded not-found (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15). gigi content migration (manual, pre-15).
+- Design-polish pass before delivery: hero carousel question (owner likes the old sliders — schema-first discussion per §2.4), plus owner's notes from browsing.
 
 ## Open decisions still pending
 
-See [`plan.md`](./plan.md) §3.
-
-- **OD-3** (CI timing) — the only open decision. Recommendation: minimal workflow before Chunk 15.
+- **OD-3** (CI timing) — recommendation: minimal workflow before Chunk 15.
 
 ## Heads-up for the next session
 
-- **Chunk 11 (marketing pages) is the active chunk** — full spec + recipes in [`execution-map.md`](./execution-map.md) §1. Everything it needs ships already; it's mostly composition.
+- **Chunk 12 (contact form + Resend) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1. Check current package APIs (react-hook-form/zod/resolvers/resend/react-email) before writing code.
 - **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev unaffected).
-- **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks; no canonical/og:url in root metadata; `useCdn: false`; `@sanity/image-url` direct dep; `generated.ts` ESLint-exempt; `page.heroImage.alt` plain-required; brand-substitution guard rails in `lib/branding.ts`; classic/premium loader cases throw on purpose.
-- Husky pre-commit is active — every commit auto-runs lint+format.
+- **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks with the explicit `/opengraph-image` fallback; `{ absolute }` titles for editor metaTitles + home; no canonical/og:url in root metadata; `useCdn: false`; `generated.ts` ESLint-exempt; brand guard rails in `lib/branding.ts`; `generateStaticParams` uses the plain client; sitemap `ROUTED_PAGE_SLUGS` until a generic page route exists.
+- **Wrap convention: ONE combined docs commit** per session (owner, 2026-06-06).
+- Husky pre-commit is active.

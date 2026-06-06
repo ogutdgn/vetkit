@@ -14,30 +14,27 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 11 — Marketing pages (`app/(marketing)/`).**
+**Chunk 12 — Contact form + Resend (`app/api/contact/route.ts`).**
 
-**Goal:** Build every public page against the shipped stack (queries → SEO helpers → template components): home (refine the Chunk 10 integration), `hakkimizda`, `hizmetler` + `hizmetler/[slug]`, `blog` + `blog/[slug]`, `galeri`, `sss`, `iletisim` (page shell only — the form itself is Chunk 12). The largest remaining chunk; everything it needs already exists.
+**Goal:** A working contact form on `/iletisim`: React Hook Form + Zod on the client, a route handler that emails the submission to the clinic via Resend (email-only, NO database — CLAUDE.md §2.3). The iletisim page shell already exists with a placeholder comment.
 
-**Locked context / load-bearing reminders:**
+**Locked context:**
 
-- **Every page calls `buildPageMetadata({ title, description, seo, path, clinicName })`** — a page-level openGraph block replaces the root wholesale, so `clinicName` matters; `path` is the canonical.
-- **Detail-page tagging (OD-5):** slug→`_id` lookup tagged `listTag(type)`, then the full fetch tagged `docTag(type, _id)`; service detail also carries `listTag('faq')` (relatedFAQs deref), blog lists/details carry `listTag('teamMember')` (author deref).
-- All `[slug]` routes use **async `params`** (Next 16); `generateStaticParams` from the list queries where it helps.
-- Rich text renders through `@portabletext/react` (re-exported by next-sanity) — build one shared `PortableTextRenderer` in `components/shared/` honoring the blockContent ruleset (h2/h3/blockquote, strong/em/link).
-- New queries needed (add as `defineQuery` + regen): page-by-slug, FAQ list, gallery list, blog post by slug, service slug→id lookups. Bound home-page lists with GROQ slices (e.g. posts `[0...4]`).
-- Header/Hero own the h1 — detail pages pass the doc title to Hero (or render their own single h1 where Hero doesn't fit); cards stay h3 under section h2s.
-- Sitemap STATIC_ROUTES must stay in sync once routes exist; the `(marketing)` route group does NOT change URLs.
-- Manifest icons + favicons: the deferred Chunk 10 item — fold into this chunk's polish pass.
+- Stack per CLAUDE.md §3: React Hook Form + Zod, Resend + React Email. New deps to install in apps/web: `react-hook-form`, `zod`, `@hookform/resolvers`, `resend`, `react-email`/`@react-email/components` (check current package names/APIs before writing code).
+- Env contract (§8, already in .env.example): `RESEND_API_KEY`, `CLINIC_EMAIL` (recipient), `CONTACT_FROM_EMAIL` (verified sender). Dev values can use Resend's onboarding sender (`onboarding@resend.dev`) + the owner's inbox; a real Resend key is an owner action.
+- `components/shared/ContactForm.tsx` (client component) per the §4 tree; the API route validates AGAIN server-side with the same Zod schema (never trust the client).
+- Spam floor: honeypot field + minimal rate limiting consideration (keep simple — no extra infra; document what's deferred).
+- Turkish UX: labels/messages/validation errors in Turkish; success/failure states; accessible (labels, aria-invalid, focus on error).
 
 **Done when:**
 
-- All routes from CLAUDE.md §4's `app/(marketing)/` tree exist and render seeded content end-to-end (lists + details).
-- Every page exports `generateMetadata` via the helpers with correct canonical paths; detail pages 404 cleanly (`notFound()`) on unknown slugs.
-- Cache tags follow the OD-5 recipes above on every fetch.
-- Portable Text renders with the shared renderer on service/blog/page/FAQ bodies.
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; browser check of every route against seeded content.
+- `/iletisim` renders the form (name, phone, email, message — optionally pet type); client + server Zod validation share one schema.
+- `app/api/contact/route.ts` sends via Resend to `CLINIC_EMAIL` with a readable email (React Email template or simple HTML) and returns proper status codes; errors surface in the UI in Turkish.
+- Honeypot silently drops bot submissions.
+- `.env.example` stays accurate; missing env vars fail loudly at submit time with a clear server log (not a silent 200).
+- `pnpm typecheck` / `lint` / `build` pass; manual browser test of the happy path + a validation error (real send requires the owner's Resend key — verify with it if provided, otherwise mock/log mode).
 
-**Depends on:** Chunks 7, 8, 9, 10 — all shipped. Dataset seeded.
+**Depends on:** Chunk 11 (iletisim page) — shipped.
 
 **Open decisions that affect this chunk:**
 
@@ -45,15 +42,11 @@
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add remaining groq queries for marketing pages` + `chore(studio): regenerate sanity types`
-2. `feat(web): add shared portable text renderer`
-3. `feat(web): add hizmetler list and detail pages`
-4. `feat(web): add blog list and detail pages`
-5. `feat(web): add hakkimizda, sss, galeri, and iletisim pages`
-6. `feat(web): refine the home page composition`
-7. `docs(architecture): document the marketing routes`
+1. `feat(web): add contact form with shared zod validation`
+2. `feat(web): add contact api route sending via resend`
+3. One combined `docs(project): wrap chunk 12` at session end.
 
-Chunk 12 (contact form + Resend) follows — small once the iletisim page shell exists.
+Chunk 13 (revalidation webhook) follows — the cache-tag groundwork is fully laid; it closes the local stale-cache gotcha.
 
 ---
 
@@ -72,6 +65,6 @@ Chunk 12 (contact form + Resend) follows — small once the iletisim page shell 
 1. **Refresh [`last-point.md`](./last-point.md)** — last commit hash, what got done, anything left dangling (use `writing-last-point` skill).
 2. **Update §1 of this file** — set the new active chunk for the next session (use `updating-execution-map` skill).
 3. **Update [`plan.md`](./plan.md)** — check off completed items, log resolved decisions in CLAUDE.md §12, reorder if scope shifted (use `updating-plan` skill).
-4. **Commit the doc updates** as topical `docs(*)` commits — usually `docs(last-point): ...`, `docs(execution-map): ...`, `docs(plan): ...`, each separate.
+4. **Commit the doc updates as ONE combined docs commit** (owner preference, 2026-06-06), e.g. `docs(project): wrap chunk N` covering plan.md + execution-map.md + last-point.md + any doc fixes. Never mix docs with feature code.
 
 This file should never go more than one chunk out of date.

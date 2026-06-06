@@ -167,6 +167,7 @@ vetkit/
 │   ├── web/                              # Next.js — deployed once per client
 │   │   ├── app/
 │   │   │   ├── (marketing)/
+│   │   │   │   ├── layout.tsx            # marketing chrome: Header/Footer, <main id="icerik">
 │   │   │   │   ├── page.tsx              # home
 │   │   │   │   ├── hakkimizda/page.tsx   # about
 │   │   │   │   ├── hizmetler/
@@ -186,11 +187,14 @@ vetkit/
 │   │   │   ├── robots.ts
 │   │   │   ├── manifest.ts
 │   │   │   ├── opengraph-image.tsx       # dynamic OG generation
+│   │   │   ├── icon.tsx                  # brand favicon (dynamic, per tenant)
+│   │   │   ├── apple-icon.tsx            # apple touch icon (dynamic)
+│   │   │   ├── globals.css               # Tailwind v4 entry + base layer
 │   │   │   └── not-found.tsx
 │   │   ├── components/
 │   │   │   ├── shared/                   # used by all templates
-│   │   │   │   ├── ContactForm.tsx
-│   │   │   │   ├── SEOHead.tsx
+│   │   │   │   ├── ContactForm.tsx       # Chunk 12
+│   │   │   │   ├── PortableTextRenderer.tsx  # blockContent ruleset (h2/h3/blockquote, strong/em/link)
 │   │   │   │   └── ImageGallery.tsx
 │   │   │   └── ui/                       # shadcn primitives (button, input, etc.)
 │   │   ├── templates/
