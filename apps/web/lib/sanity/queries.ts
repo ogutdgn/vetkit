@@ -47,6 +47,44 @@ export const serviceBySlugQuery = defineQuery(`
 `);
 
 /**
+ * All blog posts, newest first, projected for cards. Fetch with
+ * `listTag('blogPost')`.
+ */
+export const blogPostsListQuery = defineQuery(`
+  *[_type == "blogPost"] | order(publishedAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    publishedAt,
+    category,
+    tags,
+    author-> {
+      _id,
+      name,
+      title
+    }
+  }
+`);
+
+/**
+ * All team members in editor-defined order, projected for cards/sections.
+ * Fetch with `listTag('teamMember')`.
+ */
+export const teamMembersListQuery = defineQuery(`
+  *[_type == "teamMember"] | order(orderRank asc) {
+    _id,
+    name,
+    title,
+    "slug": slug.current,
+    photo,
+    specialties,
+    shortBio
+  }
+`);
+
+/**
  * Every public slug + its last update, for app/sitemap.ts. Fetch with the
  * three list tags (service/blogPost/page) so publishes refresh the sitemap.
  */
