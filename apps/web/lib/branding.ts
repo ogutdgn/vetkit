@@ -66,29 +66,44 @@ export function hexToOklch(hex: string): { l: number; c: number; h: number } | n
   return { l: L, c, h };
 }
 
+/** Below this OKLCH chroma the hue is floating-point noise — treat as gray. */
+const ACHROMATIC_THRESHOLD = 0.005;
+
 /**
  * CSS custom-property overrides for the brand scale, or {} when no/invalid
  * hex (the template's tokens.css defaults then apply).
+ *
+ * Guard rails (Chunk 10 review):
+ * - Achromatic brands (gray/black/white) get a pure neutral ramp — the
+ *   chroma floor would otherwise tint the site with a noise-derived hue.
+ * - The exact brand value substitutes only into the mid steps (400–700,
+ *   where the brand color actually appears as a surface), and never lighter
+ *   than the step's default lightness — steps 600/700 sit under white text,
+ *   so a light brand hex must not float them above the contrast floor.
  */
 export function brandStyleVars(hex: string | undefined): Record<string, string> {
   if (!hex) return {};
   const brand = hexToOklch(hex);
   if (!brand) return {};
 
+  const isAchromatic = brand.c < ACHROMATIC_THRESHOLD;
   // Preserve how muted/saturated the brand is relative to the default ramp.
-  const chromaScale = Math.min(Math.max(brand.c / ANCHOR_CHROMA, 0.15), 1.15);
+  const chromaScale = isAchromatic ? 0 : Math.min(Math.max(brand.c / ANCHOR_CHROMA, 0.15), 1.15);
 
-  // The step nearest the brand's own lightness renders the exact brand color.
-  let nearest = SCALE[0]!;
-  for (const step of SCALE) {
-    if (Math.abs(step[1] - brand.l) < Math.abs(nearest[1] - brand.l)) nearest = step;
+  // The mid step nearest the brand's own lightness carries the brand value.
+  let nearest: readonly [number, number, number] | null = null;
+  if (!isAchromatic) {
+    for (const step of SCALE) {
+      if (step[0] < 400 || step[0] > 700) continue;
+      if (!nearest || Math.abs(step[1] - brand.l) < Math.abs(nearest[1] - brand.l)) nearest = step;
+    }
   }
 
   const vars: Record<string, string> = {};
   for (const [step, lightness, chroma] of SCALE) {
     vars[`--color-brand-${step}`] =
-      step === nearest[0]
-        ? `oklch(${brand.l.toFixed(4)} ${brand.c.toFixed(4)} ${brand.h.toFixed(2)})`
+      step === nearest?.[0]
+        ? `oklch(${Math.min(brand.l, lightness).toFixed(4)} ${brand.c.toFixed(4)} ${brand.h.toFixed(2)})`
         : `oklch(${lightness} ${(chroma * chromaScale).toFixed(4)} ${brand.h.toFixed(2)})`;
   }
   return vars;
