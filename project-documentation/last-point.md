@@ -13,39 +13,41 @@
 
 ## Snapshot
 
-**Date:** 2026-06-05 (Chunks 6b, 7, 8, 9 shipped + dataset seeded — one long day)
-**Last commit on `main`:** `6f6cbf1 docs(architecture): add template contract and templates rows`. This wrap ships `docs(plan): ...`, `docs(execution-map): ...`, then this `docs(last-point): ...`, then pushes.
+**Date:** 2026-06-05 (Chunks 6b, 7, 8, 9, 10 shipped + dataset seeded — one very long day)
+**Last commit on `main`:** `2b9eade docs(architecture): document the template loader and modern template`. This wrap ships `docs(plan): ...`, `docs(execution-map): ...`, then this `docs(last-point): ...`, then pushes.
 **Working tree:** apart from this wrap's doc edits and untracked `.claude/` local files, clean.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `c307c18`; the Chunk 9 batch + this wrap push at wrap end.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `6bc1be8`; the Chunk 10 batch + this wrap push at wrap end.
 
 ## What's running
 
-- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (sanity 5.30), plain-field Phase 1 schema.
-- **`vetkit-dev` seeded** (projectId `v682t332`, public dataset): "Pati Veteriner Kliniği" siteSettings, 5 services, 4 FAQs, 3 team members, hakkımızda page, 2 testimonials, 2 blog posts, 4 gallery images (+15 assets).
-- **Chunk 7 data layer** (`lib/sanity/`): origin-only client, `sanityFetch`, **6 typed queries** (incl. blog + team lists), OD-5 tags, `urlFor`.
-- **Chunk 8 SEO layer** (`lib/seo/` + 4 route files), root layout wired (metadata + `VeterinaryCare` JSON-LD).
-- **Chunk 9 template contract** (`types/template.ts`): six-component `ThemeComponents`, props typed against query-result projections, `SanityImageWithAlt` invariant holds for every contract image (incl. `page.heroImage` after the alt fix). `templates/classic|premium` placeholder READMEs.
+- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (5.30), plain-field schema, `vetkit-dev` seeded (22 docs).
+- **Chunk 7 data layer** (`lib/sanity/`): origin-only client, `sanityFetch`, 6 typed queries (lists now filter `defined(slug.current)` → non-null slug types), OD-5 tags.
+- **Chunk 8 SEO layer** (`lib/seo/` + 4 route files); manifest + viewport `theme-color` now Sanity-driven.
+- **Chunk 9 contract** (`types/template.ts`), **Chunk 10 `templates/modern/`**: six components + `MobileNav` (Escape/outside-click dismissal, focus return), `getTemplate()` loader (classic/premium throw), §2.5 brand pipeline (`lib/branding.ts`: hex→OKLCH full-scale re-ramp with achromatic guard + contrast-floor clamp), skip link, brand `theme-color`. Home page renders through the template.
+- **Browser-verified** (agent-browser): teal `#0F766E` brand live across the site, mobile menu + Escape, icon tel button below `sm`, skip link, single h1, `lang=tr`, landmarks.
 - `pnpm typecheck` / `lint` / `build` clean.
 
-## What was done in this (2026-06-05, Chunk 9 + seeding) session
+## What was done in this (2026-06-05, Chunk 10) session
 
-1. **Dataset seeded** (22 docs + 15 assets via `sanity dataset import`; builder at `/tmp/vetkit-seed/`, deliberately uncommitted per anti-pattern #8). Verified live: build renders "Pati Veteriner Kliniği", 5 services, JSON-LD, branded OG image. Owner's one-shot Editor token used and not stored (revocation advised).
-2. **Chunk 9 shipped:** `types/template.ts` contract + `blogPostsListQuery`/`teamMembersListQuery` + classic/premium READMEs. Assignability probes passed.
-3. **Adversarial review** (2 lenses, 12 agents) → 6 confirmed findings, all fixed:
-   - blog list query comment now names the `listTag('teamMember')` dependency (`author->` deref, tags.ts rule 2).
-   - `page.heroImage.alt` made plain-required (typegen can't see conditional validation; optional alt broke the `SanityImageWithAlt` assignability invariant) + typegen regen + SCHEMA.md note.
-   - CLAUDE.md §6 sketch aligned with the shipped contract (query-result typing, image-only media) + §12 row logging the decision; PROJECT-ARCHITECTURE got `types/template.ts` + `templates/` rows.
-4. **Wrap:** plan.md row 9 checked, execution-map → Chunk 10, this file.
+1. **Chunk 10 shipped** (`4d962cc`–`9fabfdb`): loader, six modern components + MobileNav, brand pipeline (OKLCH math numerically verified against references), home through the template. Screenshots delivered to owner.
+2. **Adversarial review** (4 lenses, 39 agents) → 26 confirmed findings, all fixed (`a24e7a5`-era batch through `2b9eade`):
+   - **Branding guard rails:** achromatic brands no longer get a noise-hue tint; exact brand substitution restricted to steps 400–700 and clamped to the step's lightness (white-text contrast floor).
+   - **Slug integrity:** list queries filter `defined(slug.current)` (typegen narrows slug to `string`; dead fallbacks removed).
+   - **A11y:** Escape/outside-click menu dismissal with focus return, skip link → `#icerik`, focus-visible rings everywhere, icon-only tel button below `sm`, BlogCard meta contrast (ink-700), team bios unclamped.
+   - **Schema fidelity:** `emergencyBanner.variant === 'sticky'` honored; `footerLinks` `newTab` honored; BlogCard dates pinned to `Europe/Istanbul`.
+   - **Chrome surfaces:** manifest name/theme_color + viewport themeColor from siteSettings (icons re-homed to Chunk 11 polish).
+   - Docs: CLAUDE.md §4 tree (MobileNav, branding.ts, navigation.ts) + §6 loader sketch synced; tokens.css comments live + SCALE-sync warning; PROJECT-ARCHITECTURE rows.
+3. **Wrap:** plan.md row 10 checked, execution-map → Chunk 11, this file.
 
 ## What is NOT yet set up
 
 Standing inventory — cross off as items ship.
 
-- ~~Chunks 1–6, 6b, 7, 8, 9~~ ✓ (plan.md §2 has dates/commits). ~~Dataset content~~ ✓ seeded.
-- **`templates/modern/` (Chunk 10)** — active next. First visual work; L-size.
-- Marketing pages (Chunk 11) — reminders: `buildPageMetadata({ ..., path, clinicName })`, slug→`_id` two-step for per-doc tags, `listTag('faq')` on service detail, `listTag('teamMember')` on blog list.
-- Contact form + Resend (Chunk 12). Revalidation webhook (Chunk 13) — bust BOTH doc and list tags. shadcn/ui (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15).
-- Manifest icons (Chunk 10 branding pass).
+- ~~Chunks 1–6, 6b, 7, 8, 9, 10~~ ✓ (plan.md §2 has dates/commits). ~~Dataset seeding~~ ✓.
+- **Marketing pages (Chunk 11)** — active next; the largest remaining chunk. Load-bearing recipes are in execution-map §1 (metadata args, OD-5 detail-page tagging, Portable Text renderer, async params).
+- Contact form + Resend (Chunk 12). Revalidation webhook (Chunk 13). shadcn/ui (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15).
+- Manifest icons + favicons — folded into Chunk 11 polish.
+- gigi-veteriner content migration (manual, pre-Chunk 15).
 
 ## Open decisions still pending
 
@@ -55,7 +57,7 @@ See [`plan.md`](./plan.md) §3.
 
 ## Heads-up for the next session
 
-- **Chunk 10 (`templates/modern/`) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1: six components against the contract, `getTemplate()` loader, §2.5 brand-token pipeline (siteSettings.brandColor → CSS vars on root layout), home page rendered through the template. Seeded content makes every component renderable from day one.
-- **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev server unaffected).
-- **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks; no canonical/og:url in root metadata; `useCdn: false`; `@sanity/image-url` direct dep; `generated.ts` ESLint-exempt; `page.heroImage.alt` plain-required on purpose.
+- **Chunk 11 (marketing pages) is the active chunk** — full spec + recipes in [`execution-map.md`](./execution-map.md) §1. Everything it needs ships already; it's mostly composition.
+- **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev unaffected).
+- **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks; no canonical/og:url in root metadata; `useCdn: false`; `@sanity/image-url` direct dep; `generated.ts` ESLint-exempt; `page.heroImage.alt` plain-required; brand-substitution guard rails in `lib/branding.ts`; classic/premium loader cases throw on purpose.
 - Husky pre-commit is active — every commit auto-runs lint+format.
