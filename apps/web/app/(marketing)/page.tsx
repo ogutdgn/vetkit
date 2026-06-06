@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { sanityFetch } from '@/lib/sanity/live';
 import {
   homeBlogPostsQuery,
@@ -6,7 +8,24 @@ import {
   teamMembersListQuery,
 } from '@/lib/sanity/queries';
 import { listTag, siteSettingsTag } from '@/lib/sanity/tags';
+import { buildPageMetadata, siteNameFallback } from '@/lib/seo/metadata';
 import { getTemplate } from '@/lib/template';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await sanityFetch({ query: siteSettingsQuery, tags: [siteSettingsTag] });
+  const clinicName = settings?.clinicName ?? siteNameFallback;
+  const metadata = buildPageMetadata({
+    title: clinicName,
+    description: settings?.tagline,
+    seo: settings?.defaultSeo,
+    path: '/',
+    clinicName,
+  });
+  // Without a defaultSeo.metaTitle the templated form would render
+  // "Clinic | Clinic" — the home title is the clinic name itself.
+  if (!settings?.defaultSeo?.metaTitle) metadata.title = { absolute: clinicName };
+  return metadata;
+}
 
 export default async function HomePage() {
   const { Hero, ServiceCard, BlogCard, TeamSection } = await getTemplate();

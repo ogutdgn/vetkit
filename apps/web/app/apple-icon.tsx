@@ -11,7 +11,8 @@ export const contentType = 'image/png';
 // Apple touch icon — same brand disc as app/icon.tsx at home-screen size.
 export default async function AppleIcon() {
   const settings = await client.fetch(siteSettingsQuery, {}, { next: { tags: [siteSettingsTag] } });
-  const letter = (settings?.clinicName ?? siteNameFallback).trim().charAt(0).toUpperCase() || 'V';
+  const letter =
+    (settings?.clinicName ?? siteNameFallback).trim().charAt(0).toLocaleUpperCase('tr-TR') || 'V';
   const accent = settings?.brandColor?.hex ?? '#0f766e';
 
   return new ImageResponse(

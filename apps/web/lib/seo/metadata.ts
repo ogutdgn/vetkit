@@ -116,7 +116,12 @@ export function buildPageMetadata({
       locale: ogLocale,
       url: path,
       ...(clinicName ? { siteName: clinicName } : {}),
-      ...(images ? { images } : {}),
+      // This block replaces the root openGraph WHOLESALE, which also disables
+      // the file-convention fallback — so the dynamic brand OG image must be
+      // named explicitly when the editor set none.
+      images: images ?? [
+        { url: '/opengraph-image', width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT },
+      ],
     },
     ...(seo?.noIndex ? { robots: { index: false, follow: false } } : {}),
   };

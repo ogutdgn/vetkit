@@ -33,6 +33,7 @@ export default async function HizmetlerPage() {
         </div>
       </section>
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <h2 className="sr-only">Tüm hizmetler</h2>
         {services.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (

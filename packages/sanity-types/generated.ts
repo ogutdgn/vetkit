@@ -640,48 +640,6 @@ export type ServicesListQueryResult = Array<{
 }>;
 
 // Source: ../web/lib/sanity/queries.ts
-// Variable: serviceBySlugQuery
-// Query: *[_type == "service" && slug.current == $slug][0] {    ...,    relatedFAQs[]-> {      _id,      question,      answer,      category    }  }
-export type ServiceBySlugQueryResult = {
-  _id: string;
-  _type: 'service';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  orderRank?: string;
-  title: string;
-  slug: Slug;
-  mainImage: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt: string;
-    _type: 'image';
-  };
-  icon?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: 'image';
-  };
-  shortDescription: string;
-  description: BlockContent;
-  petTypes?: Array<string>;
-  serviceLocation: 'both' | 'home-call' | 'in-clinic';
-  emergencyAvailable?: boolean;
-  relatedFAQs: Array<{
-    _id: string;
-    question: string;
-    answer: BlockContent;
-    category: 'acil' | 'asilama' | 'beslenme' | 'cerrahi' | 'genel' | null;
-  }> | null;
-  pricing?: string;
-  seo?: Seo;
-} | null;
-
-// Source: ../web/lib/sanity/queries.ts
 // Variable: blogPostsListQuery
 // Query: *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) {    _id,    title,    "slug": slug.current,    excerpt,    coverImage,    publishedAt,    category,    tags,    author-> {      _id,      name,      title    }  }
 export type BlogPostsListQueryResult = Array<{
@@ -769,11 +727,6 @@ export type ServiceSlugsQueryResult = Array<string>;
 // Variable: blogPostSlugsQuery
 // Query: *[_type == "blogPost" && defined(slug.current)].slug.current
 export type BlogPostSlugsQueryResult = Array<string>;
-
-// Source: ../web/lib/sanity/queries.ts
-// Variable: pageSlugsQuery
-// Query: *[_type == "page" && defined(slug.current)].slug.current
-export type PageSlugsQueryResult = Array<string>;
 
 // Source: ../web/lib/sanity/queries.ts
 // Variable: pageByIdQuery
@@ -954,7 +907,6 @@ declare module '@sanity/client' {
   interface SanityQueries {
     '*[_type == "siteSettings"][0]': SiteSettingsQueryResult;
     '\n  *[_type == "service" && defined(slug.current)] | order(orderRank asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    shortDescription,\n    mainImage,\n    icon,\n    petTypes,\n    serviceLocation,\n    emergencyAvailable,\n    pricing\n  }\n': ServicesListQueryResult;
-    '\n  *[_type == "service" && slug.current == $slug][0] {\n    ...,\n    relatedFAQs[]-> {\n      _id,\n      question,\n      answer,\n      category\n    }\n  }\n': ServiceBySlugQueryResult;
     '\n  *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) {\n    _id,\n    title,\n    "slug": slug.current,\n    excerpt,\n    coverImage,\n    publishedAt,\n    category,\n    tags,\n    author-> {\n      _id,\n      name,\n      title\n    }\n  }\n': BlogPostsListQueryResult;
     '\n  *[_type == "teamMember"] | order(orderRank asc) {\n    _id,\n    name,\n    title,\n    "slug": slug.current,\n    photo,\n    specialties,\n    shortBio\n  }\n': TeamMembersListQueryResult;
     '{\n  "services": *[_type == "service" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "posts": *[_type == "blogPost" && defined(slug.current)] { "slug": slug.current, _updatedAt },\n  "pages": *[_type == "page" && defined(slug.current)] { "slug": slug.current, _updatedAt }\n}': SitemapEntriesQueryResult;
@@ -963,7 +915,6 @@ declare module '@sanity/client' {
     '*[_type == "page" && slug.current == $slug][0]._id': PageIdBySlugQueryResult;
     '*[_type == "service" && defined(slug.current)].slug.current': ServiceSlugsQueryResult;
     '*[_type == "blogPost" && defined(slug.current)].slug.current': BlogPostSlugsQueryResult;
-    '*[_type == "page" && defined(slug.current)].slug.current': PageSlugsQueryResult;
     '\n  *[_type == "page" && _id == $id][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    heroImage,\n    body,\n    featuredTeamMembers[]-> {\n      _id,\n      name,\n      title,\n      "slug": slug.current,\n      photo,\n      specialties,\n      shortBio\n    },\n    ctaButtons,\n    seo\n  }\n': PageByIdQueryResult;
     '\n  *[_type == "blogPost" && _id == $id][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    excerpt,\n    body,\n    coverImage,\n    publishedAt,\n    category,\n    tags,\n    author-> {\n      _id,\n      name,\n      title\n    },\n    relatedServices[]-> {\n      _id,\n      title,\n      "slug": slug.current\n    },\n    relatedPosts[]-> {\n      _id,\n      title,\n      "slug": slug.current\n    },\n    seo\n  }\n': BlogPostByIdQueryResult;
     '\n  *[_type == "service" && _id == $id][0] {\n    ...,\n    "slug": slug.current,\n    relatedFAQs[]-> {\n      _id,\n      question,\n      answer,\n      category\n    }\n  }\n': ServiceByIdQueryResult;

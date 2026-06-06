@@ -38,12 +38,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const pageEntries: MetadataRoute.Sitemap = entries.pages.map((p) => ({
-    url: `${siteUrl}/${p.slug}`,
-    lastModified: p._updatedAt,
-    changeFrequency: 'yearly',
-    priority: 0.5,
-  }));
+  // Only page docs with a real route — there is no generic /[slug] route yet,
+  // so an arbitrary page slug would emit a URL that 404s. Extend (or replace
+  // with the generic route) when more fixed pages ship.
+  const ROUTED_PAGE_SLUGS = new Set(['hakkimizda']);
+  const pageEntries: MetadataRoute.Sitemap = entries.pages
+    .filter((p) => ROUTED_PAGE_SLUGS.has(p.slug))
+    .map((p) => ({
+      url: `${siteUrl}/${p.slug}`,
+      lastModified: p._updatedAt,
+      changeFrequency: 'yearly',
+      priority: 0.5,
+    }));
 
   // Dedupe by URL — a page doc whose slug matches a static route (e.g. the
   // "Hakkımızda" page doc at /hakkimizda) would otherwise appear twice. Doc

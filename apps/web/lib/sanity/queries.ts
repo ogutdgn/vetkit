@@ -25,28 +25,6 @@ export const servicesListQuery = defineQuery(`
 `);
 
 /**
- * A single service by slug, related FAQs resolved.
- *
- * Tagging note (OD-5): the per-doc tag `sanity:service:<id>` needs the `_id`,
- * which a by-slug fetch only knows afterwards. The detail pages (Chunk 11)
- * resolve this with a cheap slug→_id lookup tagged `sanity:service:list`,
- * then fetch the full document tagged `docTag('service', _id)` — plus
- * `listTag('faq')`, because this query dereferences relatedFAQs and FAQ
- * edits must bust the page too (see ./tags.ts rule 2).
- */
-export const serviceBySlugQuery = defineQuery(`
-  *[_type == "service" && slug.current == $slug][0] {
-    ...,
-    relatedFAQs[]-> {
-      _id,
-      question,
-      answer,
-      category
-    }
-  }
-`);
-
-/**
  * All blog posts, newest first, projected for cards. Fetch with
  * `listTag('blogPost')` + `listTag('teamMember')` — `author->` is
  * dereferenced, so teamMember edits must bust this list too (./tags.ts rule 2).
@@ -117,9 +95,6 @@ export const serviceSlugsQuery = defineQuery(
 export const blogPostSlugsQuery = defineQuery(
   `*[_type == "blogPost" && defined(slug.current)].slug.current`,
 );
-export const pageSlugsQuery = defineQuery(
-  `*[_type == "page" && defined(slug.current)].slug.current`,
-);
 
 /**
  * A page by _id (second step of the two-step). featuredTeamMembers are
@@ -149,7 +124,8 @@ export const pageByIdQuery = defineQuery(`
 
 /**
  * A blog post by _id (second step). Author + related content dereferenced —
- * fetch with `[docTag('blogPost', id), listTag('teamMember'), listTag('service')]`.
+ * fetch with `[docTag('blogPost', id), listTag('blogPost'), listTag('teamMember'),
+ * listTag('service')]` — relatedPosts[]-> makes the post list itself a dependency.
  */
 export const blogPostByIdQuery = defineQuery(`
   *[_type == "blogPost" && _id == $id][0] {

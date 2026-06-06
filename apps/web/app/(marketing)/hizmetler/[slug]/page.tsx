@@ -87,24 +87,24 @@ export default async function HizmetDetayPage({ params }: Params) {
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-ink-900">{service.title}</h1>
             <p className="mt-4 text-lg leading-relaxed text-ink-700">{service.shortDescription}</p>
-            <dl className="mt-6 flex flex-wrap gap-2">
+            <ul aria-label="Hizmet özellikleri" className="mt-6 flex flex-wrap gap-2">
               {service.emergencyAvailable ? (
-                <dd className="rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
+                <li className="rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
                   7/24 Acil
-                </dd>
+                </li>
               ) : null}
-              <dd className="rounded-full bg-white px-3 py-1 text-xs font-medium text-ink-700 shadow-sm">
+              <li className="rounded-full bg-white px-3 py-1 text-xs font-medium text-ink-700 shadow-sm">
                 {LOCATION_LABELS[service.serviceLocation] ?? service.serviceLocation}
-              </dd>
+              </li>
               {service.petTypes?.map((pet) => (
-                <dd
+                <li
                   key={pet}
                   className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800"
                 >
                   {PET_LABELS[pet] ?? pet}
-                </dd>
+                </li>
               ))}
-            </dl>
+            </ul>
             {service.pricing ? (
               <p className="mt-4 text-sm font-semibold text-brand-700">{service.pricing}</p>
             ) : null}

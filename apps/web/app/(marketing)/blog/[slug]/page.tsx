@@ -45,7 +45,9 @@ async function getPost(slug: string) {
   return sanityFetch({
     query: blogPostByIdQuery,
     params: { id },
-    tags: [docTag('blogPost', id), listTag('teamMember'), listTag('service')],
+    // listTag('blogPost') covers the relatedPosts[]-> deref (same-type
+    // references — tags.ts rule 2 applies to those too).
+    tags: [docTag('blogPost', id), listTag('blogPost'), listTag('teamMember'), listTag('service')],
   });
 }
 

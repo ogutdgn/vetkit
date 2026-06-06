@@ -13,7 +13,8 @@ export const contentType = 'image/png';
 // at delivery if desired.
 export default async function Icon() {
   const settings = await client.fetch(siteSettingsQuery, {}, { next: { tags: [siteSettingsTag] } });
-  const letter = (settings?.clinicName ?? siteNameFallback).trim().charAt(0).toUpperCase() || 'V';
+  const letter =
+    (settings?.clinicName ?? siteNameFallback).trim().charAt(0).toLocaleUpperCase('tr-TR') || 'V';
   const accent = settings?.brandColor?.hex ?? '#0f766e';
 
   return new ImageResponse(

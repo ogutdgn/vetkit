@@ -34,6 +34,7 @@ export default async function BlogPage() {
         </div>
       </section>
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <h2 className="sr-only">Tüm yazılar</h2>
         {posts.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2">
             {posts.map((post) => (
