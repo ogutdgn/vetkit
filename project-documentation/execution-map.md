@@ -14,24 +14,28 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 9 — Template contract (`apps/web/types/template.ts`).**
+**Chunk 10 — `templates/modern/` — all components, polished.**
 
-**Goal:** Lock the TypeScript contract every template must satisfy: the shared prop interfaces and the `ThemeComponents` interface from CLAUDE.md §6. This is deliberately small — it forces the data-shape decisions (what does a `Header` actually receive?) before the `modern` template (Chunk 10) is built against them, and it makes a misnamed/misshapen template a compile error by definition.
+**Goal:** The first visual work in the project: build the `modern` template's six components against the Chunk 9 contract, wire the `getTemplate()` loader, and connect the §2.5 brand-token pipeline (Sanity `brandColor` → CSS variables). The design is deliberately modern (CLAUDE.md §7: old sites are content reference, NOT visual reference). `vetkit-dev` is seeded, so every component renders real content ("Pati Veteriner Kliniği", 5 services, 3 team members) during development.
 
 **Locked context:**
 
-- CLAUDE.md §6 sketches the contract: `HeaderProps` (settings + navItems), `HeroProps`, `ServiceCardProps`, `BlogCardProps`, `TeamSectionProps`, `FooterProps` → `ThemeComponents` with exactly those component names. §2.4: no template-specific fields; one schema for all templates.
-- **Design point to settle while writing (not an OD — decide in-chunk):** props should be typed against the _query-result_ shapes pages actually fetch (e.g. `ServicesListQueryResult[number]`), not raw document types — a card never receives a full `Service` doc. Keep the contract aligned with `queries.ts` projections; add projections to queries if a template genuinely needs more.
-- Folder structure ships day-one per §2.4: `templates/classic/README.md` and `templates/premium/README.md` placeholders ("not yet implemented"); `templates/modern/` already holds `tokens.css`.
-- The `getTemplate()` loader (`lib/template.ts`, CLAUDE.md §6) needs `templates/modern/index.ts` to exist — that lands with Chunk 10, not here.
+- The contract is `apps/web/types/template.ts` — exact component names/props, typed against query projections. A mismatch is a compile error by design.
+- Styling: Tailwind utilities + the CSS variables in `templates/modern/tokens.css` ONLY (anti-pattern #11 — no custom CSS files). Brand overrides per §2.5: a server component fetches `siteSettings` and writes `brandColor` (etc.) as inline CSS vars on the root layout element, overriding tokens.css defaults.
+- Images through `urlFor` (lib/sanity/image.ts) + `next/image` (cdn.sanity.io already allowed in next.config.ts).
+- Fonts: Inter is already wired via `next/font` (`--font-inter`).
+- shadcn/ui primitives only if genuinely needed — that's Chunk 14, pull it in only when the first primitive is unavoidable.
 
 **Done when:**
 
-- `apps/web/types/template.ts` exists and exports every prop interface plus `ThemeComponents`, typed against generated Sanity query-result types (no `any`, no template-specific fields).
-- `apps/web/templates/classic/README.md` and `apps/web/templates/premium/README.md` exist as placeholders explaining "not yet implemented" (per CLAUDE.md §2.4).
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass.
+- `templates/modern/` contains `Header.tsx`, `Hero.tsx`, `ServiceCard.tsx`, `BlogCard.tsx`, `TeamSection.tsx`, `Footer.tsx` and an `index.ts` whose default export satisfies `ThemeComponents` (compile-checked, no casts).
+- `lib/template.ts` exists with the `getTemplate()` loader from CLAUDE.md §6 (dynamic import per `TEMPLATE` env, default `modern`).
+- The §2.5 brand pipeline works: `siteSettings.brandColor.hex` overrides the token defaults at runtime (verify by changing the color in Studio and reloading dev).
+- The home page renders through the template (`getTemplate()` → Header + Hero + service cards + Footer with seeded content) — it becomes the real home in Chunk 11.
+- Components are responsive (mobile-first), semantic (single h1 per page, nav/main/footer landmarks), and accessible (alt texts from Sanity, focus states).
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; visual check on the dev server against seeded content.
 
-**Depends on:** Chunks 6 (types), 7 (query shapes) — both shipped.
+**Depends on:** Chunks 1 (tokens), 9 (contract) — shipped. Dataset seeded 2026-06-05.
 
 **Open decisions that affect this chunk:**
 
@@ -39,10 +43,15 @@
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add theme components template contract`
-2. `chore(web): add classic and premium template placeholders`
+1. `feat(web): add template loader keyed on TEMPLATE env`
+2. `feat(web): add modern header and footer`
+3. `feat(web): add modern hero`
+4. `feat(web): add modern service, blog, and team components`
+5. `feat(web): wire brand tokens from siteSettings into the root layout`
+6. `feat(web): render the home page through the modern template`
+7. `docs(architecture): document the template loader and modern template`
 
-Chunk 10 (`templates/modern/` — all components, polished, L-size) follows: the first visual work in the project. Consider seeding `vetkit-dev` with a siteSettings doc + a few services first so components render real content during development.
+Chunk 11 (marketing pages) follows — by far the largest remaining chunk; it consumes everything built so far (queries, SEO helpers, template components).
 
 ---
 
