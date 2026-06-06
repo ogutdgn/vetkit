@@ -357,28 +357,33 @@ The schema should be a **superset** of what the old sites had — design for wha
 
 ### TypeScript contract
 
+The authoritative contract lives in `apps/web/types/template.ts` (shipped with Chunk 9). **Props are typed against the query-result projections from `lib/sanity/queries.ts`** — a card receives what pages actually fetch, never a raw document. If a template genuinely needs more data, extend the projection in queries.ts; never demand a schema change.
+
 ```typescript
-// apps/web/types/template.ts
+// apps/web/types/template.ts (abbreviated — the file is authoritative)
 import type { ComponentType } from 'react';
-import type { SiteSettings, Service, BlogPost, TeamMember } from './sanity';
+import type { ServicesListQueryResult, SiteSettingsQueryResult /* ... */ } from '@/types/sanity';
+
+export type SiteSettings = NonNullable<SiteSettingsQueryResult>; // pages handle null before templates render
+export type ServiceCardData = ServicesListQueryResult[number];
 
 export interface HeaderProps {
   settings: SiteSettings;
-  navItems: Array<{ label: string; href: string }>;
+  navItems: NavItem[];
 }
 
 export interface HeroProps {
   title: string;
   subtitle?: string;
-  media?: SanityImage | SanityVideo;
+  media?: SanityImageWithAlt; // image-only until the schema has a video type
   cta?: { label: string; href: string };
 }
 
 export interface ServiceCardProps {
-  service: Service;
+  service: ServiceCardData;
 }
 
-// ... all other component prop interfaces
+// ... BlogCardProps, TeamSectionProps, FooterProps — same pattern
 
 export interface ThemeComponents {
   Header: ComponentType<HeaderProps>;
@@ -618,6 +623,7 @@ These are temptations that will damage the project. Resist them.
 | 2026-05-28 | **Studio hostname pattern: `studio.<client-domain>.com` via CNAME** (resolves **OD-4**).                                                                                                                                                                                                                                                                                                                                | More professional white-label feel for clinic owners than `<client>.sanity.studio`. The ~5 minute extra onboarding step (CNAME DNS record + Sanity custom-domain config) is acceptable at our scale (2-5 clinics). The onboarding playbook in CLAUDE.md §9 will be updated when Chunk 15 ships.                                                                                                                                                                                 | 9                                                                  |
 | 2026-05-30 | **OD-5 resolved → cache-tag convention `sanity:<type>:<id>`** (namespaced, `_id`-based): single docs → `sanity:service:abc123`; collection queries → `sanity:<type>:list`; singleton → `sanity:siteSettings`.                                                                                                                                                                                                           | `_id`-based tags survive slug renames (a slug-based tag would orphan when an editor renames the slug, leaving the page stale); per-doc + per-list granularity lets the Chunk 13 webhook revalidate only the affected pages instead of busting a whole type. Coarse per-type (`sanity:<type>`) rejected as wasteful at growing content volumes.                                                                                                                                  | 7, 13                                                              |
 | 2026-06-05 | **OD-6 resolved → plain single-language fields** (supersedes the 2026-05-26 field-level i18n decision). Drop `localeString` / `localeText` / `localeSlug` / `localePortableText`, `@sanity/language-filter`, and `siteSettings.activeLocales`; all text fields become plain `string` / `text` / `slug` / portable-text array. A Chunk 4 schema-simplification pass (backlog row 6b) runs before Chunk 7.                | Sites are Turkish-only per §3 and anti-pattern #12; field-level `{ tr, en }` doubled every editor field and forced `coalesce(field[$locale], …)` into every Chunk 7+ query for a bilingual client that doesn't exist. No Sanity project or content exists yet, so migration cost is ~zero — the cheapest possible moment to reverse. If a bilingual client appears, that's the trigger to re-add i18n (and document-level vs field-level gets re-evaluated then).               | 3, 5                                                               |
+| 2026-06-05 | **Template contract typed against query-result projections** (Chunk 9): `ServiceCardData = ServicesListQueryResult[number]` etc., `SiteSettings = NonNullable<SiteSettingsQueryResult>`, `HeroProps.media` image-only via `SanityImageWithAlt`. `page.heroImage.alt` made plain-required so every contract image is assignable.                                                                                         | Cards receive what pages actually fetch — typing against raw doc types would lie about projected fields (`"slug": slug.current` is a string, not a Slug object) and invite over-fetching. Image-only media reflects schema reality (no video type exists); §2.4 forbids the contract demanding one. Template data needs are met by extending projections in queries.ts, keeping the schema the lowest common denominator.                                                       | 6                                                                  |
 | 2026-06-05 | **Cache-layer refinements (Chunk 7 review):** (a) the published Sanity client runs `useCdn: false`; (b) the Chunk 13 webhook busts BOTH `sanity:<type>:<id>` AND `sanity:<type>:list` on every create/update/delete; (c) a query that dereferences another type also tags that dependency (e.g. service detail carries `sanity:faq:list`).                                                                              | With tag-only revalidation, Next's tag-pinned data cache is the caching layer and origin is hit only at build/revalidation; the Sanity CDN in front would race `revalidateTag` (single refetch can read a not-yet-invalidated CDN response and pin stale content until the next publish). List projections carry mutable fields, so plain edits must bust lists; dereferenced content otherwise never reaches dependent pages.                                                  | 7 (lib/sanity), 13                                                 |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
