@@ -32,12 +32,11 @@ export const page = defineType({
           name: 'alt',
           type: 'string',
           title: 'Alt metin',
-          validation: (rule) =>
-            rule.custom((value, ctx) => {
-              const parent = ctx.parent as { asset?: unknown } | undefined;
-              if (!parent?.asset) return true;
-              return value ? true : 'Görsel varsa alt metin zorunludur.';
-            }),
+          // Plain required (not conditional-on-asset) so typegen emits
+          // `alt: string` and heroImage stays assignable to the template
+          // contract's SanityImageWithAlt. heroImage itself is optional, so
+          // this only bites when an editor actually adds one.
+          validation: (rule) => rule.required(),
         }),
       ],
     }),
