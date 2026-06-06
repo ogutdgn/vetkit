@@ -35,7 +35,8 @@ export default async function HomePage() {
   return (
     <>
       <Header settings={settings} navItems={NAV_ITEMS} />
-      <main>
+      {/* id="icerik" is the skip-link target from the root layout. */}
+      <main id="icerik">
         <Hero
           title={settings.clinicName}
           subtitle={settings.tagline}

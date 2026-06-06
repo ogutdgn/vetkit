@@ -57,7 +57,7 @@ export function Footer({ settings, navItems }: FooterProps) {
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-medium text-ink-300 transition hover:text-white"
+                    className="text-sm font-medium text-ink-300 transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
                   >
                     {s.label}
                   </a>
@@ -72,7 +72,10 @@ export function Footer({ settings, navItems }: FooterProps) {
           <ul className="mt-4 space-y-2">
             {navItems.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm transition hover:text-white">
+                <Link
+                  href={item.href}
+                  className="text-sm transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                >
                   {item.label}
                 </Link>
               </li>
@@ -87,20 +90,29 @@ export function Footer({ settings, navItems }: FooterProps) {
               {address.street}, {address.district}/{address.city}
             </p>
             <p>
-              <a href={`tel:${contact.primaryPhone}`} className="transition hover:text-white">
+              <a
+                href={`tel:${contact.primaryPhone}`}
+                className="transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+              >
                 {contact.primaryPhone}
               </a>
             </p>
             {contact.emergencyPhone ? (
               <p>
                 Acil:{' '}
-                <a href={`tel:${contact.emergencyPhone}`} className="transition hover:text-white">
+                <a
+                  href={`tel:${contact.emergencyPhone}`}
+                  className="transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                >
                   {contact.emergencyPhone}
                 </a>
               </p>
             ) : null}
             <p>
-              <a href={`mailto:${contact.email}`} className="transition hover:text-white">
+              <a
+                href={`mailto:${contact.email}`}
+                className="transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+              >
                 {contact.email}
               </a>
             </p>
@@ -145,7 +157,11 @@ export function Footer({ settings, navItems }: FooterProps) {
             <ul className="flex flex-wrap gap-4">
               {footerLinks.map((cta) => (
                 <li key={cta._key}>
-                  <Link href={cta.href} className="transition hover:text-white">
+                  <Link
+                    href={cta.href}
+                    {...(cta.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                  >
                     {cta.label}
                   </Link>
                 </li>

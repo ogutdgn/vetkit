@@ -22,11 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata(settings);
 }
 
-export const viewport: Viewport = {
-  themeColor: '#ffffff',
-  width: 'device-width',
-  initialScale: 1,
-};
+export async function generateViewport(): Promise<Viewport> {
+  const settings = await sanityFetch({ query: siteSettingsQuery, tags: [siteSettingsTag] });
+  return {
+    themeColor: settings?.brandColor?.hex ?? '#ffffff',
+    width: 'device-width',
+    initialScale: 1,
+  };
+}
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Same query as generateMetadata — Next memoizes identical fetches within
@@ -40,6 +43,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={htmlLang} className={inter.variable} style={brandVars}>
       <body>
+        <a
+          href="#icerik"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-700 focus:shadow-lg"
+        >
+          İçeriğe atla
+        </a>
         {jsonLd ? (
           <script
             type="application/ld+json"

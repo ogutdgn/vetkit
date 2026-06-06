@@ -54,9 +54,9 @@ export function TeamSection({ members }: TeamSectionProps) {
                   </ul>
                 ) : null}
                 {member.shortBio ? (
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-700">
-                    {member.shortBio}
-                  </p>
+                  // No clamp — members have no detail page, so clamped text
+                  // would be unreachable for sighted users.
+                  <p className="mt-3 text-sm leading-relaxed text-ink-700">{member.shortBio}</p>
                 ) : null}
               </div>
             </article>
