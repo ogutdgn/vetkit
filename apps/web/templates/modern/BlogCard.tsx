@@ -12,13 +12,16 @@ const CATEGORY_LABELS: Record<string, string> = {
   acil: 'Acil',
 };
 
-const dateFormat = new Intl.DateTimeFormat('tr-TR', { dateStyle: 'long' });
+const dateFormat = new Intl.DateTimeFormat('tr-TR', {
+  dateStyle: 'long',
+  timeZone: 'Europe/Istanbul',
+});
 
 export function BlogCard({ post }: BlogCardProps) {
   return (
     <article className="group overflow-hidden rounded-xl border border-ink-200 bg-white shadow-sm transition hover:shadow-md">
       <Link
-        href={`/blog/${post.slug ?? ''}`}
+        href={`/blog/${post.slug}`}
         className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
       >
         <div className="relative aspect-video overflow-hidden bg-ink-100">
@@ -42,7 +45,7 @@ export function BlogCard({ post }: BlogCardProps) {
             {post.title}
           </h3>
           <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-700">{post.excerpt}</p>
-          <p className="mt-3 text-xs text-ink-500">
+          <p className="mt-3 text-xs text-ink-700">
             <time dateTime={post.publishedAt}>{dateFormat.format(new Date(post.publishedAt))}</time>
             {post.author ? <> · {post.author.name}</> : null}
           </p>

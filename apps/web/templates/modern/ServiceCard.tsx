@@ -16,7 +16,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <article className="group overflow-hidden rounded-xl border border-ink-200 bg-white shadow-sm transition hover:shadow-md">
       <Link
-        href={`/hizmetler/${service.slug ?? ''}`}
+        href={`/hizmetler/${service.slug}`}
         className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
       >
         <div className="relative aspect-4/3 overflow-hidden bg-ink-100">

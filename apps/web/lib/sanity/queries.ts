@@ -10,7 +10,7 @@ export const siteSettingsQuery = defineQuery(`*[_type == "siteSettings"][0]`);
 
 /** All services in editor-defined order, projected for cards and lists. */
 export const servicesListQuery = defineQuery(`
-  *[_type == "service"] | order(orderRank asc) {
+  *[_type == "service" && defined(slug.current)] | order(orderRank asc) {
     _id,
     title,
     "slug": slug.current,
@@ -52,7 +52,7 @@ export const serviceBySlugQuery = defineQuery(`
  * dereferenced, so teamMember edits must bust this list too (./tags.ts rule 2).
  */
 export const blogPostsListQuery = defineQuery(`
-  *[_type == "blogPost"] | order(publishedAt desc) {
+  *[_type == "blogPost" && defined(slug.current)] | order(publishedAt desc) {
     _id,
     title,
     "slug": slug.current,
