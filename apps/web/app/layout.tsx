@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { brandStyleVars } from '@/lib/branding';
 import { sanityFetch } from '@/lib/sanity/live';
 import { siteSettingsQuery } from '@/lib/sanity/queries';
 import { siteSettingsTag } from '@/lib/sanity/tags';
@@ -32,9 +33,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // one render, so this does not hit Sanity twice.
   const settings = await sanityFetch({ query: siteSettingsQuery, tags: [siteSettingsTag] });
   const jsonLd = buildVeterinaryCareJsonLd(settings);
+  // §2.5 brand pipeline: siteSettings.brandColor overrides the template's
+  // default --color-brand-* scale; Tailwind utilities pick the vars up live.
+  const brandVars = brandStyleVars(settings?.brandColor?.hex);
 
   return (
-    <html lang={htmlLang} className={inter.variable}>
+    <html lang={htmlLang} className={inter.variable} style={brandVars}>
       <body>
         {jsonLd ? (
           <script
