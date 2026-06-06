@@ -48,7 +48,8 @@ export const serviceBySlugQuery = defineQuery(`
 
 /**
  * All blog posts, newest first, projected for cards. Fetch with
- * `listTag('blogPost')`.
+ * `listTag('blogPost')` + `listTag('teamMember')` — `author->` is
+ * dereferenced, so teamMember edits must bust this list too (./tags.ts rule 2).
  */
 export const blogPostsListQuery = defineQuery(`
   *[_type == "blogPost"] | order(publishedAt desc) {
