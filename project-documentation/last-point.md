@@ -20,7 +20,9 @@
 
 ## What's running
 
-- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (5.30), plain-field schema, `vetkit-dev` seeded (22 docs).
+- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (5.30), plain-field schema.
+- **`vetkit-dev` now carries REAL Ovapark content** (2026-06-06 re-seed, replacing the Pati fixtures): siteSettings (Ovapark Veteriner Kliniği, brand `#F15E42`, real Keçiören address/phones/Instagram, `isAlwaysOpen`), 6 real services with real patient photos, 4 FAQs, hakkımızda page (real about + mission), 6 gallery photos. **No team/blog/testimonial docs** — the old site has only template filler there, so those home sections render empty (correct behavior). Seed builder at `/tmp/ovapark-seed/` (uncommitted).
+- **`old-sites/` is populated locally** (gigi-veteriner + ovapark-veteriner cloned from github.com/ogutdgn, gitignored). Design note from owner: the old sites' hero carousels (Slider Revolution) are liked — consider a hero-slider option in the Chunk 11 design polish (needs a schema-first discussion per §2.4).
 - **Chunk 7 data layer** (`lib/sanity/`): origin-only client, `sanityFetch`, 6 typed queries (lists now filter `defined(slug.current)` → non-null slug types), OD-5 tags.
 - **Chunk 8 SEO layer** (`lib/seo/` + 4 route files); manifest + viewport `theme-color` now Sanity-driven.
 - **Chunk 9 contract** (`types/template.ts`), **Chunk 10 `templates/modern/`**: six components + `MobileNav` (Escape/outside-click dismissal, focus return), `getTemplate()` loader (classic/premium throw), §2.5 brand pipeline (`lib/branding.ts`: hex→OKLCH full-scale re-ramp with achromatic guard + contrast-floor clamp), skip link, brand `theme-color`. Home page renders through the template.
