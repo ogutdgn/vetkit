@@ -8,8 +8,7 @@ import { sitemapEntriesQuery } from '@/lib/sanity/queries';
 import { listTag } from '@/lib/sanity/tags';
 import { siteUrl } from '@/lib/seo/metadata';
 
-// Routes land in Chunk 11; listed here so the sitemap is complete at deploy
-// time (Chunk 15). Keep in sync with app/(marketing)/ once it exists.
+// Keep in sync with app/(marketing)/ and lib/navigation.ts.
 const STATIC_ROUTES = ['', '/hakkimizda', '/hizmetler', '/blog', '/galeri', '/sss', '/iletisim'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
