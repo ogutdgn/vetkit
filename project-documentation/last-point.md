@@ -13,15 +13,15 @@
 
 ## Snapshot
 
-**Date:** 2026-06-05 (third wrap this date — Chunks 6b, 7, and 8 all shipped today)
-**Last commit on `main`:** `f1968ea docs(architecture): document the seo layer and fix stale cdn and contents cells`. This wrap ships `docs(plan): ...`, `docs(execution-map): ...`, then this `docs(last-point): ...`.
-**Working tree:** apart from this wrap's doc edits (`plan.md`, `execution-map.md`) and untracked `.claude/` local files, clean.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `0892c70` (the Chunk 7 wrap); the 12 Chunk 8 commits + this wrap's docs are **not pushed yet** (owner approves pushes).
+**Date:** 2026-06-05 (Chunks 6b, 7, 8 shipped + dataset seeded today)
+**Last commit on `main`:** `d867cf6 docs(last-point): refresh for 2026-06-05 chunk 8 session` (pushed). This refresh ships as its own `docs(last-point): ...` after the dataset seeding.
+**Working tree:** apart from this file's edit and untracked `.claude/` local files, clean.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Fully pushed through `d867cf6`.
 
 ## What's running
 
 - Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config, Husky pre-commit, Sanity v5 Studio (sanity 5.30) with the plain-field Phase 1 schema.
-- **`vetkit-dev` Sanity project live** (projectId `v682t332`, public `production` dataset, still empty). Gitignored `.env.local` files in both apps.
+- **`vetkit-dev` Sanity project live and SEEDED** (projectId `v682t332`, public `production` dataset): 22 documents + 15 image assets — siteSettings ("Pati Veteriner Kliniği", brand `#0F766E`), 5 services, 4 FAQs, 3 team members, hakkımızda page, 2 testimonials, 2 blog posts, 4 gallery images. All Turkish dev-fixture content with cross-references and orderRanks; seeded via `sanity dataset import` (builder script at `/tmp/vetkit-seed/`, not committed — anti-pattern #8 keeps content out of the repo). Gitignored `.env.local` files in both apps.
 - **Chunk 7 data layer** (`lib/sanity/`): origin-only published client, `sanityFetch`, 4 typed queries, OD-5 tags, `urlFor`.
 - **Chunk 8 SEO layer** (`lib/seo/` + route files): `buildRootMetadata`/`buildPageMetadata` (written around Next's metadata merge semantics), `VeterinaryCare` JSON-LD, `/sitemap.xml` (URL-deduped), `/robots.txt`, `/manifest.webmanifest`, dynamic `/opengraph-image` (1200×630 `ImageResponse`). Root layout wired: dynamic metadata + JSON-LD embed, `htmlLang` from `NEXT_PUBLIC_DEFAULT_LOCALE`.
 - `pnpm typecheck` / `lint` / `build` clean; build emits all four SEO routes as static.
@@ -49,7 +49,7 @@ Standing inventory — cross off as items ship.
 - Contact form + Resend (Chunk 12).
 - Revalidation route + webhook (Chunk 13) — bust BOTH doc and list tags on every mutation (CLAUDE.md §12).
 - shadcn/ui (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15).
-- **Dataset content: `vetkit-dev` is empty** — seed siteSettings + a few services before/with Chunk 10 so components render real content (also makes the OG image show a real clinic name).
+- ~~Dataset content~~ ✓ seeded 2026-06-05 (22 docs, see "What's running").
 - Manifest icons (deferred to Chunk 10 branding pass; Lighthouse PWA installability flags it until then).
 
 ## Open decisions still pending
@@ -61,6 +61,7 @@ See [`plan.md`](./plan.md) §3.
 ## Heads-up for the next session
 
 - **Chunk 9 (template contract) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1. Key design point: type props against _query-result_ shapes (`ServicesListQueryResult[number]`), not raw doc types.
-- **Unpushed:** everything after `0892c70` (Chunk 8 batch + wrap docs). Ask owner / push at session start.
+- **Local stale-cache gotcha (until Chunk 13):** the tag-pinned fetch cache persists across builds in `.next/cache/fetch-cache` — after editing Sanity content, `rm -rf apps/web/.next/cache/fetch-cache` before `next build` or the page renders the old data. (`next dev` is unaffected; in production the Chunk 13 webhook revalidates the tags.)
+- The owner's Editor seed token was used one-shot for the import and not stored; advise revoking it in manage → API → Tokens.
 - **Gotchas — don't "fix" back:** page-level `openGraph` blocks must stay complete (Next replaces wholesale); no canonical/og:url in root metadata; `useCdn: false` deliberate; `@sanity/image-url` direct dep deliberate; `generated.ts` ESLint-exempt.
 - Husky pre-commit is active — every commit auto-runs lint+format.
