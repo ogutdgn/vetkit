@@ -14,28 +14,30 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 10 — `templates/modern/` — all components, polished.**
+**Chunk 11 — Marketing pages (`app/(marketing)/`).**
 
-**Goal:** The first visual work in the project: build the `modern` template's six components against the Chunk 9 contract, wire the `getTemplate()` loader, and connect the §2.5 brand-token pipeline (Sanity `brandColor` → CSS variables). The design is deliberately modern (CLAUDE.md §7: old sites are content reference, NOT visual reference). `vetkit-dev` is seeded, so every component renders real content ("Pati Veteriner Kliniği", 5 services, 3 team members) during development.
+**Goal:** Build every public page against the shipped stack (queries → SEO helpers → template components): home (refine the Chunk 10 integration), `hakkimizda`, `hizmetler` + `hizmetler/[slug]`, `blog` + `blog/[slug]`, `galeri`, `sss`, `iletisim` (page shell only — the form itself is Chunk 12). The largest remaining chunk; everything it needs already exists.
 
-**Locked context:**
+**Locked context / load-bearing reminders:**
 
-- The contract is `apps/web/types/template.ts` — exact component names/props, typed against query projections. A mismatch is a compile error by design.
-- Styling: Tailwind utilities + the CSS variables in `templates/modern/tokens.css` ONLY (anti-pattern #11 — no custom CSS files). Brand overrides per §2.5: a server component fetches `siteSettings` and writes `brandColor` (etc.) as inline CSS vars on the root layout element, overriding tokens.css defaults.
-- Images through `urlFor` (lib/sanity/image.ts) + `next/image` (cdn.sanity.io already allowed in next.config.ts).
-- Fonts: Inter is already wired via `next/font` (`--font-inter`).
-- shadcn/ui primitives only if genuinely needed — that's Chunk 14, pull it in only when the first primitive is unavoidable.
+- **Every page calls `buildPageMetadata({ title, description, seo, path, clinicName })`** — a page-level openGraph block replaces the root wholesale, so `clinicName` matters; `path` is the canonical.
+- **Detail-page tagging (OD-5):** slug→`_id` lookup tagged `listTag(type)`, then the full fetch tagged `docTag(type, _id)`; service detail also carries `listTag('faq')` (relatedFAQs deref), blog lists/details carry `listTag('teamMember')` (author deref).
+- All `[slug]` routes use **async `params`** (Next 16); `generateStaticParams` from the list queries where it helps.
+- Rich text renders through `@portabletext/react` (re-exported by next-sanity) — build one shared `PortableTextRenderer` in `components/shared/` honoring the blockContent ruleset (h2/h3/blockquote, strong/em/link).
+- New queries needed (add as `defineQuery` + regen): page-by-slug, FAQ list, gallery list, blog post by slug, service slug→id lookups. Bound home-page lists with GROQ slices (e.g. posts `[0...4]`).
+- Header/Hero own the h1 — detail pages pass the doc title to Hero (or render their own single h1 where Hero doesn't fit); cards stay h3 under section h2s.
+- Sitemap STATIC_ROUTES must stay in sync once routes exist; the `(marketing)` route group does NOT change URLs.
+- Manifest icons + favicons: the deferred Chunk 10 item — fold into this chunk's polish pass.
 
 **Done when:**
 
-- `templates/modern/` contains `Header.tsx`, `Hero.tsx`, `ServiceCard.tsx`, `BlogCard.tsx`, `TeamSection.tsx`, `Footer.tsx` and an `index.ts` whose default export satisfies `ThemeComponents` (compile-checked, no casts).
-- `lib/template.ts` exists with the `getTemplate()` loader from CLAUDE.md §6 (dynamic import per `TEMPLATE` env, default `modern`).
-- The §2.5 brand pipeline works: `siteSettings.brandColor.hex` overrides the token defaults at runtime (verify by changing the color in Studio and reloading dev).
-- The home page renders through the template (`getTemplate()` → Header + Hero + service cards + Footer with seeded content) — it becomes the real home in Chunk 11.
-- Components are responsive (mobile-first), semantic (single h1 per page, nav/main/footer landmarks), and accessible (alt texts from Sanity, focus states).
-- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; visual check on the dev server against seeded content.
+- All routes from CLAUDE.md §4's `app/(marketing)/` tree exist and render seeded content end-to-end (lists + details).
+- Every page exports `generateMetadata` via the helpers with correct canonical paths; detail pages 404 cleanly (`notFound()`) on unknown slugs.
+- Cache tags follow the OD-5 recipes above on every fetch.
+- Portable Text renders with the shared renderer on service/blog/page/FAQ bodies.
+- `pnpm typecheck` / `pnpm lint` / `pnpm build` pass; browser check of every route against seeded content.
 
-**Depends on:** Chunks 1 (tokens), 9 (contract) — shipped. Dataset seeded 2026-06-05.
+**Depends on:** Chunks 7, 8, 9, 10 — all shipped. Dataset seeded.
 
 **Open decisions that affect this chunk:**
 
@@ -43,15 +45,15 @@
 
 **Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
 
-1. `feat(web): add template loader keyed on TEMPLATE env`
-2. `feat(web): add modern header and footer`
-3. `feat(web): add modern hero`
-4. `feat(web): add modern service, blog, and team components`
-5. `feat(web): wire brand tokens from siteSettings into the root layout`
-6. `feat(web): render the home page through the modern template`
-7. `docs(architecture): document the template loader and modern template`
+1. `feat(web): add remaining groq queries for marketing pages` + `chore(studio): regenerate sanity types`
+2. `feat(web): add shared portable text renderer`
+3. `feat(web): add hizmetler list and detail pages`
+4. `feat(web): add blog list and detail pages`
+5. `feat(web): add hakkimizda, sss, galeri, and iletisim pages`
+6. `feat(web): refine the home page composition`
+7. `docs(architecture): document the marketing routes`
 
-Chunk 11 (marketing pages) follows — by far the largest remaining chunk; it consumes everything built so far (queries, SEO helpers, template components).
+Chunk 12 (contact form + Resend) follows — small once the iletisim page shell exists.
 
 ---
 
