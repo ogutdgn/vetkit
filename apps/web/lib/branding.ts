@@ -66,6 +66,40 @@ export function hexToOklch(hex: string): { l: number; c: number; h: number } | n
   return { l: L, c, h };
 }
 
+/** OKLab → linear sRGB (Ottosson inverse matrices), channels clamped to gamut. */
+function oklchToLinearRgb(l: number, c: number, h: number): [number, number, number] {
+  const hr = (h * Math.PI) / 180;
+  const a = c * Math.cos(hr);
+  const b = c * Math.sin(hr);
+  const l_ = (l + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m_ = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s_ = (l - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const clamp = (x: number) => Math.min(1, Math.max(0, x));
+  return [
+    clamp(4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_),
+    clamp(-1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_),
+    clamp(-0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_),
+  ];
+}
+
+/** WCAG contrast ratio of white text over the given OKLCH background. */
+function whiteContrast(l: number, c: number, h: number): number {
+  const [r, g, b] = oklchToLinearRgb(l, c, h);
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 1.05 / (luminance + 0.05);
+}
+
+/**
+ * The lightness clamp alone is hue-blind (a vivid green at OKLCH L 0.54 is
+ * far more luminous than a red at the same L), so the white-text steps get a
+ * real WCAG check: lower lightness until white text clears AA (4.5:1).
+ */
+function ensureWhiteContrast(l: number, c: number, h: number): number {
+  let adjusted = l;
+  while (adjusted > 0.05 && whiteContrast(adjusted, c, h) < 4.5) adjusted -= 0.01;
+  return adjusted;
+}
+
 /** Below this OKLCH chroma the hue is floating-point noise — treat as gray. */
 const ACHROMATIC_THRESHOLD = 0.005;
 
@@ -101,10 +135,12 @@ export function brandStyleVars(hex: string | undefined): Record<string, string> 
 
   const vars: Record<string, string> = {};
   for (const [step, lightness, chroma] of SCALE) {
-    vars[`--color-brand-${step}`] =
-      step === nearest?.[0]
-        ? `oklch(${Math.min(brand.l, lightness).toFixed(4)} ${brand.c.toFixed(4)} ${brand.h.toFixed(2)})`
-        : `oklch(${lightness} ${(chroma * chromaScale).toFixed(4)} ${brand.h.toFixed(2)})`;
+    const isExact = step === nearest?.[0];
+    let l = isExact ? Math.min(brand.l, lightness) : lightness;
+    const c = isExact ? brand.c : chroma * chromaScale;
+    // 600/700 sit under white text throughout the templates.
+    if (step === 600 || step === 700) l = ensureWhiteContrast(l, c, brand.h);
+    vars[`--color-brand-${step}`] = `oklch(${l.toFixed(4)} ${c.toFixed(4)} ${brand.h.toFixed(2)})`;
   }
   return vars;
 }

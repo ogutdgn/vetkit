@@ -75,10 +75,10 @@ export default async function HomePage() {
               href="/iletisim"
               className="rounded-xl bg-brand-600 p-6 text-white shadow-lg transition hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
-              <h3 className="text-sm font-semibold tracking-wide uppercase">Çalışma Saatleri</h3>
+              <p className="text-sm font-semibold tracking-wide uppercase">Çalışma Saatleri</p>
               <p className="mt-2 text-lg font-bold">{hoursSummary}</p>
               {hours?.emergencyNote ? (
-                <p className="mt-1 text-sm text-white/80">{hours.emergencyNote}</p>
+                <p className="mt-1 text-sm text-white">{hours.emergencyNote}</p>
               ) : null}
             </Link>
             <a
@@ -88,19 +88,19 @@ export default async function HomePage() {
                 : {})}
               className="rounded-xl bg-ink-900 p-6 text-white shadow-lg transition hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
             >
-              <h3 className="text-sm font-semibold tracking-wide uppercase">Adres</h3>
+              <p className="text-sm font-semibold tracking-wide uppercase">Adres</p>
               <p className="mt-2 text-lg font-bold">
                 {settings.address.district}/{settings.address.city}
               </p>
-              <p className="mt-1 text-sm text-white/80">{settings.address.street}</p>
+              <p className="mt-1 text-sm text-white">{settings.address.street}</p>
             </a>
             <a
               href={`tel:${settings.contact.primaryPhone}`}
               className="rounded-xl bg-brand-600 p-6 text-white shadow-lg transition hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
-              <h3 className="text-sm font-semibold tracking-wide uppercase">İletişim</h3>
+              <p className="text-sm font-semibold tracking-wide uppercase">İletişim</p>
               <p className="mt-2 text-lg font-bold">{settings.contact.primaryPhone}</p>
-              <p className="mt-1 text-sm text-white/80">7/24 acil hattımız açık</p>
+              <p className="mt-1 text-sm text-white">7/24 acil hattımız açık</p>
             </a>
           </div>
         </section>
