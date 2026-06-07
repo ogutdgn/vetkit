@@ -44,7 +44,7 @@ export function MobileNav({ navItems }: { navItems: NavItem[] }) {
         aria-controls="mobile-menu"
         aria-label={open ? 'Menüyü kapat' : 'Menüyü aç'}
         onClick={() => setOpen((v) => !v)}
-        className="rounded-md p-2 text-ink-700 hover:bg-ink-100 focus-visible:outline-2 focus-visible:outline-brand-600"
+        className="rounded-md p-2 text-ink-200 hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-brand-400"
       >
         <svg
           viewBox="0 0 24 24"
@@ -65,7 +65,7 @@ export function MobileNav({ navItems }: { navItems: NavItem[] }) {
         <div
           ref={panelRef}
           id="mobile-menu"
-          className="absolute inset-x-0 top-full border-b border-ink-200 bg-white shadow-lg"
+          className="absolute inset-x-0 top-full border-b border-ink-700 bg-ink-900 shadow-lg"
         >
           <ul className="space-y-1 px-4 py-3">
             {navItems.map((item) => (
@@ -73,7 +73,7 @@ export function MobileNav({ navItems }: { navItems: NavItem[] }) {
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-md px-3 py-2 text-base font-medium text-ink-700 hover:bg-brand-50 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-brand-600"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-ink-200 hover:bg-ink-700 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-400"
                 >
                   {item.label}
                 </Link>

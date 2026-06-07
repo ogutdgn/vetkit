@@ -41,6 +41,7 @@ export interface SanityImageWithAlt {
 export type SiteSettings = NonNullable<SiteSettingsQueryResult>;
 
 export type ServiceCardData = ServicesListQueryResult[number];
+export type HeroSlideData = NonNullable<SiteSettings['heroSlides']>[number];
 export type BlogCardData = BlogPostsListQueryResult[number];
 export type TeamMemberData = TeamMembersListQueryResult[number];
 
@@ -60,6 +61,12 @@ export interface HeroProps {
   /** The schema has no video type yet, so media is image-only for now. */
   media?: SanityImageWithAlt;
   cta?: { label: string; href: string };
+  /**
+   * Carousel slides from `siteSettings.heroSlides` (2026-06-07 decision).
+   * When present they take precedence over title/subtitle/media; templates
+   * without a slider render the first slide as a static hero.
+   */
+  slides?: HeroSlideData[];
 }
 
 export interface ServiceCardProps {

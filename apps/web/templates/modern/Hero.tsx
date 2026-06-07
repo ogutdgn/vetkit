@@ -4,16 +4,19 @@ import Link from 'next/link';
 import { urlFor } from '@/lib/sanity/image';
 import type { HeroProps } from '@/types/template';
 
+import { HeroCarousel } from './HeroCarousel';
+
 // Renders the page's single <h1> — pages must not add another (CLAUDE.md §5
 // keeps h1 out of editor content for the same reason).
-export function Hero({ title, subtitle, media, cta }: HeroProps) {
+export function Hero({ title, subtitle, media, cta, slides }: HeroProps) {
+  if (slides?.length) return <HeroCarousel slides={slides} />;
   return (
-    <section className="bg-linear-to-b from-brand-50 to-ink-50">
+    <section className="bg-ink-900">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">{title}</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">{title}</h1>
           {subtitle ? (
-            <p className="mt-4 text-lg leading-relaxed text-ink-700">{subtitle}</p>
+            <p className="mt-4 text-lg leading-relaxed text-ink-300">{subtitle}</p>
           ) : null}
           {cta ? (
             <Link

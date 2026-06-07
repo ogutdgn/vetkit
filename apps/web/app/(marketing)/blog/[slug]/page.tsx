@@ -85,15 +85,15 @@ export default async function BlogYaziPage({ params }: Params) {
 
   return (
     <article>
-      <section className="bg-linear-to-b from-brand-50 to-ink-50">
+      <section className="bg-ink-900">
         <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
           {post.category ? (
-            <p className="text-sm font-semibold tracking-wide text-brand-700 uppercase">
+            <p className="text-sm font-semibold tracking-wide text-brand-400 uppercase">
               {CATEGORY_LABELS[post.category] ?? post.category}
             </p>
           ) : null}
-          <h1 className="mt-2 text-4xl font-bold tracking-tight text-ink-900">{post.title}</h1>
-          <p className="mt-4 text-sm text-ink-700">
+          <h1 className="mt-2 text-4xl font-bold tracking-tight text-white">{post.title}</h1>
+          <p className="mt-4 text-sm text-ink-300">
             <time dateTime={post.publishedAt}>{dateFormat.format(new Date(post.publishedAt))}</time>
             {post.author ? <> · {post.author.name}</> : null}
           </p>

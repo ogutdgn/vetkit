@@ -24,10 +24,10 @@ export default async function HizmetlerPage() {
 
   return (
     <>
-      <section className="bg-linear-to-b from-brand-50 to-ink-50">
+      <section className="bg-ink-900">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <h1 className="text-4xl font-bold tracking-tight text-ink-900">Hizmetlerimiz</h1>
-          <p className="mt-3 max-w-2xl text-lg text-ink-700">
+          <h1 className="text-4xl font-bold tracking-tight text-white">Hizmetlerimiz</h1>
+          <p className="mt-3 max-w-2xl text-lg text-ink-300">
             Dostlarınızın sağlığı için sunduğumuz tüm hizmetler.
           </p>
         </div>

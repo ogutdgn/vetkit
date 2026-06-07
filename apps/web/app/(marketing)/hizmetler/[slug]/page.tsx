@@ -82,11 +82,11 @@ export default async function HizmetDetayPage({ params }: Params) {
 
   return (
     <>
-      <section className="bg-linear-to-b from-brand-50 to-ink-50">
+      <section className="bg-ink-900">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-ink-900">{service.title}</h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink-700">{service.shortDescription}</p>
+            <h1 className="text-4xl font-bold tracking-tight text-white">{service.title}</h1>
+            <p className="mt-4 text-lg leading-relaxed text-ink-300">{service.shortDescription}</p>
             <ul aria-label="Hizmet özellikleri" className="mt-6 flex flex-wrap gap-2">
               {service.emergencyAvailable ? (
                 <li className="rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
@@ -106,7 +106,7 @@ export default async function HizmetDetayPage({ params }: Params) {
               ))}
             </ul>
             {service.pricing ? (
-              <p className="mt-4 text-sm font-semibold text-brand-700">{service.pricing}</p>
+              <p className="mt-4 text-sm font-semibold text-brand-400">{service.pricing}</p>
             ) : null}
             {settings ? (
               <a
