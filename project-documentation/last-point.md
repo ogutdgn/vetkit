@@ -13,19 +13,20 @@
 
 ## Snapshot
 
-**Date:** 2026-06-06
-**Last commit on `main`:** `4e804f2 fix(web): apply chunk 11 review fixes`. This wrap ships as ONE combined `docs(project): wrap chunk 11` commit (new owner convention), then pushes.
+**Date:** 2026-06-07
+**Last commit on `main`:** the design-adoption review-fix commit. This wrap ships as ONE combined `docs(project): wrap legacy design adoption` commit, then pushes.
 **Working tree:** apart from this wrap's doc/skill edits and untracked `.claude/` local files, clean.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `ddcf329`; Chunk 11 batch + wrap push at wrap end.
+**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `b983992`; the design-adoption batch pushes at wrap end.
 
 ## What's running
 
 - Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config (ignores `old-sites/**`), Husky, Sanity v5 Studio (5.30), plain-field schema.
 - **`vetkit-dev` = real Ovapark content** (siteSettings `#F15E42`, 6 services + photos, 4 FAQs, hakkımızda, 6 gallery; no team/blog/testimonials — old site had only filler). `old-sites/` populated locally (gitignored).
+- **The site now wears the legacy look (owner decision 2026-06-07, CLAUDE.md §12):** dark header/nav, full-width CMS-driven hero carousel (`siteSettings.heroSlides`, 3 real Ovapark slides seeded — inert inactive slides, sr-only h1 outside the rotation, autoplay stops on manual nav, reduced-motion aware), overlapping info-card row, Hoşgeldiniz + legacy icon-row services on home, dark page banners everywhere. Brand ramp now carries a hue-aware WCAG floor for white-text steps.
 - **The full public site works end-to-end**: `(marketing)` route group — home, hakkımızda, hizmetler + 6 SSG detail pages, blog (+detail, empty state), galeri, sss, iletisim (form shell). OD-5 two-step tagging on details; `PortableTextRenderer` + `ImageGallery` shared components; per-tenant dynamic favicons; sitemap guards unrouted page slugs.
 - Chunks 1–11 ✓ (see plan.md §2). `pnpm typecheck` / `lint` / `build` clean; 15 routes emit; HTTP walk all 200 + clean 404.
 
-## What was done in this (2026-06-06, Chunk 11) session
+## What was done in this (2026-06-07, design-adoption) session — previous session summary below still applies
 
 1. **Ovapark re-seed + old-sites pull** (see ddcf329's last-point entry): real client content now drives dev; design note — owner likes the old hero carousels (Slider Revolution), discuss for a design-polish pass.
 2. **Chunk 11 shipped** (`a8cc1b2`–`754704e`, consolidated commits): 12 new queries (OD-5 two-step recipes), shared renderers, the 9 marketing pages, brand favicon routes, eslint old-sites ignore, absolute-title fix for editor metaTitles.
@@ -46,6 +47,7 @@
 
 ## Heads-up for the next session
 
+- **Design adoption (Chunk 11b) shipped this session** — review fixed a keyboard ghost-focus blocker (inert), h1-in-rotation, contrast floors. New gotchas: hero h1 is sr-only inside HeroCarousel; heroSlides drives the hero (static fallback only when empty); the brand 600/700 steps pass a real WCAG check in `lib/branding.ts`.
 - **Chunk 12 (contact form + Resend) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1. Check current package APIs (react-hook-form/zod/resolvers/resend/react-email) before writing code.
 - **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev unaffected).
 - **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks with the explicit `/opengraph-image` fallback; `{ absolute }` titles for editor metaTitles + home; no canonical/og:url in root metadata; `useCdn: false`; `generated.ts` ESLint-exempt; brand guard rails in `lib/branding.ts`; `generateStaticParams` uses the plain client; sitemap `ROUTED_PAGE_SLUGS` until a generic page route exists.

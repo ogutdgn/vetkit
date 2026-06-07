@@ -200,6 +200,7 @@ vetkit/
 │   │   ├── templates/
 │   │   │   ├── modern/                   # Phase 1 — implemented
 │   │   │   │   ├── Header.tsx
+│   │   │   │   ├── HeroCarousel.tsx      # client-side slider (internal to Hero)
 │   │   │   │   ├── MobileNav.tsx         # client-side menu (internal to Header)
 │   │   │   │   ├── Hero.tsx
 │   │   │   │   ├── ServiceCard.tsx
@@ -331,15 +332,15 @@ The schema is the most critical design artifact in this project. A bad schema is
 
 ### Required document types (Phase 1)
 
-| Type           | Plural label (TR)     | Purpose                                                                                                | Singleton? |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
-| `siteSettings` | Klinik Bilgileri      | Clinic name, logo, primary color, address, phone, email, opening hours, social links, Maps coordinates | Yes        |
-| `service`      | Hizmetler             | Veterinary services offered                                                                            | No         |
-| `blogPost`     | Blog Yazıları         | Articles                                                                                               | No         |
-| `teamMember`   | Ekip                  | Veterinarians and staff                                                                                | No         |
-| `galleryImage` | Galeri                | Clinic photos                                                                                          | No         |
-| `faq`          | Sıkça Sorulan Sorular | FAQ entries with category                                                                              | No         |
-| `page`         | Sayfalar              | Generic flexible pages (e.g. "Hakkımızda")                                                             | No         |
+| Type           | Plural label (TR)     | Purpose                                                                                                             | Singleton? |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `siteSettings` | Klinik Bilgileri      | Clinic name, logo, primary color, hero slides, address, phone, email, opening hours, social links, Maps coordinates | Yes        |
+| `service`      | Hizmetler             | Veterinary services offered                                                                                         | No         |
+| `blogPost`     | Blog Yazıları         | Articles                                                                                                            | No         |
+| `teamMember`   | Ekip                  | Veterinarians and staff                                                                                             | No         |
+| `galleryImage` | Galeri                | Clinic photos                                                                                                       | No         |
+| `faq`          | Sıkça Sorulan Sorular | FAQ entries with category                                                                                           | No         |
+| `page`         | Sayfalar              | Generic flexible pages (e.g. "Hakkımızda")                                                                          | No         |
 
 ### Reusable objects
 
@@ -347,6 +348,7 @@ The schema is the most critical design artifact in this project. A bad schema is
 - `openingHours` (day-by-day open/close, plus closed flag)
 - `socialLinks` (instagram, facebook, x, youtube, tiktok — all optional)
 - `cta` (label, link — used in hero, footer, etc.)
+- `heroSlide` (image, heading, subheading?, cta? — carousel slides on `siteSettings.heroSlides`)
 
 ### Schema extraction task
 
@@ -384,6 +386,7 @@ export interface HeroProps {
   subtitle?: string;
   media?: SanityImageWithAlt; // image-only until the schema has a video type
   cta?: { label: string; href: string };
+  slides?: HeroSlideData[]; // siteSettings.heroSlides — precedence over title/media; non-slider templates render slides[0]
 }
 
 export interface ServiceCardProps {
@@ -470,7 +473,7 @@ old-sites/
 ### Do NOT:
 
 - Copy old CSS or JS into the new codebase. The new site is built from scratch with modern tooling.
-- Replicate the old design pixel-for-pixel. The new templates are deliberately modern.
+- **(Superseded 2026-06-07 — see §12.)** The `modern` template now deliberately mirrors the legacy design language (dark chrome, hero carousel, info cards, icon rows), always rebuilt natively — never copied CSS/JS.
 - Use the old PHP form handler. Form submissions go through Resend (see 2.3).
 
 ---
@@ -586,7 +589,7 @@ These are temptations that will damage the project. Resist them.
 
 4. **Do not let templates dictate schema fields.** If a template wants something the schema doesn't have, redesign the template, not the schema. (Section 2.4)
 
-5. **Do not reproduce the old site's design.** New templates are deliberately modern. The old sites are reference for content, not visual style. (Section 7)
+5. **(Superseded 2026-06-07.)** The owner chose a full look-alike of the legacy theme for the `modern` template — mirror the old design language, but always rebuilt with the modern stack (no legacy CSS/JS). (Section 7, §12)
 
 6. **Do not deploy each client from a separate repo.** This is the failure mode the project exists to escape. (Section 2.1)
 
@@ -634,6 +637,7 @@ These are temptations that will damage the project. Resist them.
 | 2026-06-05 | **OD-6 resolved → plain single-language fields** (supersedes the 2026-05-26 field-level i18n decision). Drop `localeString` / `localeText` / `localeSlug` / `localePortableText`, `@sanity/language-filter`, and `siteSettings.activeLocales`; all text fields become plain `string` / `text` / `slug` / portable-text array. A Chunk 4 schema-simplification pass (backlog row 6b) runs before Chunk 7.                | Sites are Turkish-only per §3 and anti-pattern #12; field-level `{ tr, en }` doubled every editor field and forced `coalesce(field[$locale], …)` into every Chunk 7+ query for a bilingual client that doesn't exist. No Sanity project or content exists yet, so migration cost is ~zero — the cheapest possible moment to reverse. If a bilingual client appears, that's the trigger to re-add i18n (and document-level vs field-level gets re-evaluated then).               | 3, 5                                                               |
 | 2026-06-05 | **Template contract typed against query-result projections** (Chunk 9): `ServiceCardData = ServicesListQueryResult[number]` etc., `SiteSettings = NonNullable<SiteSettingsQueryResult>`, `HeroProps.media` image-only via `SanityImageWithAlt`. `page.heroImage.alt` made plain-required so every contract image is assignable.                                                                                         | Cards receive what pages actually fetch — typing against raw doc types would lie about projected fields (`"slug": slug.current` is a string, not a Slug object) and invite over-fetching. Image-only media reflects schema reality (no video type exists); §2.4 forbids the contract demanding one. Template data needs are met by extending projections in queries.ts, keeping the schema the lowest common denominator.                                                       | 6                                                                  |
 | 2026-06-05 | **Cache-layer refinements (Chunk 7 review):** (a) the published Sanity client runs `useCdn: false`; (b) the Chunk 13 webhook busts BOTH `sanity:<type>:<id>` AND `sanity:<type>:list` on every create/update/delete; (c) a query that dereferences another type also tags that dependency (e.g. service detail carries `sanity:faq:list`).                                                                              | With tag-only revalidation, Next's tag-pinned data cache is the caching layer and origin is hit only at build/revalidation; the Sanity CDN in front would race `revalidateTag` (single refetch can read a not-yet-invalidated CDN response and pin stale content until the next publish). List projections carry mutable fields, so plain edits must bust lists; dereferenced content otherwise never reaches dependent pages.                                                  | 7 (lib/sanity), 13                                                 |
+| 2026-06-07 | **Legacy design adoption (owner decision):** the `modern` template is restyled as a full look-alike of the old sites' theme — dark header, full-width hero CAROUSEL (editable `siteSettings.heroSlides`: image/heading/subheading/cta), info-card row under the hero, icon-row services section, dark footer. Supersedes §7's "deliberately modern" guidance and anti-pattern #5. `HeroProps` gains `slides?`.          | The owner explicitly prefers the legacy look ("so cool carousels, hero banners") and wants clients to see a familiar design. The carousel content is schema-driven (heroSlides on siteSettings — meaningful for every template; single-pane templates can render the first slide), keeping §2.4's no-template-specific-fields rule intact. Visuals are rebuilt natively (Tailwind + tokens + a small client slider) — no legacy CSS/JS is copied.                               | 2.4, 5, 6, 7                                                       |
 
 When making future decisions, append to this table with date, decision, rationale, and the section that captures it.
 
