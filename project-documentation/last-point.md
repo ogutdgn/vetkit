@@ -48,6 +48,8 @@
 
 ## Heads-up for the next session
 
+- **⚠ DESIGN IS PROVISIONAL (owner, 2026-06-07):** the legacy look-alike currently on `main` is NOT final — the owner will change the designs. **Future design work goes on a feature branch and is NOT pushed to `main` without explicit owner approval.** (Everything up to `28f860a` is already on `main`/origin from the earlier wrap flow.)
+
 - **Design adoption (Chunk 11b) shipped this session** — review fixed a keyboard ghost-focus blocker (inert), h1-in-rotation, contrast floors. New gotchas: hero h1 is sr-only inside HeroCarousel; heroSlides drives the hero (static fallback only when empty); the brand 600/700 steps pass a real WCAG check in `lib/branding.ts`.
 - **Chunk 12 (contact form + Resend) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1. Check current package APIs (react-hook-form/zod/resolvers/resend/react-email) before writing code.
 - **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev unaffected).
