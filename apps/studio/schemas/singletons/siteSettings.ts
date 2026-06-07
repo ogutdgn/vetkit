@@ -54,6 +54,16 @@ export const siteSettings = defineType({
       ],
     }),
 
+    defineField({
+      name: 'heroSlides',
+      type: 'array',
+      title: 'Anasayfa slaytları',
+      description:
+        'Anasayfanın üstündeki kayan görseller. Boş bırakılırsa sade bir başlık alanı gösterilir.',
+      of: [defineArrayMember({ type: 'heroSlide' })],
+      validation: (rule) => rule.max(5),
+    }),
+
     // Contact & address
     defineField({
       name: 'contact',

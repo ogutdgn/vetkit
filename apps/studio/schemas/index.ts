@@ -12,6 +12,7 @@ import { blockContent } from './objects/blockContent';
 import { contactInfo } from './objects/contactInfo';
 import { cta } from './objects/cta';
 import { emergencyBanner } from './objects/emergencyBanner';
+import { heroSlide } from './objects/heroSlide';
 import { openingHours } from './objects/openingHours';
 import { seo } from './objects/seo';
 import { socialLinks } from './objects/socialLinks';
@@ -25,6 +26,7 @@ export const schemaTypes = [
   openingHours,
   socialLinks,
   cta,
+  heroSlide,
   contactInfo,
   emergencyBanner,
   // Singletons.

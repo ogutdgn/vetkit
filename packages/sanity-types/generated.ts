@@ -369,6 +369,11 @@ export type SiteSettings = {
     hex: string;
     name?: string;
   };
+  heroSlides?: Array<
+    {
+      _key: string;
+    } & HeroSlide
+  >;
   contact: ContactInfo;
   address: Address;
   openingHours: OpeningHours;
@@ -423,6 +428,21 @@ export type ContactInfo = {
   whatsapp?: string;
   email: string;
   secondaryEmails?: Array<string>;
+};
+
+export type HeroSlide = {
+  _type: 'heroSlide';
+  image: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string;
+    _type: 'image';
+  };
+  heading: string;
+  subheading?: string;
+  cta?: Cta;
 };
 
 export type Cta = {
@@ -562,6 +582,7 @@ export type AllSanitySchemaTypes =
   | OpeningHours
   | Address
   | ContactInfo
+  | HeroSlide
   | Cta
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -595,6 +616,11 @@ export type SiteSettingsQueryResult = {
     hex: string;
     name?: string;
   };
+  heroSlides?: Array<
+    {
+      _key: string;
+    } & HeroSlide
+  >;
   contact: ContactInfo;
   address: Address;
   openingHours: OpeningHours;
