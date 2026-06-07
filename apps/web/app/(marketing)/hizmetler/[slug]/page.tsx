@@ -83,7 +83,7 @@ export default async function HizmetDetayPage({ params }: Params) {
   return (
     <>
       <section className="bg-ink-900">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-36 pb-14 sm:px-6 lg:grid-cols-2">
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-white">{service.title}</h1>
             <p className="mt-4 text-lg leading-relaxed text-ink-300">{service.shortDescription}</p>

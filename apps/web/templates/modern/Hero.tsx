@@ -12,7 +12,7 @@ export function Hero({ title, subtitle, media, cta, slides }: HeroProps) {
   if (slides?.length) return <HeroCarousel slides={slides} />;
   return (
     <section className="bg-ink-900">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-36 pb-16 sm:px-6 lg:grid-cols-2 lg:pb-24">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">{title}</h1>
           {subtitle ? (

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Changa, Karla } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { brandStyleVars } from '@/lib/branding';
@@ -11,9 +11,15 @@ import { buildVeterinaryCareJsonLd, serializeJsonLd } from '@/lib/seo/schema';
 
 import './globals.css';
 
-const inter = Inter({
+const karla = Karla({
   subsets: ['latin', 'latin-ext'],
-  variable: '--font-inter',
+  variable: '--font-karla',
+  display: 'swap',
+});
+
+const changa = Changa({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-changa',
   display: 'swap',
 });
 
@@ -41,7 +47,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const brandVars = brandStyleVars(settings?.brandColor?.hex);
 
   return (
-    <html lang={htmlLang} className={inter.variable} style={brandVars}>
+    <html lang={htmlLang} className={`${karla.variable} ${changa.variable}`} style={brandVars}>
       <body>
         <a
           href="#icerik"

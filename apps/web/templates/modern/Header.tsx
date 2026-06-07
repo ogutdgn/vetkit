@@ -11,7 +11,9 @@ export function Header({ settings, navItems }: HeaderProps) {
   const showBanner = emergencyBanner?.enabled && emergencyBanner.text;
 
   return (
-    <>
+    // Legacy-theme overlay: the header floats transparent over the hero;
+    // page banners add top padding to clear it.
+    <div className="absolute inset-x-0 top-0 z-40">
       {showBanner ? (
         <div
           className={
@@ -33,7 +35,7 @@ export function Header({ settings, navItems }: HeaderProps) {
           </div>
         </div>
       ) : null}
-      <header className="sticky top-0 z-40 border-b border-ink-700 bg-ink-900/95 text-white backdrop-blur">
+      <header className="text-white">
         <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link
             href="/"
@@ -91,6 +93,6 @@ export function Header({ settings, navItems }: HeaderProps) {
           </div>
         </div>
       </header>
-    </>
+    </div>
   );
 }

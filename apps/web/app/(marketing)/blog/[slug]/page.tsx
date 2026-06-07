@@ -86,7 +86,7 @@ export default async function BlogYaziPage({ params }: Params) {
   return (
     <article>
       <section className="bg-ink-900">
-        <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-3xl px-4 pt-36 pb-14 sm:px-6">
           {post.category ? (
             <p className="text-sm font-semibold tracking-wide text-brand-400 uppercase">
               {CATEGORY_LABELS[post.category] ?? post.category}

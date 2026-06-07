@@ -34,7 +34,7 @@ export default async function IletisimPage() {
   return (
     <>
       <section className="bg-ink-900">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 pt-36 pb-14 sm:px-6">
           <h1 className="text-4xl font-bold tracking-tight text-white">İletişim</h1>
           <p className="mt-3 max-w-2xl text-lg text-ink-300">
             Sorularınız için bize ulaşın — acil durumlarda 7/24 telefonla yanınızdayız.

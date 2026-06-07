@@ -50,7 +50,7 @@ export default async function HakkimizdaPage() {
   return (
     <>
       <section className="bg-ink-900">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 pt-36 pb-14 sm:px-6">
           <h1 className="text-4xl font-bold tracking-tight text-white">{page.title}</h1>
         </div>
       </section>
