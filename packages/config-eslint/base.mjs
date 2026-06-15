@@ -28,6 +28,8 @@ export default tseslint.config(
       // Machine-written by `sanity typegen` — eslint --fix would drift it
       // from raw typegen output and make every regen a noisy diff.
       'packages/sanity-types/generated.ts',
+      // Machine-written by `supabase gen types` — same reasoning.
+      'packages/db/src/database-generated.types.ts',
       // Read-only reference copies of the legacy client sites (CLAUDE.md §7).
       // Gitignored, but flat config does not read .gitignore.
       'old-sites/**',
