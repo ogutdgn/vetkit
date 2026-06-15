@@ -12,23 +12,17 @@ export async function signOut(): Promise<void> {
   redirect('/login');
 }
 
-export async function switchTenant(formData: FormData): Promise<void> {
-  const tenantIdRaw = formData.get('tenantId');
-  const tenantId = typeof tenantIdRaw === 'string' ? tenantIdRaw : '';
-
-  // Only allow switching to a tenant the actor may act on (RLS-backed list).
+export async function setActiveTenant(tenantId: string): Promise<void> {
+  // Only switch to a tenant the actor may act on (RLS-backed list).
   const actor = await getActor();
-  const allowed = actor?.availableTenants.some((t) => t.id === tenantId);
-  if (!allowed) {
-    redirect('/');
+  if (actor?.availableTenants.some((t) => t.id === tenantId)) {
+    const cookieStore = await cookies();
+    cookieStore.set(ACTIVE_TENANT_COOKIE, tenantId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+    });
   }
-
-  const cookieStore = await cookies();
-  cookieStore.set(ACTIVE_TENANT_COOKIE, tenantId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 365,
-  });
   redirect('/');
 }

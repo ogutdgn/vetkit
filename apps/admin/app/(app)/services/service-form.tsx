@@ -1,6 +1,6 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import type { JSONContent } from '@tiptap/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,13 @@ import { Controller, useForm, type SubmitHandler } from 'react-hook-form';
 
 import { RichTextField } from '@/components/editor/rich-text-field';
 import { MediaPicker } from '@/components/media/media-picker';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { turkishSlugify } from '@/lib/slug';
+import { cn } from '@/lib/utils';
 
 import { upsertService, type ActionState } from './actions';
 import {
@@ -18,9 +24,9 @@ import {
   type ServiceFormValues,
 } from './schema';
 
-const fieldClass =
-  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500';
-const labelClass = 'block text-sm font-medium text-slate-700';
+const selectClass =
+  'h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50';
+const errorClass = 'text-sm text-destructive';
 
 export function ServiceForm({
   id,
@@ -41,7 +47,7 @@ export function ServiceForm({
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<ServiceFormInput, unknown, ServiceFormValues>({
-    resolver: zodResolver(serviceFormSchema),
+    resolver: standardSchemaResolver(serviceFormSchema),
     defaultValues: defaults,
   });
 
@@ -61,164 +67,160 @@ export function ServiceForm({
 
   return (
     <form onSubmit={(e) => void handleSubmit(onValid)(e)} className="max-w-2xl space-y-6">
-      <div className="space-y-1">
-        <label htmlFor="title" className={labelClass}>
-          Başlık
-        </label>
-        <input id="title" className={fieldClass} {...register('title')} />
-        {errors.title ? <p className="text-sm text-red-600">{errors.title.message}</p> : null}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Temel bilgiler</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Başlık</Label>
+            <Input id="title" {...register('title')} />
+            {errors.title ? <p className={errorClass}>{errors.title.message}</p> : null}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="slug">URL kimliği (slug)</Label>
+            <div className="flex gap-2">
+              <Input id="slug" placeholder="kedi-asilamasi" {...register('slug')} />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setValue('slug', turkishSlugify(getValues('title')), { shouldValidate: true })
+                }
+              >
+                Başlıktan üret
+              </Button>
+            </div>
+            {errors.slug ? <p className={errorClass}>{errors.slug.message}</p> : null}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shortDescription">Kısa açıklama (kart için)</Label>
+            <Textarea id="shortDescription" rows={3} {...register('shortDescription')} />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="space-y-1">
-        <label htmlFor="slug" className={labelClass}>
-          URL kimliği (slug)
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="slug"
-            className={fieldClass}
-            placeholder="kedi-asilamasi"
-            {...register('slug')}
-          />
-          <button
-            type="button"
-            onClick={() =>
-              setValue('slug', turkishSlugify(getValues('title')), { shouldValidate: true })
-            }
-            className="shrink-0 rounded-md border border-slate-300 px-3 text-sm text-slate-600 hover:bg-slate-50"
-          >
-            Başlıktan üret
-          </button>
-        </div>
-        {errors.slug ? <p className="text-sm text-red-600">{errors.slug.message}</p> : null}
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="shortDescription" className={labelClass}>
-          Kısa açıklama (kart için)
-        </label>
-        <textarea
-          id="shortDescription"
-          rows={3}
-          className={fieldClass}
-          {...register('shortDescription')}
-        />
-      </div>
-
-      <div className="space-y-1">
-        <span className={labelClass}>Ana görsel</span>
-        <Controller
-          name="mainImageMediaId"
-          control={control}
-          render={({ field }) => (
-            <MediaPicker
-              value={field.value ?? null}
-              initialUrl={initialImageUrl}
-              onChange={field.onChange}
+      <Card>
+        <CardHeader>
+          <CardTitle>Görsel ve açıklama</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Ana görsel</Label>
+            <Controller
+              name="mainImageMediaId"
+              control={control}
+              render={({ field }) => (
+                <MediaPicker
+                  value={field.value ?? null}
+                  initialUrl={initialImageUrl}
+                  onChange={field.onChange}
+                />
+              )}
             />
-          )}
-        />
-      </div>
-
-      <div className="space-y-1">
-        <span className={labelClass}>Detay açıklama</span>
-        <Controller
-          name="description"
-          control={control}
-          render={({ field }) => (
-            <RichTextField
-              value={(field.value as JSONContent | null) ?? null}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
+          </div>
+          <div className="space-y-2">
+            <Label>Detay açıklama</Label>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <RichTextField
+                  value={(field.value as JSONContent | null) ?? null}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
-          )}
-        />
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <fieldset className="space-y-2">
-        <legend className={labelClass}>Hayvan türleri</legend>
-        <div className="flex flex-wrap gap-3">
-          {PET_TYPES.map((pt) => (
-            <label key={pt.value} className="flex items-center gap-1.5 text-sm text-slate-700">
-              <input type="checkbox" value={pt.value} {...register('petTypes')} />
-              {pt.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ayrıntılar</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Hayvan türleri</Label>
+            <div className="flex flex-wrap gap-3">
+              {PET_TYPES.map((pt) => (
+                <label key={pt.value} className="flex items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    value={pt.value}
+                    className="size-4 accent-primary"
+                    {...register('petTypes')}
+                  />
+                  {pt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="serviceLocation">Hizmet yeri</Label>
+              <select id="serviceLocation" className={selectClass} {...register('serviceLocation')}>
+                <option value="in-clinic">Klinikte</option>
+                <option value="home-call">Evde</option>
+                <option value="both">Her ikisi</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pricing">Fiyat bilgisi (opsiyonel)</Label>
+              <Input id="pricing" {...register('pricing')} />
+            </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              {...register('emergencyAvailable')}
+            />
+            Acil olarak sunuluyor
+          </label>
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label htmlFor="serviceLocation" className={labelClass}>
-            Hizmet yeri
+      <Card>
+        <CardHeader>
+          <CardTitle>SEO</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="metaTitle">Meta başlık</Label>
+            <Input id="metaTitle" {...register('metaTitle')} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="metaDescription">Meta açıklama</Label>
+            <Textarea id="metaDescription" rows={2} {...register('metaDescription')} />
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4 accent-primary" {...register('noIndex')} />
+            Arama motorlarından gizle
           </label>
-          <select id="serviceLocation" className={fieldClass} {...register('serviceLocation')}>
-            <option value="in-clinic">Klinikte</option>
-            <option value="home-call">Evde</option>
-            <option value="both">Her ikisi</option>
-          </select>
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="pricing" className={labelClass}>
-            Fiyat bilgisi (opsiyonel)
-          </label>
-          <input id="pricing" className={fieldClass} {...register('pricing')} />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" {...register('emergencyAvailable')} /> Acil olarak sunuluyor
-      </label>
-
-      <fieldset className="space-y-3 rounded-md border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-medium text-slate-500">SEO</legend>
-        <div className="space-y-1">
-          <label htmlFor="metaTitle" className={labelClass}>
-            Meta başlık
-          </label>
-          <input id="metaTitle" className={fieldClass} {...register('metaTitle')} />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="metaDescription" className={labelClass}>
-            Meta açıklama
-          </label>
-          <textarea
-            id="metaDescription"
-            rows={2}
-            className={fieldClass}
-            {...register('metaDescription')}
-          />
-        </div>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" {...register('noIndex')} /> Arama motorlarından gizle
-        </label>
-      </fieldset>
-
-      <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-        <div className="space-y-1">
-          <label htmlFor="status" className={labelClass}>
-            Durum
-          </label>
-          <select id="status" className={fieldClass} {...register('status')}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="status">Durum</Label>
+          <select id="status" className={cn(selectClass, 'w-40')} {...register('status')}>
             <option value="draft">Taslak</option>
             <option value="published">Yayında</option>
           </select>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/services" className="text-sm text-slate-500 hover:text-slate-900">
+          <Link href="/services" className={buttonVariants({ variant: 'ghost' })}>
             İptal
           </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Kaydediliyor…' : 'Kaydet'}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {errors.root ? <p className="text-sm text-red-600">{errors.root.message}</p> : null}
+      {errors.root ? <p className={errorClass}>{errors.root.message}</p> : null}
     </form>
   );
 }

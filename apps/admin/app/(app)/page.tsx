@@ -1,44 +1,67 @@
-import { getActor } from '@/lib/auth';
+import { CheckCircle2, FileEdit, Stethoscope } from 'lucide-react';
+import Link from 'next/link';
+
+import { buttonVariants } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getTenantContext } from '@/lib/tenant-db';
 
 export default async function DashboardPage() {
-  // Cached within the request — shares the layout's resolution.
-  const actor = await getActor();
+  const { supabase, tenant, actor } = await getTenantContext();
+
+  const head = { count: 'exact' as const, head: true };
+  const [total, published, drafts] = await Promise.all([
+    supabase.from('services').select('*', head).eq('tenant_id', tenant.id),
+    supabase
+      .from('services')
+      .select('*', head)
+      .eq('tenant_id', tenant.id)
+      .eq('status', 'published'),
+    supabase.from('services').select('*', head).eq('tenant_id', tenant.id).eq('status', 'draft'),
+  ]);
+
+  const stats = [
+    { label: 'Hizmetler', value: total.count ?? 0, icon: Stethoscope },
+    { label: 'Yayında', value: published.count ?? 0, icon: CheckCircle2 },
+    { label: 'Taslak', value: drafts.count ?? 0, icon: FileEdit },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Hoş geldiniz</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {actor?.isSuperAdmin
-            ? 'Tüm kliniklerin içeriğini buradan yönetebilirsiniz.'
-            : 'Kliniğinizin içeriğini buradan yönetebilirsiniz.'}
+    <>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Hoş geldiniz</h1>
+        <p className="text-sm text-muted-foreground">
+          {tenant.name} · {actor.isSuperAdmin ? 'Süper yönetici' : 'Klinik kullanıcısı'}
         </p>
       </div>
 
-      <dl className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Aktif klinik
-          </dt>
-          <dd className="mt-1 text-sm font-medium text-slate-900">
-            {actor?.activeTenant?.name ?? '—'}
-          </dd>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Rol</dt>
-          <dd className="mt-1 text-sm font-medium text-slate-900">
-            {actor?.isSuperAdmin ? 'Süper yönetici' : 'Klinik kullanıcısı'}
-          </dd>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">Erişim</dt>
-          <dd className="mt-1 text-sm font-medium text-slate-900">
-            {actor?.availableTenants.length ?? 0} klinik
-          </dd>
-        </div>
-      </dl>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {stats.map((s) => (
+          <Card key={s.label}>
+            <CardHeader>
+              <CardDescription>{s.label}</CardDescription>
+              <s.icon className="size-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="font-mono text-3xl font-semibold tabular-nums">{s.value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      <p className="text-sm text-slate-400">İçerik yönetimi (R3) yakında.</p>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>İçerik yönetimi</CardTitle>
+          <CardDescription>Kliniğinizin web sitesi içeriğini buradan yönetin.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <Link href="/services" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+            Hizmetleri yönet
+          </Link>
+          <span className="text-sm text-muted-foreground">
+            Blog, ekip, SSS, galeri ve diğer türler yakında.
+          </span>
+        </CardContent>
+      </Card>
+    </>
   );
 }
