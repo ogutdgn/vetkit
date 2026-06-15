@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { signOut, switchTenant } from '@/app/(app)/actions';
+import { SidebarNav } from '@/components/sidebar-nav';
 import type { Actor } from '@/lib/auth';
 
 export function AdminShell({ actor, children }: { actor: Actor; children: ReactNode }) {
@@ -60,7 +61,12 @@ export function AdminShell({ actor, children }: { actor: Actor; children: ReactN
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+      <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">
+        <aside className="w-44 shrink-0">
+          <SidebarNav />
+        </aside>
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
     </div>
   );
 }
