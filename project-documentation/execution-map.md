@@ -14,38 +14,33 @@
 
 ## 1. Active chunk — what to build next
 
-**R2 — `apps/admin` auth shell (`@supabase/ssr`, invite-only login, tenant + super-admin resolution).**
+**R3 — Admin content CRUD (forms per type, draft/publish, Tiptap, Storage uploads, ordering).**
 
-> ⚠ Context: the project pivoted off Sanity onto Supabase + a custom admin (CLAUDE.md §12 2026-06-14). R1 shipped — `packages/db` is live on cloud `alzwrhvuvqwwxoownnjf`, RLS verified 9/9. Work stays on branch `feat/supabase-rebuild`; **no push to `main` without owner approval.**
+> ⚠ Context: the Sanity→Supabase rebuild (CLAUDE.md §12 2026-06-14). R1 (`@vetkit/db`, RLS 9/9) and R2 (`apps/admin` auth shell) shipped. Work stays on branch `feat/supabase-rebuild`; **no push to `main` without owner approval.** Super-admin dev login: `doganogut06@gmail.com` (temp password issued at R2 — owner should rotate).
 
-**Goal:** A new `apps/admin` Next 16 app where clinic users (invite-only) and the super-admin sign in via Supabase Auth; the session resolves the user's tenant(s) from `memberships` (super-admin via `platform_admins`, with a tenant switcher). Reads/writes go through `@vetkit/db` under the authenticated role — RLS does the scoping. No content CRUD yet (that's R3); this is auth + the protected shell.
+**Goal:** Inside `apps/admin`, give clinic users + super-admin full content management for the active tenant: list/create/edit/delete for each content type, a draft/publish toggle, a Tiptap rich-text editor, Supabase Storage image uploads (the `media` table + bucket), and drag/ordering via `sort_order`. All writes go through `@vetkit/db` under the authenticated role — RLS scopes to the active tenant.
 
 **Locked context:**
 
-- Stack: Next 16 App Router + `@supabase/ssr` (NOT the deprecated auth-helpers). Cookie `getAll`/`setAll` pattern + middleware session refresh. Consume `@vetkit/db` (`createAnonClient` is the browser/anon base; R2 adds the cookie-bound server/browser clients).
-- Auth: invite-only — super-admin provisions users; no public signup. The **first** `platform_admin` is seeded out-of-band with the service-role key (chicken-and-egg, see review §residuals) — do this as the first R2 step so you can actually log in.
-- Tenant resolution: `private.auth_tenant_ids()` / membership lookup → the logged-in user's tenant; `platform_admins` → super-admin sees all + a tenant switcher (store the active tenant in a cookie/URL).
-- New deps in `apps/admin`: `@supabase/ssr`, `@supabase/supabase-js`, `@vetkit/db` (workspace). New Vercel project later (R10).
-
-**Before writing code:** verify the CURRENT `@supabase/ssr` API + the Next 16 cookies/middleware pattern against live Supabase docs — training data is stale (the brief's §5 ssr notes were deferred from R1).
+- Content types (spec §4): services, blog_posts, team_members, faqs, gallery_images, pages, testimonials, hero_slides, the `site_settings` singleton.
+- Rich text: **Tiptap**, configured to the §5 ruleset — blocks `normal/h2/h3/blockquote`, lists `bullet/number`, marks `strong/em/link(newTab)`; **no h1**. Store as the `TiptapDoc` jsonb shape (`@vetkit/db` schemas). Verify current Tiptap + React 19 APIs against live docs first.
+- Images: upload to the `media` bucket at `<tenantId>/<category>/<file>` (the storage write policy enforces the tenant segment), insert a `media` row, reference via `*_media_id`. Image transforms are **Pro-plan only** — confirm the plan with the owner (Free → origin images + focal CSS only).
+- Validation: the `@vetkit/db` Zod schemas at the write boundary (add richer email/url/phone validators here — verify zod 4 API). Port `turkishSlugify` from `apps/studio/lib/slug.ts` for slugs (unique per tenant).
+- Forms: React Hook Form + Zod (per CLAUDE.md §3). shadcn/ui init (R9) likely pulled forward here for inputs/dialogs/tables.
 
 **Done when:**
 
-- `apps/admin` runs; an unauthenticated visitor is redirected to a login; a seeded user logs in and lands on a protected shell showing their tenant (super-admin sees a tenant switcher).
-- Session is read in Server Components via the cookie-bound client; middleware refreshes it.
-- A clinic user's session is scoped to its tenant; the super-admin can switch tenants. `pnpm typecheck`/`lint`/`build` pass.
+- Each content type has a working list + create/edit/delete in `apps/admin`, scoped to the active tenant, with draft/publish.
+- Tiptap editor saves/loads the jsonb body; image upload writes to Storage + the `media` table; ordering persists.
+- The `site_settings` singleton editor works. `pnpm typecheck`/`lint`/`build` pass; a content round-trip is verified against the live DB.
 
-**Depends on:** R1 (`@vetkit/db`) — shipped.
+**Depends on:** R2 (auth shell) — shipped.
 
-**Open decisions affecting this chunk:** none blocking. (`is_platform_admin` stays a live table lookup per R1; revisit only if instant-revoke matters.)
+**Open decisions affecting this chunk:** Supabase plan tier (Pro for image transforms) — owner call before the image-upload UX is finalized.
 
-**Suggested commit split:**
+**Suggested commit split:** by content area, e.g. `feat(admin): add services CRUD`, `feat(admin): add the tiptap editor`, `feat(admin): add media uploads`; one combined `docs(project): wrap R3` at session end.
 
-1. `feat(admin): scaffold apps/admin with supabase ssr auth`
-2. `feat(admin): add tenant + super-admin resolution and protected shell`
-3. One combined `docs(project): wrap R2` at session end.
-
-R3 (admin content CRUD: forms, draft/publish, Tiptap, Storage uploads) follows.
+R4 (public data-layer swap to `@vetkit/db`) can proceed in parallel — it only depends on R1.
 
 ---
 
