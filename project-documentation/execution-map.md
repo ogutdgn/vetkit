@@ -14,39 +14,38 @@
 
 ## 1. Active chunk — what to build next
 
-**Chunk 12 — Contact form + Resend (`app/api/contact/route.ts`).**
+**R2 — `apps/admin` auth shell (`@supabase/ssr`, invite-only login, tenant + super-admin resolution).**
 
-**Goal:** A working contact form on `/iletisim`: React Hook Form + Zod on the client, a route handler that emails the submission to the clinic via Resend (email-only, NO database — CLAUDE.md §2.3). The iletisim page shell already exists with a placeholder comment.
+> ⚠ Context: the project pivoted off Sanity onto Supabase + a custom admin (CLAUDE.md §12 2026-06-14). R1 shipped — `packages/db` is live on cloud `alzwrhvuvqwwxoownnjf`, RLS verified 9/9. Work stays on branch `feat/supabase-rebuild`; **no push to `main` without owner approval.**
+
+**Goal:** A new `apps/admin` Next 16 app where clinic users (invite-only) and the super-admin sign in via Supabase Auth; the session resolves the user's tenant(s) from `memberships` (super-admin via `platform_admins`, with a tenant switcher). Reads/writes go through `@vetkit/db` under the authenticated role — RLS does the scoping. No content CRUD yet (that's R3); this is auth + the protected shell.
 
 **Locked context:**
 
-- Stack per CLAUDE.md §3: React Hook Form + Zod, Resend + React Email. New deps to install in apps/web: `react-hook-form`, `zod`, `@hookform/resolvers`, `resend`, `react-email`/`@react-email/components` (check current package names/APIs before writing code).
-- Env contract (§8, already in .env.example): `RESEND_API_KEY`, `CLINIC_EMAIL` (recipient), `CONTACT_FROM_EMAIL` (verified sender). Dev values can use Resend's onboarding sender (`onboarding@resend.dev`) + the owner's inbox; a real Resend key is an owner action.
-- `components/shared/ContactForm.tsx` (client component) per the §4 tree; the API route validates AGAIN server-side with the same Zod schema (never trust the client).
-- Spam floor: honeypot field + minimal rate limiting consideration (keep simple — no extra infra; document what's deferred).
-- Turkish UX: labels/messages/validation errors in Turkish; success/failure states; accessible (labels, aria-invalid, focus on error).
+- Stack: Next 16 App Router + `@supabase/ssr` (NOT the deprecated auth-helpers). Cookie `getAll`/`setAll` pattern + middleware session refresh. Consume `@vetkit/db` (`createAnonClient` is the browser/anon base; R2 adds the cookie-bound server/browser clients).
+- Auth: invite-only — super-admin provisions users; no public signup. The **first** `platform_admin` is seeded out-of-band with the service-role key (chicken-and-egg, see review §residuals) — do this as the first R2 step so you can actually log in.
+- Tenant resolution: `private.auth_tenant_ids()` / membership lookup → the logged-in user's tenant; `platform_admins` → super-admin sees all + a tenant switcher (store the active tenant in a cookie/URL).
+- New deps in `apps/admin`: `@supabase/ssr`, `@supabase/supabase-js`, `@vetkit/db` (workspace). New Vercel project later (R10).
+
+**Before writing code:** verify the CURRENT `@supabase/ssr` API + the Next 16 cookies/middleware pattern against live Supabase docs — training data is stale (the brief's §5 ssr notes were deferred from R1).
 
 **Done when:**
 
-- `/iletisim` renders the form (name, phone, email, message — optionally pet type); client + server Zod validation share one schema.
-- `app/api/contact/route.ts` sends via Resend to `CLINIC_EMAIL` with a readable email (React Email template or simple HTML) and returns proper status codes; errors surface in the UI in Turkish.
-- Honeypot silently drops bot submissions.
-- `.env.example` stays accurate; missing env vars fail loudly at submit time with a clear server log (not a silent 200).
-- `pnpm typecheck` / `lint` / `build` pass; manual browser test of the happy path + a validation error (real send requires the owner's Resend key — verify with it if provided, otherwise mock/log mode).
+- `apps/admin` runs; an unauthenticated visitor is redirected to a login; a seeded user logs in and lands on a protected shell showing their tenant (super-admin sees a tenant switcher).
+- Session is read in Server Components via the cookie-bound client; middleware refreshes it.
+- A clinic user's session is scoped to its tenant; the super-admin can switch tenants. `pnpm typecheck`/`lint`/`build` pass.
 
-**Depends on:** Chunk 11 (iletisim page) — shipped.
+**Depends on:** R1 (`@vetkit/db`) — shipped.
 
-**Open decisions that affect this chunk:**
+**Open decisions affecting this chunk:** none blocking. (`is_platform_admin` stays a live table lookup per R1; revisit only if instant-revoke matters.)
 
-- None blocking. OD-3 (CI timing) is open but does not block this chunk.
+**Suggested commit split:**
 
-**Suggested commit split** (per `.claude/skills/writing-commits/SKILL.md`):
+1. `feat(admin): scaffold apps/admin with supabase ssr auth`
+2. `feat(admin): add tenant + super-admin resolution and protected shell`
+3. One combined `docs(project): wrap R2` at session end.
 
-1. `feat(web): add contact form with shared zod validation`
-2. `feat(web): add contact api route sending via resend`
-3. One combined `docs(project): wrap chunk 12` at session end.
-
-Chunk 13 (revalidation webhook) follows — the cache-tag groundwork is fully laid; it closes the local stale-cache gotcha.
+R3 (admin content CRUD: forms, draft/publish, Tiptap, Storage uploads) follows.
 
 ---
 

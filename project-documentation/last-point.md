@@ -7,52 +7,38 @@
 > - [`execution-map.md`](./execution-map.md) — what to work on next.
 > - [`plan.md`](./plan.md) — the full plan and backlog.
 >
-> **Maintenance:** Refresh before chat closes, before any big operation (multi-file refactor, deploy, schema migration), or whenever the working tree is about to shift significantly. Skill `writing-last-point` at `.claude/skills/writing-last-point/SKILL.md` codifies the protocol.
+> **Maintenance:** Refresh before chat closes, before any big operation, or whenever the working tree is about to shift significantly. Skill `writing-last-point` at `.claude/skills/writing-last-point/SKILL.md` codifies the protocol.
 
 ---
 
 ## Snapshot
 
-**Date:** 2026-06-07
-**Last commit on `main`:** the design-adoption review-fix commit. This wrap ships as ONE combined `docs(project): wrap legacy design adoption` commit, then pushes.
-**Working tree:** apart from this wrap's doc/skill edits and untracked `.claude/` local files, clean.
-**Remote:** `origin → https://github.com/ogutdgn/vetkit.git`. Pushed through `b983992`; the design-adoption batch pushes at wrap end.
+**Date:** 2026-06-14
+**Branch:** `feat/supabase-rebuild` (off `main` @ `5302328`). **Not pushed.** No `main` push without explicit owner approval.
+**State:** the **Sanity → Supabase pivot** is underway (CLAUDE.md §12 2026-06-14). **R1 (the `packages/db` data layer) shipped and is fully verified.** Committing this session as feature commits + one bundled docs commit.
+**Cloud project:** Supabase `alzwrhvuvqwwxoownnjf` (`vetkit-dev`). Keys (incl. the correct `sb_secret_` service-role key) are in `apps/web/.env.local` (gitignored). CLI linked.
 
-## What's running
+## R1 — DONE ✓ (`packages/db` = `@vetkit/db`)
 
-- Monorepo (pnpm + Turborepo), Tailwind v4, ESLint flat-config (ignores `old-sites/**`), Husky, Sanity v5 Studio (5.30), plain-field schema.
-- **`vetkit-dev` = real Ovapark content** (siteSettings `#F15E42`, 6 services + photos, 4 FAQs, hakkımızda, 6 gallery; no team/blog/testimonials — old site had only filler). `old-sites/` populated locally (gitignored).
-- **Fidelity pass (owner: "not exact enough — copy the view"):** the design spec was extracted from the old HTML/CSS itself — Changa/Karla fonts, transparent overlay header, navy `#27304B` visit cards, home map embed (from coordinates), doghouse welcome illustration (template asset in `apps/web/public/`), dark `#333530` photo band, 72px line-icon services, `#B8D4DA` Neden Biz panel, gallery masonry. New static tokens `--color-navy` / `--color-teal-soft`; ink-900 retuned to legacy dark olive. Carousel internals unchanged from the reviewed version (this pass was layout/typography only; quick a11y probe: 1 h1, fonts live, map titled).
-- **The site now wears the legacy look (owner decision 2026-06-07, CLAUDE.md §12):** dark header/nav, full-width CMS-driven hero carousel (`siteSettings.heroSlides`, 3 real Ovapark slides seeded — inert inactive slides, sr-only h1 outside the rotation, autoplay stops on manual nav, reduced-motion aware), overlapping info-card row, Hoşgeldiniz + legacy icon-row services on home, dark page banners everywhere. Brand ramp now carries a hue-aware WCAG floor for white-text steps.
-- **The full public site works end-to-end**: `(marketing)` route group — home, hakkımızda, hizmetler + 6 SSG detail pages, blog (+detail, empty state), galeri, sss, iletisim (form shell). OD-5 two-step tagging on details; `PortableTextRenderer` + `ImageGallery` shared components; per-tenant dynamic favicons; sitemap guards unrouted page slugs.
-- Chunks 1–11 ✓ (see plan.md §2). `pnpm typecheck` / `lint` / `build` clean; 15 routes emit; HTTP walk all 200 + clean 404.
+- **Schema LIVE on the cloud DB** — 4 migrations applied via `supabase db push`: `init_base_and_tenancy` (private schema, `set_updated_at`, tenants/profiles/memberships/platform_admins, the 2 security-definer helpers, `handle_new_user` trigger), `media_and_storage` (media table + public bucket), `content_tables` (10 content tables + 4 junctions), `rls_and_grants` (RLS on every table, per-op/per-role policies, GRANTs incl. **service_role**, Storage policies).
+- **6-lens adversarial review** (workflow; synthesis agent stalled, findings recovered from the journal) → all blockers fixed. Report: [`specs/2026-06-14-supabase-r1-review.md`](./specs/2026-06-14-supabase-r1-review.md). Notable fixes: the **critical `service_role` grants gap** (auto-expose OFF withholds them), storage `SELECT` policy for `list()`, junction tenant-integrity WITH CHECK, `profiles` auto-trigger, leak-test correctness (`is_empty`→`throws_ok` on submissions) + coverage (9→16 assertions).
+- **Types generated** from the live schema (19 tables) + jsonb override (`MergeDeep` from Zod). `@vetkit/db` typecheck + ESLint clean; full-repo typecheck green.
+- **RLS proven LIVE 9/9** via a no-Docker Node smoke test (anon published-only + can't read leads + can submit; clinic user tenant-scoped; cross-tenant writes denied; reads own leads). The pgTAP suite is the durable CI gate for **R10** (needs Docker — not installed here).
 
-## What was done in this (2026-06-07, design-adoption) session — previous session summary below still applies
+## What was done this session
 
-1. **Ovapark re-seed + old-sites pull** (see ddcf329's last-point entry): real client content now drives dev; design note — owner likes the old hero carousels (Slider Revolution), discuss for a design-polish pass.
-2. **Chunk 11 shipped** (`a8cc1b2`–`754704e`, consolidated commits): 12 new queries (OD-5 two-step recipes), shared renderers, the 9 marketing pages, brand favicon routes, eslint old-sites ignore, absolute-title fix for editor metaTitles.
-3. **Adversarial review** (4 lenses, 36 agents) → 22 confirmed, all fixed in ONE commit (`4e804f2`): **blocker** — home page had no generateMetadata (no canonical/og:url on the homepage); OG-image fallback was disabled on all inner pages by the wholesale openGraph replacement (now named explicitly); blog detail missing `listTag('blogPost')` for relatedPosts deref; dead queries removed; sitemap unrouted-slug guard; Turkish-locale favicon uppercase; `dl`→`ul` a11y; sr-only h2s.
-4. **Owner convention change:** session-wrap docs now bundle into ONE combined docs commit (skills + execution-map §3 updated; memory saved).
+1. Owner pivoted off Sanity → Supabase + a custom admin (`apps/admin`); all 6 forks locked (shared project + RLS; both clinic + super-admin; draft/publish; submissions persist + email; full rebuild; supabase-js + gen-types).
+2. Wrote the data-model spec + ran a research workflow → R1 brief. Locked the pivot into CLAUDE.md (§12 + banner), plan.md (R1–R10 roadmap), execution-map, last-point.
+3. Built + reviewed + verified R1 (above). Created `vetkit-dev` cloud project, fixed two malformed env values (URL had `/rest/v1/`; ref was wrong; later the secret↔publishable mixup).
 
-## What is NOT yet set up
+## Next chunk: R2 — `apps/admin` auth shell
 
-- ~~Chunks 1–11~~ ✓. ~~Dataset seeding~~ ✓ (Ovapark).
-- **Contact form + Resend (Chunk 12)** — active next; iletisim shell + comment in place. Owner action when ready: Resend API key (+ verified sender for real sends).
-- Revalidation webhook (Chunk 13) — closes the local stale-cache gotcha; bust BOTH doc and list tags.
-- shadcn/ui + branded not-found (Chunk 14). CI (OD-3). Vercel deploy (Chunk 15). gigi content migration (manual, pre-15).
-- Design-polish pass before delivery: hero carousel question (owner likes the old sliders — schema-first discussion per §2.4), plus owner's notes from browsing.
-
-## Open decisions still pending
-
-- **OD-3** (CI timing) — recommendation: minimal workflow before Chunk 15.
+Spec in [`execution-map.md`](./execution-map.md) §1. `@supabase/ssr` auth, invite-only login, tenant + super-admin resolution, protected shell. **First R2 step:** seed the first `platform_admin` with the service-role key (chicken-and-egg — RLS write policies need an existing admin). Verify the current `@supabase/ssr` + Next 16 cookie/middleware API against live docs first.
 
 ## Heads-up for the next session
 
-- **⚠ DESIGN IS PROVISIONAL (owner, 2026-06-07):** the legacy look-alike currently on `main` is NOT final — the owner will change the designs. **Future design work goes on a feature branch and is NOT pushed to `main` without explicit owner approval.** (Everything up to `28f860a` is already on `main`/origin from the earlier wrap flow.)
-
-- **Design adoption (Chunk 11b) shipped this session** — review fixed a keyboard ghost-focus blocker (inert), h1-in-rotation, contrast floors. New gotchas: hero h1 is sr-only inside HeroCarousel; heroSlides drives the hero (static fallback only when empty); the brand 600/700 steps pass a real WCAG check in `lib/branding.ts`.
-- **Chunk 12 (contact form + Resend) is the active chunk** — spec in [`execution-map.md`](./execution-map.md) §1. Check current package APIs (react-hook-form/zod/resolvers/resend/react-email) before writing code.
-- **Local stale-cache gotcha (until Chunk 13):** after Sanity content edits, `rm -rf apps/web/.next/cache/fetch-cache` before a local `next build` (dev unaffected).
-- **Gotchas — don't "fix" back:** complete per-page `openGraph` blocks with the explicit `/opengraph-image` fallback; `{ absolute }` titles for editor metaTitles + home; no canonical/og:url in root metadata; `useCdn: false`; `generated.ts` ESLint-exempt; brand guard rails in `lib/branding.ts`; `generateStaticParams` uses the plain client; sitemap `ROUTED_PAGE_SLUGS` until a generic page route exists.
-- **Wrap convention: ONE combined docs commit** per session (owner, 2026-06-06).
-- Husky pre-commit is active.
+- **Sanity code is still on disk** (apps/studio, lib/sanity, packages/sanity-types, the marketing pages) — NOT deleted; removal is R4 (public swap). Sanity env vars are commented in `.env.local` / marked legacy in `.env.example`.
+- **No Docker here** → can't run `supabase db test` (pgTAP) or `supabase start` locally; use the Node RLS smoke pattern for behavioral checks, pgTAP is the R10 CI gate (Docker on the runner; basejump bootstrap chain in `packages/db/README.md`).
+- **CLI workflow:** load `apps/web/.env.local` literally (don't `source` — values may contain shell metachars), then `pnpm --filter @vetkit/db exec supabase --workdir . <cmd>`. Push is `db:push:dry` then `db:push`; types via `gen:types` (uses `SUPABASE_PROJECT_REF`).
+- **Don't "fix" back:** `service_role` grants are required (auto-expose OFF); junction policies carry same-tenant EXISTS guards; helpers live in `private` with empty `search_path`; anon submission insert is an accepted R1 residual (move server-side in R6).
+- Husky pre-commit active; ONE bundled docs commit per session wrap.

@@ -11,6 +11,8 @@
 >
 > **Maintenance:** Update this file whenever a chunk completes, a decision resolves, the backlog reorders, or scope shifts. Skill `updating-plan` at `.claude/skills/updating-plan/SKILL.md` codifies the protocol.
 
+> **⚠ 2026-06-14 — PIVOT: Sanity → Supabase + admin dashboard (full rebuild).** Owner decision (CLAUDE.md §12, 2026-06-14). The Sanity-based Phase 1 (chunks 1–11b, below under "Built on Sanity") shipped and worked, but is being **replaced**. The new Phase 1 is the **rebuild backlog R1–R10** in §2. Data-model + RLS spec: [`specs/2026-06-14-supabase-data-model.md`](./specs/2026-06-14-supabase-data-model.md). Work happens on branch `feat/supabase-rebuild`; **not pushed to `main` without owner approval.**
+
 ---
 
 ## 1. Phased roadmap
@@ -25,26 +27,20 @@ Infrastructure (already done):
 - [x] Shared `@vetkit/config-typescript` presets — base / nextjs / react-library
 - [x] Documentation set in place — CLAUDE.md, PROJECT-ARCHITECTURE.md, plan.md, execution-map.md, last-point.md, README
 
-Feature work (open):
+**Built on Sanity (2026-05/06) — now being replaced by the Supabase rebuild.** Chunks 1–11b shipped a complete public site on Sanity (Tailwind v4 + tokens, ESLint/Husky, full schema + Studio + typegen, `lib/sanity/` infra, SEO helpers, the template contract, `templates/modern/`, all marketing pages, legacy design adoption). The infra/tooling chunks (Tailwind, ESLint, Husky, the templates, SEO helper structure, route tree) are **kept**; the Sanity-specific layers (schema, Studio, `lib/sanity/*`, typegen, cache-tags) are **removed** in the rebuild. See git history through `5302328` for the Sanity Phase 1.
 
-- [x] Tailwind CSS v4 + token-driven theme variables (Chunk 1)
-- [x] ESLint flat config — `packages/config-eslint` + per-app `eslint.config.mjs` (Chunk 2)
-- [x] Husky + lint-staged pre-commit hooks (Chunk 3)
-- [x] Full Sanity schema — all doc types + reusable objects (Chunk 4)
-- [x] Sanity Studio Turkish localization + custom desk structure (Chunk 5)
-- [x] Sanity type generation (`sanity typegen`) — TS types into `packages/sanity-types/` (Chunk 6)
-- [x] Schema i18n simplification — swap `locale*` fields for plain single-language fields (Chunk 6b)
-- [x] Shared Sanity infra in `apps/web/lib/sanity/` — client, GROQ, image, draft mode (Chunk 7)
-- [x] SEO helpers — `generateMetadata`, JSON-LD, sitemap, robots, OG image (Chunk 8)
-- [x] Template contract `apps/web/types/template.ts` — `ThemeComponents` interface (Chunk 9)
-- [x] `templates/modern/` — Header, Hero, ServiceCard, BlogCard, TeamSection, Footer, tokens.css (Chunk 10)
-- [x] Marketing pages — home, hakkimizda, hizmetler list/detail, blog list/detail, galeri, sss, iletisim (Chunk 11)
-- [x] Legacy design adoption — dark chrome, CMS-driven hero carousel, legacy home sections (Chunk 11b)
-- [ ] Contact form + Resend `api/contact/route.ts` (Chunk 12)
-- [ ] Revalidation route + Sanity webhook (Chunk 13)
-- [ ] shadcn/ui init — only when first primitive is needed (Chunk 14)
-- [ ] Migrate gigi-veteriner content into Sanity (manual)
-- [ ] Deploy gigi-veteriner to Vercel with custom domain (Chunk 15)
+Rebuild on Supabase (active Phase 1) — see §2 for the ordered R1–R10 backlog:
+
+- [x] R1 — Supabase project + `packages/db`: SQL migrations, RLS + leak test, generated types, client factory
+- [ ] R2 — `apps/admin` shell: `@supabase/ssr` auth, invite-only login, tenant + super-admin resolution
+- [ ] R3 — Admin content CRUD: forms per type, draft/publish, Tiptap, Storage uploads, ordering
+- [ ] R4 — Public data-layer swap: `lib/sanity/*` → `lib/db/*`, re-type template props, image + rich-text rendering
+- [ ] R5 — Revalidate-on-publish (replaces the Sanity webhook)
+- [ ] R6 — Contact form + Resend + `submissions` inbox
+- [ ] R7 — Super-admin: clinic management, user invites, cross-client overview
+- [ ] R8 — Seed/migrate Ovapark + gigi content into Supabase
+- [ ] R9 — shadcn/ui init + branded `not-found.tsx`
+- [ ] R10 — CI (OD-3) + Vercel deploy (admin + public projects), RLS verified in prod
 - [ ] Hand off to client, gather feedback for one week
 
 ### Phase 2 — Second client + second template (target: 2 weeks)
@@ -60,38 +56,34 @@ Feature work (open):
 - [ ] Build `scripts/new-tenant.ts` to automate onboarding
 - [ ] Write `project-documentation/CLIENT-GUIDE.md` properly (Turkish, with screenshots)
 
-### Phase 4 — Internal admin (only at 5+ clients)
+### Phase 4 — Clinic operations (future, beyond content)
 
-- [ ] Add Supabase for centralized form submission storage (if needed)
-- [ ] Build `apps/admin` for the developer to monitor all clients in one place
+> Supabase + `apps/admin` + a leads/`submissions` table were **pulled into Phase 1** by the 2026-06-14 pivot. This phase is now the operational tables a vet clinic wants beyond marketing content.
+
+- [ ] Appointments / booking
+- [ ] Patient records
+- [ ] Leads/CRM workflows on top of `submissions`
 
 ---
 
 ## 2. Phase 1 ordered backlog
 
-The order is chosen so each chunk has its dependencies in place. Don't reorder without checking the **Depends on** column.
+The order is chosen so each chunk has its dependencies in place. Don't reorder without checking the **Depends on** column. Full data-model + RLS design: [`specs/2026-06-14-supabase-data-model.md`](./specs/2026-06-14-supabase-data-model.md).
 
-| #     | Chunk                                                                      | Depends on | Size | Notes                                                                                                                                                                                                                                                                                                                                                                               |
-| ----- | -------------------------------------------------------------------------- | ---------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✓ 1   | Tailwind v4 + token system in `apps/web`                                   | —          | S    | Shipped 2026-05-20 (commits `56a0b30`, `8ca0a3e`).                                                                                                                                                                                                                                                                                                                                  |
-| ✓ 2   | ESLint flat config: `packages/config-eslint` + per-app `eslint.config.mjs` | —          | S    | Shipped 2026-05-20 (commits `c570f55`, `8d3187b`).                                                                                                                                                                                                                                                                                                                                  |
-| ✓ 3   | Husky + lint-staged pre-commit (eslint + prettier on staged files)         | 2          | S    | Shipped 2026-05-20 (commit `0c20426`). OD-2 resolved.                                                                                                                                                                                                                                                                                                                               |
-| ✓ 4   | **Sanity schema (Phase 1)** — all doc types + reusable objects             | —          | L    | Shipped 2026-05-26. Sanity v5 + language-filter + orderable-document-list; 4 locale primitives, 7 reusable objects, 8 doc types incl. testimonial. OD-1 resolved (v5). Spec: [specs/2026-05-26-sanity-schema-design.md](./specs/2026-05-26-sanity-schema-design.md). Plan: [plans/2026-05-26-sanity-schema-impl.md](./plans/2026-05-26-sanity-schema-impl.md).                      |
-| ✓ 5   | Sanity Studio Turkish localization + custom desk structure                 | 4          | M    | Shipped 2026-05-26 (commit `1eb8bfc`). Most of this chunk's scope (desk structure, singleton enforcement, language-filter, Turkish field labels/descriptions) landed inside Chunk 4; Chunk 5's residual was registering `@sanity/locale-tr-tr` for Studio chrome. Editorial dry-run pending a scratch dataset (not blocking).                                                       |
-| ✓ 6   | Sanity type generation — `sanity typegen` → `packages/sanity-types/`       | 4          | S    | Shipped 2026-05-26 (commits `9b23d43`, `032de43`). Uses Sanity v5's official `sanity typegen` CLI (not the older `sanity-codegen` community package). `pnpm --filter @vetkit/studio typegen` regenerates `schema.json` + `generated.ts`; both checked in. `apps/web/types/sanity.ts` re-exports from `@vetkit/sanity-types`.                                                        |
-| ✓ 6b  | **Schema i18n simplification** — plain single-language fields              | 4, 6       | M    | Shipped 2026-06-05 (commits `7748687`, `186739a`, `b263871`, `a5cd768`). OD-6 resolved → Option 1 (supersedes the 2026-05-26 field-level i18n decision, CLAUDE.md §12). Post-review fixes same day (`f397fa0`–`0e1a5e1`): orderRank wiring for orderable docs, typegen config moved into `sanity.cli.js`, generated types excluded from ESLint.                                     |
-| ✓ 7   | Shared Sanity infra in `apps/web/lib/sanity/`                              | 4, 6, 6b   | M    | Shipped 2026-06-05 (commits `f4a8cbd`–`68f0f6e`, review fix `819de66`). next-sanity 13 + `@sanity/image-url` as a **direct dep** (next-sanity 13 does not re-export the builder). Published client is **origin-only** (`useCdn: false` — see §12 cache refinements). Adds `tags.ts` beyond the planned four modules. Smoke-tested against `vetkit-dev`.                             |
-| ✓ 8   | SEO helpers in `apps/web/lib/seo/`                                         | 7          | M    | Shipped 2026-06-05 (commits `312c095`–`777e855` + review fixes). `buildRootMetadata`/`buildPageMetadata` (written around Next's merge semantics: page OG blocks are complete, no root canonical/og:url), `VeterinaryCare` JSON-LD, sitemap (URL-deduped) / robots / manifest / dynamic OG image. Chunk 11 reminder: pages must call `buildPageMetadata` with `path` + `clinicName`. |
-| ✓ 9   | Template contract (`apps/web/types/template.ts`)                           | 6          | S    | Shipped 2026-06-05. Props typed against **query-result projections** (decision logged in CLAUDE.md §12); blog + team list queries added (6 total); `page.heroImage.alt` made plain-required for contract assignability; classic/premium placeholder READMEs.                                                                                                                        |
-| ✓ 10  | `templates/modern/` — all components, polished                             | 1, 9       | L    | Shipped 2026-06-05 (six components + MobileNav + `getTemplate()` loader + §2.5 brand pipeline with achromatic/contrast guard rails; home rendered through the template; browser-verified incl. mobile menu, Escape-close, skip link, brand `theme-color`). Manifest icons deferred to Chunk 11 polish.                                                                              |
-| ✓ 11  | Marketing pages                                                            | 7, 10      | L    | Shipped 2026-06-06 (`a8cc1b2`–`4e804f2`). `(marketing)` route group with chrome-owning layout; OD-5 two-step on detail pages; brand favicon routes; review fixed a home-page metadata blocker + the OG-image fallback for inner pages.                                                                                                                                              |
-| ✓ 11b | Legacy design adoption (owner decision, CLAUDE.md §12 2026-06-07)          | 10, 11     | M    | Shipped 2026-06-07 (`d8a4d08`–review fix). `heroSlide` schema + `siteSettings.heroSlides` (3 real Ovapark slides seeded); native HeroCarousel (inert slides, sr-only h1 outside rotation, reduced-motion aware, stops on manual nav); dark chrome + legacy home sections; hue-aware WCAG floor in the brand ramp.                                                                   |
-| 12    | Contact form + Resend                                                      | 11         | S    | No DB; email-only per CLAUDE.md §2.3.                                                                                                                                                                                                                                                                                                                                               |
-| 13    | Revalidation API route + Sanity webhook                                    | 7          | S    | `revalidateTag(tag, 'max')` — Next 16 signature.                                                                                                                                                                                                                                                                                                                                    |
-| 14    | shadcn/ui init                                                             | 1          | S    | Only when the first primitive is actually needed. Also: branded `not-found.tsx` (currently Next default 404).                                                                                                                                                                                                                                                                       |
-| 15    | Vercel deploy + custom domain for gigi-veteriner                           | through 14 | S    | Follow CLAUDE.md §9 onboarding playbook.                                                                                                                                                                                                                                                                                                                                            |
+| #    | Chunk                                                                                                                                                | Depends on | Size | Notes                                                                                                                                                                                                                                                                                |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ✓ R1 | Supabase project + `packages/db` — SQL migrations, RLS policies + **cross-tenant leak test**, generated types, client factory                        | —          | L    | Shipped 2026-06-14. Applied to cloud `alzwrhvuvqwwxoownnjf`; 6-lens adversarial review + all blockers fixed ([review](./specs/2026-06-14-supabase-r1-review.md)); **RLS proven live 9/9** via a no-Docker Node smoke test. pgTAP suite is the R10 CI gate (needs Docker). 19 tables. |
+| R2   | `apps/admin` shell — `@supabase/ssr` auth, invite-only login, tenant resolution from membership, super-admin tenant switcher                         | R1         | M    | Verify `@supabase/ssr` + Next 16 cookie pattern against live docs first.                                                                                                                                                                                                             |
+| R3   | Admin content CRUD — forms per type, draft/publish toggle, Tiptap rich text, Storage image upload + transforms, ordering, siteSettings + hero slides | R2         | L    | Tiptap config mirrors the §5 ruleset (h2/h3/blockquote, lists, strong/em/link; no h1). Port `turkishSlugify`.                                                                                                                                                                        |
+| R4   | Public data-layer swap — `lib/sanity/*` → `lib/db/*`, re-type template props against DB types, image + rich-text rendering swap                      | R1         | M    | Templates/design untouched. PortableText renderer → Tiptap-JSON renderer; `urlFor` → Storage transform URLs.                                                                                                                                                                         |
+| R5   | Revalidate-on-publish (replaces the Sanity webhook)                                                                                                  | R3, R4     | S    | Admin publish → `revalidateTag`/`revalidatePath` on the public site. OD-5 tag concept survives.                                                                                                                                                                                      |
+| R6   | Contact form + Resend + `submissions` inbox                                                                                                          | R3         | S    | Form writes to `submissions` (leads seed) AND emails via Resend; admin inbox view. Owner action: Resend key + verified sender for real sends.                                                                                                                                        |
+| R7   | Super-admin — clinic (tenant) management, user invites, cross-client overview                                                                        | R3         | M    | `platform_admins` + invite flow.                                                                                                                                                                                                                                                     |
+| R8   | Seed/migrate Ovapark + gigi content into Supabase                                                                                                    | R3         | M    | Ovapark content already extracted (was in `vetkit-dev` Sanity); gigi manual.                                                                                                                                                                                                         |
+| R9   | shadcn/ui init + branded `not-found.tsx`                                                                                                             | R2         | S    | Admin needs many primitives (forms, dialogs, tables); init when first is needed.                                                                                                                                                                                                     |
+| R10  | CI (OD-3) + Vercel deploy — admin project + public projects, env, RLS verified in prod                                                               | through R9 | M    | Follow the rewritten §9 onboarding playbook (updated during R10).                                                                                                                                                                                                                    |
 
-**Explicitly out of Phase 1** — don't pull in unless asked: `templates/classic/`, `templates/premium/`, `apps/admin`, Supabase, automated `scripts/new-tenant.ts`, i18n, analytics SDKs.
+**Explicitly out of Phase 1** — don't pull in unless asked: `templates/classic/`, `templates/premium/`, appointments/patients/scheduling tables, content version history, document-level i18n, analytics SDKs, automated `scripts/new-tenant.ts`.
 
 ---
 
@@ -99,9 +91,9 @@ The order is chosen so each chunk has its dependencies in place. Don't reorder w
 
 Flagged here so we don't forget. Resolve before they block the corresponding chunk.
 
-| #    | Decision                     | Why it matters                                                                                                                                                                                                        | Resolve before            |
-| ---- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| OD-3 | **GitHub Actions CI: when?** | Husky + Vercel build cover most of the gap today; GH Actions would catch `apps/studio` build issues that Vercel doesn't see and would survive a Husky-less machine. Recommendation: minimal workflow before Chunk 15. | Chunk 15 (Vercel deploy). |
+| #    | Decision                     | Why it matters                                                                                                                                                                                                                                                             | Resolve before       |
+| ---- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| OD-3 | **GitHub Actions CI: when?** | Husky + Vercel build cover most of the gap today; GH Actions would catch `apps/admin` build issues + run the RLS leak test on every push, and would survive a Husky-less machine. Recommendation: minimal workflow during R10 (or earlier, to run the R1 leak test in CI). | R10 (Vercel deploy). |
 
 ---
 
