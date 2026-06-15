@@ -28,6 +28,8 @@
 - Deps added to `apps/admin`: `react-hook-form@7.79`, `zod@4.4.3`, `@hookform/resolvers@5.4`, `@tiptap/{react,pm,starter-kit}@3.26`.
 - Brief: [`specs/2026-06-14-supabase-r3-research-brief.md`](./specs/2026-06-14-supabase-r3-research-brief.md) (the per-resource pattern to replicate).
 
+**Professional UI — shadcn/ui pulled forward (R9), 2026-06-15:** `shadcn init` (base-nova style, neutral, Geist Sans/Mono, lucide) + 18 components. Rebuilt: collapsible **Sidebar** shell + header (tenant switcher, user menu), **dashboard** with stat Cards, shadcn **login**, services **list** (Table + Badge + DropdownMenu row actions + AlertDialog delete) and **form** (Card sections). Old `admin-shell`/`sidebar-nav` removed. base-nova uses **Base UI** (`render` prop, not `asChild`); RHF uses **`standardSchemaResolver`** (zod-4 via Standard Schema — `zodResolver` had a zod-4.4 type clash). Light default; dark tokens present. Build/lint/typecheck + runtime smoke clean. Remaining R9: branded `not-found.tsx`.
+
 **Remaining R3 (replicate the services pattern):** blog_posts, team_members, faqs, gallery_images, pages, testimonials, hero_slides (each: schema + actions + form + list/new/[id]); `site_settings` singleton (one form, jsonb value-objects via the `@vetkit/db` Zod schemas); `submissions` (leads — list + status triage, no authoring). Ordering (`sort_order` reorder action) still to add. Per the brief §7, extract shared form-field components after 2–3 types.
 
 ## Open decisions (R3/R4)
