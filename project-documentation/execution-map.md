@@ -18,6 +18,8 @@
 
 > ⚠ Context: the Sanity→Supabase rebuild (CLAUDE.md §12 2026-06-14). R1 (`@vetkit/db`, RLS 9/9) and R2 (`apps/admin` auth shell) shipped. Work stays on branch `feat/supabase-rebuild`; **no push to `main` without owner approval.** Super-admin dev login: `doganogut06@gmail.com` (temp password issued at R2 — owner should rotate).
 
+**Progress (2026-06-15):** `services` CRUD shipped + verified live (the template type); the reusable editor / media-upload / tenant-data layers are in place. Replicate the per-resource pattern (brief §7) to the other 8 content types + the `site_settings` singleton + `submissions` (leads), then add `sort_order` reordering. After 2–3 types, extract shared form-field components.
+
 **Goal:** Inside `apps/admin`, give clinic users + super-admin full content management for the active tenant: list/create/edit/delete for each content type, a draft/publish toggle, a Tiptap rich-text editor, Supabase Storage image uploads (the `media` table + bucket), and drag/ordering via `sort_order`. All writes go through `@vetkit/db` under the authenticated role — RLS scopes to the active tenant.
 
 **Locked context:**

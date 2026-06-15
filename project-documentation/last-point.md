@@ -2,50 +2,43 @@
 
 > **Snapshot of where the last session stopped.** Read this first when picking up work; refresh it before closing a chat or before any major operation.
 >
-> **Read with siblings:**
->
-> - [`execution-map.md`](./execution-map.md) — what to work on next.
-> - [`plan.md`](./plan.md) — the full plan and backlog.
->
-> **Maintenance:** Refresh before chat closes, before any big operation, or whenever the working tree is about to shift significantly. Skill `writing-last-point` codifies the protocol.
+> **Read with siblings:** [`execution-map.md`](./execution-map.md) (next chunk) · [`plan.md`](./plan.md) (full backlog). Skill `writing-last-point` codifies the protocol.
 
 ---
 
 ## Snapshot
 
-**Date:** 2026-06-14
-**Branch:** `feat/supabase-rebuild` — **pushed to `origin`**. Still **no `main` push** without owner approval. `main` is at `5302328`.
-**State:** Sanity → Supabase pivot (CLAUDE.md §12 2026-06-14). **R1 (`@vetkit/db`) and R2 (`apps/admin` auth shell) shipped + verified.** Committing R2 this session (feature commits + bundled docs commit).
-**Cloud project:** Supabase `alzwrhvuvqwwxoownnjf` (`vetkit-dev`). Seeded: 2 tenants (`gigi`, `ovapark`) + a super-admin **`doganogut06@gmail.com`** (temp password issued in chat — owner should rotate). Keys in `apps/web/.env.local` + `apps/admin/.env.local` (both gitignored; admin only needs the public pair).
+**Date:** 2026-06-15 (work spans 06-14 → 06-15)
+**Branch:** `feat/supabase-rebuild` — **pushed to `origin`** (through R2; R3-services commits land this session). **No `main` push** without owner approval; `main` is at `5302328`.
+**State:** Sanity → Supabase pivot (CLAUDE.md §12). **R1 + R2 shipped + verified. R3 is IN PROGRESS** — `services` content CRUD (the template type) done; 8 more content types + the singleton/leads variants remain.
+**Cloud project:** Supabase `alzwrhvuvqwwxoownnjf` (`vetkit-dev`). Seeded: tenants `gigi` + `ovapark`, super-admin `doganogut06@gmail.com` (temp password — owner should rotate). Public keys in `apps/web/.env.local` + `apps/admin/.env.local`.
 
-## R1 — DONE ✓ (`packages/db`)
+## Done ✓
 
-Schema live on the cloud DB, 6-lens reviewed, RLS proven 9/9. See [`specs/2026-06-14-supabase-r1-review.md`](./specs/2026-06-14-supabase-r1-review.md). (Full detail in the prior last-point; unchanged.)
+- **R1 — `@vetkit/db`:** schema live, RLS proven 9/9. [Review](./specs/2026-06-14-supabase-r1-review.md).
+- **R2 — `apps/admin` auth shell:** Next 16 `proxy.ts` + `getClaims()` SSR auth, login, protected shell, tenant + super-admin resolution. Verified (build, live auth 5/5, runtime proxy).
 
-## R2 — DONE ✓ (`apps/admin`)
+## R3 — IN PROGRESS
 
-- New Next 16 app. **Supabase SSR auth verified against the canonical example**, with the key Next 16 detail: **`proxy.ts` replaces `middleware.ts`** (`export async function proxy`), **async `cookies()`**, and **`getClaims()`** (not getUser/getSession) for verification.
-- `lib/supabase/{client,server,proxy}.ts` + root `proxy.ts` (gates all routes except `/login`); login (server action `signInWithPassword` + `useActionState` form); protected `(app)` group with `AdminShell` (tenant display, super-admin tenant switcher, sign-out); `lib/auth.ts` `getActor()` (cached) resolves email/super-admin/active-tenant/available-tenants via RLS-scoped queries.
-- **Bootstrap:** `packages/db/scripts/bootstrap-superadmin.mjs` (idempotent) seeds the first `platform_admin` + the client tenants — the chicken-and-egg the R1 review flagged.
-- **Verified:** typecheck + lint + `next build` clean (Proxy recognized); **live auth 5/5** (signin, getClaims, platform_admins, sees both tenants, no memberships); **runtime proxy** `GET /` → 307 `/login`, `/login` → 200 form.
+**Done this session — Services CRUD + reusable content infra:**
 
-## What was done this session
+- **Reusable layer:** `lib/tenant-db.ts` (`getTenantContext`), `lib/editor/extensions.ts` (Tiptap StarterKit v3, restricted ruleset: h2/h3/quote/lists/bold/italic/link, no h1, Link bundled — do NOT add `@tiptap/extension-link`), `components/editor/rich-text-field.tsx` (SSR-safe `immediatelyRender:false`, controlled JSON via `getJSON`), `components/media/media-picker.tsx` + `app/(app)/media/actions.ts` (`uploadMedia`: client measures dims via `createImageBitmap` → tenant-path Storage upload → `media` row), sidebar nav.
+- **Services CRUD:** `app/(app)/services/{page,schema,actions,service-form,new,[id]}`. RHF + Zod 4 + `zodResolver`, Tiptap via `Controller`, draft/publish, `published_at` stamped-on-first-publish-then-preserved, slug auto-gen + override, RLS-scoped writes (`.eq('tenant_id')` + cookie client — NEVER service-role).
+- **Verified:** typecheck + lint + `next build` clean (routes `/services`, `/services/new`, `/services/[id]`); **live CRUD 6/6** (super-admin insert→read→publish→anon-sees→delete on gigi). NOT browser-clicked (Tiptap/upload UI untested by hand).
+- Deps added to `apps/admin`: `react-hook-form@7.79`, `zod@4.4.3`, `@hookform/resolvers@5.4`, `@tiptap/{react,pm,starter-kit}@3.26`.
+- Brief: [`specs/2026-06-14-supabase-r3-research-brief.md`](./specs/2026-06-14-supabase-r3-research-brief.md) (the per-resource pattern to replicate).
 
-1. Decided the pivot; wrote the data-model spec + research brief; locked docs.
-2. Built + reviewed + verified **R1**; created the cloud project; fixed env-value mistakes (URL `/rest/v1/` suffix, wrong ref, secret↔publishable mixup).
-3. Committed R1 (4 commits) and **pushed the branch**.
-4. Built + verified **R2** (above); seeded the super-admin + tenants.
+**Remaining R3 (replicate the services pattern):** blog_posts, team_members, faqs, gallery_images, pages, testimonials, hero_slides (each: schema + actions + form + list/new/[id]); `site_settings` singleton (one form, jsonb value-objects via the `@vetkit/db` Zod schemas); `submissions` (leads — list + status triage, no authoring). Ordering (`sort_order` reorder action) still to add. Per the brief §7, extract shared form-field components after 2–3 types.
 
-## Next chunk: R3 — admin content CRUD
+## Open decisions (R3/R4)
 
-Spec in [`execution-map.md`](./execution-map.md) §1. Forms per content type, draft/publish, **Tiptap** (verify current API), Supabase Storage uploads (`media` table + bucket), ordering. Likely pulls **shadcn/ui** (R9) forward for inputs/dialogs/tables. R4 (public swap) can run in parallel (depends only on R1).
+- **Supabase plan:** Pro enables Storage image transforms; on Free use `next/image` + `focal_x/y` CSS. Owner call before finalizing image UX.
+- **Media bucket is PUBLIC** → unpublished images are URL-guessable. Accepted for now (marketing imagery); revisit if private assets appear.
+- Public render (R4): `@tiptap/static-renderer` `renderToHTMLString` (recommended) vs `renderToReactElement`.
 
-## Heads-up for the next session
+## Heads-up
 
-- **Port 3000 is taken by the owner's other app** (a Vite "Samaritan Inn" app). Run the admin dev server on another port: `pnpm --filter @vetkit/admin exec next dev -p 3100`. Kill stray Next dev with `pkill -f next-server` (the :3000 app is Vite, safe).
-- **Sanity code still on disk** (apps/studio, lib/sanity, packages/sanity-types, marketing pages) — removed in **R4**, not piecemeal.
-- **No Docker here** → pgTAP leak test is the R10 CI gate; use the Node smoke pattern for live behavioral checks.
-- **R3 verify-first:** Tiptap + React 19 API, zod 4 validators, and the Supabase **Pro-plan** requirement for image transforms (owner decision).
-- **CLI/scripts:** load `apps/web/.env.local` literally (don't `source`); run supabase CLI via `pnpm --filter @vetkit/db exec supabase --workdir . <cmd>`.
-- **Don't "fix" back:** Next 16 uses `proxy.ts` not `middleware.ts`; `getClaims()` not getUser; `service_role` grants are required; junction policies carry same-tenant guards.
+- **Port 3000 = owner's other Vite app.** Run admin dev elsewhere: `pnpm --filter @vetkit/admin exec next dev -p 3100`. Log in at `/login`.
+- **Sanity code still on disk** → removed in R4 (public swap), not piecemeal. No Docker here (pgTAP = R10 CI gate).
+- **Don't "fix" back:** Next 16 `proxy.ts` (not middleware); `getClaims()`; `immediatelyRender:false`; store Tiptap JSON not HTML; no `@tiptap/extension-link`; `service_role` grants required; admin writes use the cookie client (RLS), never service-role.
 - Husky pre-commit active; ONE bundled docs commit per session wrap.
