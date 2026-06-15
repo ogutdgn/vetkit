@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./types": "./src/database.types.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./editor": "./src/editor.ts"
   },
   "files": [
     "src",
@@ -32,6 +33,9 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
+    "@tiptap/static-renderer": "^3.26.1",
     "type-fest": "^5.7.0",
     "zod": "^4.4.3"
   }
